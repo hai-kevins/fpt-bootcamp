@@ -1,5 +1,5 @@
 # Chủ đề 4 - Task State và Synchronization
-## Efficient Blocking, Delayed Task List, Semaphore và Mutex trong HairRTOS
+## Efficient Blocking, Delayed Task List, Semaphore và Mutex
 
 > README này được xây dựng theo phạm vi **Chủ đề 4 — “Task state + Synchronization”** trong chương trình tự phát triển AKOS.
 
