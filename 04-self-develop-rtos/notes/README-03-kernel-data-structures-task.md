@@ -3116,7 +3116,7 @@ stack ranges  : PASS
 
 ---
 
-# 50. Liên hệ với roadmap HairRTOS
+# 49. Liên hệ với roadmap HairRTOS
 
 Chủ đề này liên quan trực tiếp:
 
@@ -3155,7 +3155,7 @@ Chủ đề 3 cung cấp data model để các phase này hoạt động ổn đ
 
 ---
 
-# 51. Tiêu chí hoàn thành
+# 50. Tiêu chí hoàn thành
 
 ## Linked list
 
@@ -3240,7 +3240,7 @@ Chủ đề 3 cung cấp data model để các phase này hoạt động ổn đ
 
 ---
 
-# 52. Tổng kết
+# 51. Tổng kết
 
 Chủ đề 3 trả lời hai câu hỏi:
 
