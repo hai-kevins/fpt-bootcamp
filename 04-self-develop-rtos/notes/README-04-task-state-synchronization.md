@@ -2843,7 +2843,7 @@ v  validate
 
 ---
 
-# 70. Liên hệ với roadmap HairRTOS
+# 71. Liên hệ với roadmap HairRTOS
 
 Chủ đề này bao phủ các phase:
 
@@ -2875,7 +2875,7 @@ Queue chưa phải trọng tâm, nhưng blocking model và wait lists được t
 
 ---
 
-# 71. Tiêu chí hoàn thành
+# 72. Tiêu chí hoàn thành
 
 ## Task state
 
@@ -2947,7 +2947,7 @@ Queue chưa phải trọng tâm, nhưng blocking model và wait lists được t
 
 ---
 
-# 72. Tổng kết
+# 73. Tổng kết
 
 Chủ đề 4 trả lời:
 
