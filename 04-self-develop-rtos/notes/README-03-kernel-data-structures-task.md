@@ -1,5 +1,5 @@
 # Chủ đề 3 - Cấu trúc dữ liệu trong Kernel và Task
-## Kernel Data Structures, Intrusive Lists và Task Control Block trong HairRTOS
+## Kernel Data Structures, Intrusive Lists và Task Control Block
 
 > README này được xây dựng theo phạm vi **Chủ đề 3 — “Cấu trúc dữ liệu trong kernel + Task”** của chương trình tự phát triển AKOS.
 
