@@ -2319,7 +2319,7 @@ Bỏ wrap tail về 0.
 
 ---
 
-## Lab 02 — Blocking queue on host
+## Bài 02 — Blocking queue on host
 
 ### Mục tiêu
 
@@ -2346,7 +2346,7 @@ Bỏ wrap tail về 0.
 
 ---
 
-## Lab 03 — Queue from ISR
+## Bài 03 — Queue from ISR
 
 ### Mục tiêu
 
@@ -2367,7 +2367,7 @@ Timer/EXTI ISR gửi message cho high-priority task.
 
 ---
 
-## Lab 04 — Message pool
+## Bài 04 — Message pool
 
 ### Mục tiêu
 
@@ -2392,7 +2392,7 @@ Timer/EXTI ISR gửi message cho high-priority task.
 
 ---
 
-## Lab 05 — Software timer list
+## Bài 05 — Software timer list
 
 ### Mục tiêu
 
@@ -2419,7 +2419,7 @@ Timer/EXTI ISR gửi message cho high-priority task.
 
 ---
 
-## Lab 06 — Timer service task
+## Bài 06 — Timer service task
 
 ### Mục tiêu
 
@@ -2445,7 +2445,7 @@ Timer C restartable
 
 ---
 
-## Lab 07 — Timestamp backends
+## Bài 07 — Timestamp backends
 
 ### Mục tiêu
 
@@ -2470,7 +2470,7 @@ So sánh:
 
 ---
 
-## Lab 08 — Context-switch benchmark
+## Bài 08 — Context-switch benchmark
 
 ### Mục tiêu
 
@@ -2500,7 +2500,7 @@ histogram
 
 ---
 
-## Lab 09 — Event and message latency
+## Bài 09 — Event and message latency
 
 ### Mục tiêu
 
@@ -2525,7 +2525,7 @@ histogram
 
 ---
 
-## Lab 10 — Target Communication and Benchmark Console
+## Bài 10 — Target Communication and Benchmark Console
 
 ### Mục tiêu
 
@@ -2570,7 +2570,7 @@ validate
 ## Tên project
 
 ```text
-HairRTOS Communication and Benchmark Console
+Communication and Benchmark Console
 ```
 
 ## 89.1 Mục tiêu
