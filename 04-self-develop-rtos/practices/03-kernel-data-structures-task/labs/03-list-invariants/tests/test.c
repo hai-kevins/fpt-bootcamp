@@ -1,0 +1,3 @@
+#include "list.h"
+#include "test.h"
+int main(void){hr_list_t a,b;hr_list_node_t n1,n2;hr_list_init(&a);hr_list_init(&b);hr_list_node_init(&n1);hr_list_node_init(&n2);TEST_ASSERT(hr_list_push_back(&a,&n1));TEST_ASSERT(!hr_list_push_back(&b,&n1));TEST_ASSERT(!hr_list_remove(&b,&n1));TEST_ASSERT(hr_list_push_back(&a,&n2));TEST_ASSERT(hr_list_validate(&a));n2.previous=0;TEST_ASSERT(!hr_list_validate(&a));n2.previous=&n1;TEST_ASSERT(hr_list_validate(&a));TEST_PASS("ownership and invariants");return 0;}

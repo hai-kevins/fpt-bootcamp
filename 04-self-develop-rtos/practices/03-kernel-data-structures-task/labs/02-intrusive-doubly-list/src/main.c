@@ -1,0 +1,3 @@
+#include "dlist.h"
+#include <stdio.h>
+typedef struct{int value;dlist_node_t node;}item_t;int main(void){dlist_t l;item_t a={.value=1},b={.value=2};dlist_init(&l);dlist_node_init(&a.node);dlist_node_init(&b.node);dlist_push_back(&l,&a.node);dlist_push_back(&l,&b.node);for(dlist_node_t*n=l.head;n;n=n->next)printf("%d ",DLIST_CONTAINER_OF(n,item_t,node)->value);printf("\nvalid=%s\n",dlist_validate(&l)?"yes":"no");return 0;}

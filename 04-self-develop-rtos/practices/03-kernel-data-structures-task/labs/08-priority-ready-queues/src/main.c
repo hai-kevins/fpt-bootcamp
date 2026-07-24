@@ -1,0 +1,4 @@
+#include "ready_queue.h"
+#include <stdio.h>
+static void e(void*a){(void)a;}
+int main(void){hr_task_t a={0},b={0},h={0};uint32_t sa[64]__attribute__((aligned(8))),sb[64]__attribute__((aligned(8))),sh[64]__attribute__((aligned(8)));hr_ready_init();hr_task_create_static(&a,"a",0,2,e,0,sa,64);hr_task_create_static(&b,"b",1,2,e,0,sb,64);hr_task_create_static(&h,"high",2,0,e,0,sh,64);hr_ready_insert(&a);hr_ready_insert(&b);printf("selected=%s bitmap=0x%X\n",hr_ready_select_highest()->name,(unsigned)hr_ready_bitmap());hr_ready_insert(&h);printf("selected=%s\n",hr_ready_select_highest()->name);return 0;}

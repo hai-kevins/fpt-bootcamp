@@ -1,0 +1,4 @@
+#include "ready_queue.h"
+#include "test.h"
+static void e(void*a){(void)a;}
+int main(void){hr_task_t a={0},b={0},h={0};uint32_t sa[64]__attribute__((aligned(8))),sb[64]__attribute__((aligned(8))),sh[64]__attribute__((aligned(8)));hr_ready_init();hr_task_create_static(&a,"a",0,2,e,0,sa,64);hr_task_create_static(&b,"b",1,2,e,0,sb,64);hr_task_create_static(&h,"h",2,0,e,0,sh,64);TEST_ASSERT(hr_ready_insert(&a));TEST_ASSERT(hr_ready_insert(&b));TEST_ASSERT(hr_ready_select_highest()==&a);TEST_ASSERT(hr_ready_rotate(2));TEST_ASSERT(hr_ready_select_highest()==&b);TEST_ASSERT(hr_ready_insert(&h));TEST_ASSERT(hr_ready_select_highest()==&h);TEST_ASSERT(hr_ready_remove(&h));TEST_ASSERT(hr_ready_bitmap()==(1UL<<2));TEST_ASSERT(hr_ready_validate());TEST_PASS("priority ready queues");return 0;}
