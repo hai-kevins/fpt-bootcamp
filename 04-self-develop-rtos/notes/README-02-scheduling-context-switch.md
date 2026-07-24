@@ -1,14 +1,7 @@
 # Chủ đề 2 - Scheduling và Context Switch trên ARM Cortex-M3
 ## Priority Scheduler, SysTick, SVC và PendSV
 
-> Chủ đề này được xây dựng theo phạm vi **“Scheduling + Context Switch”** trong chương trình tự phát triển RTOS AKOS.  
-> Nội dung gốc của chủ đề tập trung vào:
->
-> - priority-based scheduling;
-> - kiến trúc ARM Cortex-M3 cơ bản;
-> - SysTick trong scheduling;
-> - PendSV cho context switch;
-> - tự triển khai context switch trong một RTOS.
+> Chủ đề này được xây dựng theo phạm vi **“Scheduling + Context Switch”** trong chương trình tự phát triển AKOS.
 
 ---
 
