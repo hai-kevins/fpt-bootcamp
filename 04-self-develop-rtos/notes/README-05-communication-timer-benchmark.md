@@ -97,9 +97,9 @@
 88. [Bài thực hành](#88-bài-thực-hành)
 89. [Project tổng kết chủ đề](#89-project-tổng-kết-chủ-đề)
 90. [Cấu trúc repository đề xuất](#90-cấu-trúc-repository-đề-xuất)
-92. [Liên hệ với roadmap HairRTOS](#92-liên-hệ-với-roadmap-hairtos)
-94. [Tiêu chí hoàn thành](#94-tiêu-chí-hoàn-thành)
-95. [Tổng kết](#95-tổng-kết)
+91. [Liên hệ với roadmap HairRTOS](#91-liên-hệ-với-roadmap-hairtos)
+92. [Tiêu chí hoàn thành](#92-tiêu-chí-hoàn-thành)
+93. [Tổng kết](#93-tổng-kết)
 
 ---
 
@@ -2816,68 +2816,7 @@ Lost samples: ...
 
 ---
 
-# 91. Quy tắc Makefile
-
-## Root Makefile
-
-Chỉ quản lý project tổng kết:
-
-```bash
-make
-make rebuild
-make clean
-make size
-make sections
-make symbols
-make symbols-size
-make disasm
-make flash-stlink
-make flash-openocd
-make erase
-```
-
-Không có:
-
-```text
-lab01
-all-labs
-run-labs
-```
-
-## Lab Makefile
-
-Host lab:
-
-```bash
-make
-make test
-make run
-make clean
-```
-
-Target lab:
-
-```bash
-make
-make rebuild
-make clean
-make size
-make disasm
-make flash-stlink
-make flash-openocd
-make erase
-```
-
-Output:
-
-```text
-root -> build/
-lab  -> labs/<lab>/build/
-```
-
----
-
-# 92. Liên hệ với roadmap HairRTOS
+# 91. Liên hệ với roadmap HairRTOS
 
 Chủ đề này liên quan trực tiếp:
 
@@ -2913,39 +2852,7 @@ Chủ đề này liên quan trực tiếp:
 
 ---
 
-# 93. Nội dung chưa thuộc chủ đề này
-
-## Network communication
-
-- TCP/IP;
-- CAN transport;
-- UART protocol framing.
-
-Không nằm trong kernel message system cơ bản.
-
-## Full pub/sub event framework
-
-Thuộc HairEvent hoặc framework riêng.
-
-## Dynamic message size queue
-
-Có thể làm sau. Phiên bản đầu dùng fixed item size.
-
-## Reference counting
-
-Không bắt buộc.
-
-## Formal WCET
-
-Benchmark không thay thế static timing analysis hoặc formal WCET proof.
-
-## Certification benchmark
-
-Không khẳng định phù hợp ISO 26262 hoặc certification nếu chưa có phương pháp và evidence tương ứng.
-
----
-
-# 94. Tiêu chí hoàn thành
+# 92. Tiêu chí hoàn thành
 
 ## Communication
 
@@ -3021,7 +2928,7 @@ Không khẳng định phù hợp ISO 26262 hoặc certification nếu chưa có
 
 ---
 
-# 95. Tổng kết
+# 93. Tổng kết
 
 Chủ đề 5 trả lời ba câu hỏi:
 
