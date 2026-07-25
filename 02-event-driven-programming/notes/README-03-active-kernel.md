@@ -3034,6 +3034,27 @@ Sau reset, shell phải đọc được:
 - Timestamp.
 - Restart count.
 
+## Bài 14 — Mini Game
+
+Tạo game đơn giản gồm:
+
+```text
+Input Task
+Game Task
+Display Task
+Audio Task
+Shell Task
+```
+
+Yêu cầu:
+
+- Không blocking delay.
+- Game tick bằng timer.
+- Input bằng event.
+- State Machine cho MENU/PLAY/GAME_OVER.
+- Record event.
+- Có command debug.
+
 ---
 
 # 37. Tiêu chí hoàn thành
