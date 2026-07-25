@@ -8,12 +8,14 @@ Repository thực hành cho **Chủ đề 1** của lộ trình tự phát tri�
 - Fragmentation và các lỗi bộ nhớ.
 - First-fit allocator, block splitting và block coalescing.
 
-Project được tổ chức theo cùng triết lý với `01-embedded-foundation`:
+Project được tổ chức theo cùng một bố cục:
 
-- Phần root là firmware tổng hợp cuối chủ đề.
+- Phần root là firmware tổng kết cuối chủ đề.
 - `labs/` chứa từng bài thực hành độc lập.
 - `docs/` chứa phần giải thích sâu hơn.
 - `build/` chỉ chứa artifact sinh tự động.
+- Makefile gốc chỉ quản lý project tổng kết.
+- Mỗi lab có Makefile riêng và không được build từ root.
 
 Cấu hình mặc định:
 
@@ -52,22 +54,12 @@ Sau khi hoàn thành repository này, người học có thể:
 ├── README.md
 ├── Makefile
 ├── .gitignore
+├── LICENSE
+├── VALIDATION.md
 ├── linker/
 │   └── memory.ld
 ├── startup/
 │   └── startup.c
-├── src/
-│   ├── command_parser.c
-│   ├── gpio.c
-│   ├── heap.c
-│   ├── heap_stats.c
-│   ├── main.c
-│   ├── memory_explorer.c
-│   ├── memory_layout.c
-│   ├── runtime.c
-│   ├── stack_monitor.c
-│   ├── systick.c
-│   └── uart.c
 ├── include/
 │   ├── command_parser.h
 │   ├── compiler.h
@@ -80,18 +72,30 @@ Sau khi hoàn thành repository này, người học có thể:
 │   ├── stm32f1.h
 │   ├── systick.h
 │   └── uart.h
+├── src/
+│   ├── command_parser.c
+│   ├── gpio.c
+│   ├── heap.c
+│   ├── heap_stats.c
+│   ├── main.c
+│   ├── memory_explorer.c
+│   ├── memory_layout.c
+│   ├── runtime.c
+│   ├── stack_monitor.c
+│   ├── systick.c
+│   └── uart.c
 ├── labs/
 │   ├── README.md
-│   ├── 01-memory-layout
-│   ├── 02-startup-sections
-│   ├── 03-stack-high-water
-│   ├── 04-static-memory-budget
-│   ├── 05-first-fit-basic
-│   ├── 06-block-splitting
-│   ├── 07-block-coalescing
-│   ├── 08-invalid-free
-│   ├── 09-fragmentation
-│   └── 10-target-demo
+│   ├── 01-memory-layout/
+│   ├── 02-startup-sections/
+│   ├── 03-stack-high-water/
+│   ├── 04-static-memory-budget/
+│   ├── 05-first-fit-basic/
+│   ├── 06-block-splitting/
+│   ├── 07-block-coalescing/
+│   ├── 08-invalid-free/
+│   ├── 09-fragmentation/
+│   └── 10-target-demo/
 ├── docs/
 │   ├── allocation-models.md
 │   ├── allocator-design.md
@@ -105,7 +109,7 @@ Sau khi hoàn thành repository này, người học có thể:
 
 ## 3. Firmware root làm gì?
 
-Firmware root là **Memory Explorer** chạy trên STM32F103:
+Firmware root là **RTOS Memory Explorer** chạy trên STM32F103:
 
 ```text
 Reset
@@ -135,7 +139,7 @@ UART command loop
 First-fit allocator
 ```
 
-Allocator chỉ phục vụ đào tạo. HairRTOS production kernel vẫn nên theo hướng `static-first`.
+Allocator chỉ phục vụ đào tạo. Một production RTOS kernel vẫn nên ưu tiên hướng `static-first`.
 
 ---
 
@@ -152,10 +156,16 @@ sudo apt install \
     gcc
 ```
 
-Công cụ flash tùy chọn:
+Clang/LLD dùng làm toolchain thay thế:
 
 ```bash
-sudo apt install openocd stlink-tools
+sudo apt install clang lld llvm
+```
+
+Công cụ flash và debug tùy chọn:
+
+```bash
+sudo apt install openocd stlink-tools gdb-multiarch
 ```
 
 Kiểm tra:
@@ -166,6 +176,8 @@ arm-none-eabi-objcopy --version
 arm-none-eabi-size --version
 make --version
 ```
+
+Makefile mặc định dùng GNU Arm Embedded Toolchain. Khi muốn dùng Clang/LLD, chạy `make TOOLCHAIN=clang`.
 
 ---
 
@@ -197,7 +209,7 @@ make clean
 make rebuild
 ```
 
-Trong môi trường chỉ có Clang/LLD:
+Build bằng Clang/LLD:
 
 ```bash
 make TOOLCHAIN=clang
@@ -223,6 +235,18 @@ Mass erase:
 
 ```bash
 make erase
+```
+
+Debug bằng OpenOCD và GDB:
+
+```bash
+openocd -f interface/stlink.cfg -f target/stm32f1x.cfg
+```
+
+Ở terminal khác:
+
+```bash
+gdb-multiarch build/rtos_memory_foundation.elf
 ```
 
 ---
@@ -254,18 +278,19 @@ USART1: 9600 8-N-1
 
 Các lệnh:
 
-```text
-help
-memory
-alloc 32
-alloc 80
-blocks
-stats
-free 0
-validate
-fragment-demo
-reset
-```
+| Lệnh | Chức năng |
+|---|---|
+| `help` | In danh sách lệnh. |
+| `memory` | In memory layout và linker symbols. |
+| `alloc <bytes>` | Cấp phát một block và trả về ID. |
+| `free <id>` | Giải phóng block theo ID. |
+| `blocks` | In block map của allocator. |
+| `stats` | In thống kê heap và fragmentation. |
+| `validate` | Kiểm tra invariant của allocator. |
+| `fragment-demo` | Chạy kịch bản minh họa fragmentation. |
+| `reset` | Khởi tạo lại vùng heap demo. |
+
+Các lệnh allocator chỉ phục vụ thực hành và chẩn đoán; không dùng command parser trong interrupt context.
 
 ---
 
@@ -273,12 +298,7 @@ reset
 
 Makefile ở thư mục gốc **chỉ quản lý project tổng kết RTOS Memory Explorer**. Nó không gọi hoặc điều khiển Makefile của các lab.
 
-Mỗi lab được build ngay trong thư mục của chính lab đó:
-
-```bash
-cd labs/01-memory-layout
-make
-```
+Mỗi lab được build ngay trong thư mục của chính lab đó.
 
 Ví dụ với lab chạy trên host:
 
@@ -288,11 +308,12 @@ make test
 make run
 ```
 
-Ví dụ với lab chạy trên STM32 bằng Clang/LLD:
+Ví dụ với lab chạy trên STM32:
 
 ```bash
 cd labs/10-target-demo
-make TOOLCHAIN=clang
+make
+make flash-stlink
 ```
 
 Để quay lại thư mục gốc:
@@ -303,11 +324,13 @@ cd ../..
 
 Quy ước:
 
-- Lab 01, 02 và 10 tự tạo firmware STM32 trong thư mục `build/` của lab đó.
-- Lab 03 đến 09 tự build và chạy trực tiếp trên Ubuntu.
-- Các lab allocator chạy test với AddressSanitizer và UndefinedBehaviorSanitizer.
+- Host labs: `03-stack-high-water`, `04-static-memory-budget`, `05-first-fit-basic`, `06-block-splitting`, `07-block-coalescing`, `08-invalid-free`, `09-fragmentation`.
+- Target labs: `01-memory-layout`, `02-startup-sections`, `10-target-demo`.
+- Các lab host chạy AddressSanitizer và UndefinedBehaviorSanitizer.
+- Mỗi lab tạo output trong thư mục `build/` của chính lab đó.
 - `make clean` tại root chỉ xóa output của project tổng kết.
 - `make clean` trong một lab chỉ xóa output của lab đó.
+- Root Makefile không có rule tổng hợp như `lab01`, `all-labs`, `run-labs` hoặc `run-host-labs`.
 
 ---
 
@@ -337,16 +360,19 @@ Quy ước:
 Build và chạy lab
       |
       v
+Quan sát output, UART, GDB hoặc unit test
+      |
+      v
 Trả lời câu hỏi cuối lab
       |
       v
-Cố ý tạo một lỗi
+Cố ý tạo một lỗi hoặc phá một invariant
       |
       v
 Giải thích nguyên nhân
       |
       v
-Chuyển sang lab tiếp theo
+Khôi phục và chuyển sang lab tiếp theo
 ```
 
 Không nên chỉ chạy code có sẵn. Với allocator, cần tự thay đổi kích thước allocation, thứ tự `free()` và quan sát block map.

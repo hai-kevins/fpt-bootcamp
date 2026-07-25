@@ -2,7 +2,7 @@
 
 ## Mục tiêu
 
-- Switch cooperative giữa hai task cùng priority bằng `hr_task_yield()`.
+- Switch cooperative giữa hai task cùng priority bằng `rtos_task_yield()`.
 - Kiểm tra PendSV lưu `R4-R11`, đổi `saved_sp` và phục hồi local context.
 - Bỏ lưu một register có chủ đích rồi quan sát biến local hoặc task state bị hỏng.
 

@@ -9,9 +9,9 @@ Repository thực hành cho **Chủ đề 3** của lộ trình tự phát tri�
 - Static task creation và task stack initialization.
 - All-task registry, per-priority ready queues và ready bitmap.
 
-Project được tổ chức theo cùng triết lý với `01-rtos-introduction-memory-management`:
+Project được tổ chức theo cùng một bố cục:
 
-- Phần root là firmware tổng hợp cuối chủ đề.
+- Phần root là firmware tổng kết cuối chủ đề.
 - `labs/` chứa từng bài thực hành độc lập.
 - `docs/` chứa phần giải thích sâu hơn.
 - `build/` chỉ chứa artifact sinh tự động.
@@ -63,10 +63,28 @@ Sau khi hoàn thành repository này, người học có thể:
 ├── README.md
 ├── Makefile
 ├── .gitignore
+├── LICENSE
+├── VALIDATION.md
 ├── linker/
 │   └── memory.ld
 ├── startup/
 │   └── startup.c
+├── include/
+│   ├── clock.h
+│   ├── compiler.h
+│   ├── cortex_m3_port.h
+│   ├── critical_section.h
+│   ├── gpio.h
+│   ├── list.h
+│   ├── panic.h
+│   ├── ready_queue.h
+│   ├── scheduler.h
+│   ├── stm32f1.h
+│   ├── systick.h
+│   ├── task.h
+│   ├── task_inspector.h
+│   ├── task_registry.h
+│   └── uart.h
 ├── src/
 │   ├── clock.c
 │   ├── cortex_m3_port.c
@@ -84,34 +102,18 @@ Sau khi hoàn thành repository này, người học có thể:
 │   ├── task_inspector.c
 │   ├── task_registry.c
 │   └── uart.c
-├── include/
-│   ├── clock.h
-│   ├── compiler.h
-│   ├── cortex_m3_port.h
-│   ├── critical_section.h
-│   ├── gpio.h
-│   ├── list.h
-│   ├── panic.h
-│   ├── ready_queue.h
-│   ├── scheduler.h
-│   ├── stm32f1.h
-│   ├── systick.h
-│   ├── task.h
-│   ├── task_inspector.h
-│   ├── task_registry.h
-│   └── uart.h
 ├── labs/
 │   ├── README.md
-│   ├── 01-singly-linked-list
-│   ├── 02-intrusive-doubly-list
-│   ├── 03-list-invariants
-│   ├── 04-tcb-layout
-│   ├── 05-static-task-creation
-│   ├── 06-task-stack-initialization
-│   ├── 07-all-task-registry
-│   ├── 08-priority-ready-queues
-│   ├── 09-tcb-multiple-lists
-│   └── 10-target-task-inspector
+│   ├── 01-singly-linked-list/
+│   ├── 02-intrusive-doubly-list/
+│   ├── 03-list-invariants/
+│   ├── 04-tcb-layout/
+│   ├── 05-static-task-creation/
+│   ├── 06-task-stack-initialization/
+│   ├── 07-all-task-registry/
+│   ├── 08-priority-ready-queues/
+│   ├── 09-tcb-multiple-lists/
+│   └── 10-target-task-inspector/
 ├── docs/
 │   ├── intrusive-list.md
 │   ├── linked-list-types.md
@@ -123,7 +125,9 @@ Sau khi hoàn thành repository này, người học có thể:
 │   ├── task-stack.md
 │   └── tcb-layout.md
 ├── tools/
-│   └── check_structure.py
+│   ├── check_all.sh
+│   ├── check_structure.py
+│   └── run_host_tests.sh
 └── build/
 ```
 
@@ -131,7 +135,7 @@ Sau khi hoàn thành repository này, người học có thể:
 
 ## 3. Firmware root làm gì?
 
-Firmware root là **HairRTOS Task Inspector** chạy trên STM32F103:
+Firmware root là **RTOS Task Inspector** chạy trên STM32F103:
 
 ```text
 Reset
@@ -199,19 +203,16 @@ sudo apt install \
     gcc
 ```
 
-Công cụ flash và debug tùy chọn:
-
-```bash
-sudo apt install \
-    openocd \
-    stlink-tools \
-    gdb-multiarch
-```
-
-Makefile có thể tự chuyển sang Clang/LLD nếu không tìm thấy GNU Arm Embedded Toolchain:
+Clang/LLD dùng làm toolchain thay thế:
 
 ```bash
 sudo apt install clang lld llvm
+```
+
+Công cụ flash và debug tùy chọn:
+
+```bash
+sudo apt install openocd stlink-tools gdb-multiarch
 ```
 
 Kiểm tra:
@@ -222,6 +223,8 @@ arm-none-eabi-objcopy --version
 arm-none-eabi-size --version
 make --version
 ```
+
+Makefile ưu tiên GNU Arm Embedded Toolchain; nếu không tìm thấy `arm-none-eabi-gcc`, nó tự chuyển sang Clang/LLD.
 
 ---
 
@@ -281,13 +284,13 @@ Mass erase:
 make erase
 ```
 
-Debug:
+Debug bằng OpenOCD và GDB:
 
 ```bash
 openocd -f interface/stlink.cfg -f target/stm32f1x.cfg
 ```
 
-Terminal khác:
+Ở terminal khác:
 
 ```bash
 gdb-multiarch build/task_inspector.elf
@@ -315,31 +318,20 @@ picocom -b 9600 /dev/ttyUSB0
 Banner dự kiến:
 
 ```text
-HairRTOS Task Inspector
+RTOS Task Inspector
 h help | t tasks | r ready | c current | s stacks | v validate
 ```
 
 Các lệnh:
 
-```text
-h
-t
-r
-c
-s
-v
-```
-
-Ý nghĩa:
-
 | Lệnh | Chức năng |
 |---|---|
-| `h` | In hướng dẫn |
-| `t` | In tất cả TCB trong all-task registry |
-| `r` | In ready bitmap và từng ready queue |
-| `c` | In current task, kernel tick và context-switch count |
-| `s` | In stack guard và số word chưa sử dụng |
-| `v` | Validate registry, ready queues và scheduler |
+| `h` | In hướng dẫn. |
+| `t` | In tất cả TCB trong all-task registry. |
+| `r` | In ready bitmap và từng ready queue. |
+| `c` | In current task, kernel tick và context-switch count. |
+| `s` | In stack guard và số word chưa sử dụng. |
+| `v` | Validate registry, ready queues và scheduler. |
 
 Task Inspector tạo snapshot trong critical section ngắn rồi mới in UART. Không in UART trong PendSV.
 
@@ -347,17 +339,11 @@ Task Inspector tạo snapshot trong critical section ngắn rồi mới in UART.
 
 ## 8. Build các lab
 
-Makefile ở thư mục gốc **chỉ quản lý project tổng kết HairRTOS Task Inspector**. Nó không gọi hoặc điều khiển Makefile của các lab.
+Makefile ở thư mục gốc **chỉ quản lý project tổng kết RTOS Task Inspector**. Nó không gọi hoặc điều khiển Makefile của các lab.
 
-Mỗi lab được build ngay trong thư mục của chính lab đó:
+Mỗi lab được build ngay trong thư mục của chính lab đó.
 
-```bash
-cd labs/01-singly-linked-list
-make test
-make run
-```
-
-Ví dụ với TCB:
+Ví dụ với lab chạy trên host:
 
 ```bash
 cd labs/04-tcb-layout
@@ -365,7 +351,7 @@ make test
 make run
 ```
 
-Ví dụ với firmware STM32:
+Ví dụ với lab chạy trên STM32:
 
 ```bash
 cd labs/10-target-task-inspector
@@ -381,12 +367,13 @@ cd ../..
 
 Quy ước:
 
-- Lab 01 đến 09 build và chạy trực tiếp trên Ubuntu.
-- Các lab host dùng AddressSanitizer và UndefinedBehaviorSanitizer.
-- Lab 10 tự tạo firmware STM32 trong thư mục `build/` của chính lab.
+- Host labs: `01-singly-linked-list`, `02-intrusive-doubly-list`, `03-list-invariants`, `04-tcb-layout`, `05-static-task-creation`, `06-task-stack-initialization`, `07-all-task-registry`, `08-priority-ready-queues`, `09-tcb-multiple-lists`.
+- Target labs: `10-target-task-inspector`.
+- Các lab host chạy AddressSanitizer và UndefinedBehaviorSanitizer.
+- Mỗi lab tạo output trong thư mục `build/` của chính lab đó.
 - `make clean` tại root chỉ xóa output của project tổng kết.
 - `make clean` trong một lab chỉ xóa output của lab đó.
-- Root Makefile không có rule `lab01`, `all-labs` hoặc `run-labs`.
+- Root Makefile không có rule tổng hợp như `lab01`, `all-labs`, `run-labs` hoặc `run-host-labs`.
 
 ---
 
@@ -416,22 +403,22 @@ Quy ước:
 Build và chạy lab
       |
       v
-Quan sát output hoặc unit test
+Quan sát output, UART, GDB hoặc unit test
       |
       v
 Trả lời câu hỏi cuối lab
       |
       v
-Cố ý tạo một lỗi
+Cố ý tạo một lỗi hoặc phá một invariant
       |
       v
-Giải thích invariant bị phá
+Giải thích nguyên nhân
       |
       v
-Chuyển sang lab tiếp theo
+Khôi phục và chuyển sang lab tiếp theo
 ```
 
-Không nên chỉ đọc source code. Với linked list, cần thay đổi thứ tự insert/remove và chủ động phá `owner`, `next`, `previous` hoặc `count`. Với TCB, cần kiểm tra `sizeof`, `offsetof`, stack range và initial frame.
+Không nên chỉ chạy code có sẵn. Với linked list, cần thay đổi thứ tự insert/remove và chủ động phá `owner`, `next`, `previous` hoặc `count`. Với TCB, cần kiểm tra `sizeof`, `offsetof`, stack range và initial frame.
 
 ---
 
@@ -450,7 +437,7 @@ Một node chỉ thuộc một list tại một thời điểm. Cùng một TCB 
 
 ### `saved_sp`
 
-`hr_task_t.saved_sp` nằm ở offset 0 và được khóa bằng `_Static_assert`. PendSV assembly dựa vào contract này để lưu và phục hồi PSP.
+`rtos_task_t.saved_sp` nằm ở offset 0 và được khóa bằng `_Static_assert`. PendSV assembly dựa vào contract này để lưu và phục hồi PSP.
 
 ### Stack
 

@@ -19,5 +19,5 @@ void systick_stop(void)
 
 void SysTick_Handler(void)
 {
-    hr_scheduler_on_tick();
+    rtos_scheduler_on_tick();
 }

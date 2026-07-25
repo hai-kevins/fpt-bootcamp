@@ -1,28 +1,28 @@
 #include "scheduler_trace.h"
 #include "critical_section.h"
 
-#define HR_TRACE_CAPACITY (64U)
+#define RTOS_TRACE_CAPACITY (64U)
 
-static hr_trace_record_t g_trace[HR_TRACE_CAPACITY];
+static rtos_trace_record_t g_trace[RTOS_TRACE_CAPACITY];
 static size_t g_trace_write_index;
 static size_t g_trace_count;
 static uint32_t g_trace_sequence;
 
-void hr_trace_reset(void)
+void rtos_trace_reset(void)
 {
-    const hr_irq_state_t state = hr_critical_enter();
+    const rtos_irq_state_t state = rtos_critical_enter();
     g_trace_write_index = 0U;
     g_trace_count = 0U;
     g_trace_sequence = 0U;
-    hr_critical_exit(state);
+    rtos_critical_exit(state);
 }
 
-void hr_trace_record(hr_trace_type_t type,
+void rtos_trace_record(rtos_trace_type_t type,
                      uint8_t from_task,
                      uint8_t to_task,
                      uint32_t tick)
 {
-    hr_trace_record_t *record = &g_trace[g_trace_write_index];
+    rtos_trace_record_t *record = &g_trace[g_trace_write_index];
 
     record->tick = tick;
     record->sequence = g_trace_sequence;
@@ -31,34 +31,34 @@ void hr_trace_record(hr_trace_type_t type,
     record->to_task = to_task;
 
     ++g_trace_sequence;
-    g_trace_write_index = (g_trace_write_index + 1U) % HR_TRACE_CAPACITY;
-    if (g_trace_count < HR_TRACE_CAPACITY)
+    g_trace_write_index = (g_trace_write_index + 1U) % RTOS_TRACE_CAPACITY;
+    if (g_trace_count < RTOS_TRACE_CAPACITY)
     {
         ++g_trace_count;
     }
 }
 
-size_t hr_trace_snapshot(hr_trace_record_t *output, size_t capacity)
+size_t rtos_trace_snapshot(rtos_trace_record_t *output, size_t capacity)
 {
     size_t count;
     size_t first;
-    const hr_irq_state_t state = hr_critical_enter();
+    const rtos_irq_state_t state = rtos_critical_enter();
 
-    if ((output == (hr_trace_record_t *)0) || (capacity == 0U))
+    if ((output == (rtos_trace_record_t *)0) || (capacity == 0U))
     {
-        hr_critical_exit(state);
+        rtos_critical_exit(state);
         return 0U;
     }
 
     count = (g_trace_count < capacity) ? g_trace_count : capacity;
-    first = (g_trace_write_index + HR_TRACE_CAPACITY - g_trace_count) %
-            HR_TRACE_CAPACITY;
+    first = (g_trace_write_index + RTOS_TRACE_CAPACITY - g_trace_count) %
+            RTOS_TRACE_CAPACITY;
 
     for (size_t index = 0U; index < count; ++index)
     {
-        output[index] = g_trace[(first + index) % HR_TRACE_CAPACITY];
+        output[index] = g_trace[(first + index) % RTOS_TRACE_CAPACITY];
     }
 
-    hr_critical_exit(state);
+    rtos_critical_exit(state);
     return count;
 }

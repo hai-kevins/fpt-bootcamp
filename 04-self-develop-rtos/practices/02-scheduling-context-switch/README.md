@@ -9,9 +9,9 @@ Repository thực hành cho **Chủ đề 2** của lộ trình tự phát tri�
 - PendSV để lưu và phục hồi context.
 - SysTick, preemption và round-robin.
 
-Project được tổ chức theo cùng triết lý với `01-rtos-introduction-memory-management`:
+Project được tổ chức theo cùng một bố cục:
 
-- Phần root là firmware tổng hợp cuối chủ đề.
+- Phần root là firmware tổng kết cuối chủ đề.
 - `labs/` chứa từng bài thực hành độc lập.
 - `docs/` chứa phần giải thích sâu hơn.
 - `build/` chỉ chứa artifact sinh tự động.
@@ -61,10 +61,25 @@ Sau khi hoàn thành repository này, người học có thể:
 ├── README.md
 ├── Makefile
 ├── .gitignore
+├── LICENSE
+├── VALIDATION.md
 ├── linker/
 │   └── memory.ld
 ├── startup/
 │   └── startup.c
+├── include/
+│   ├── clock.h
+│   ├── compiler.h
+│   ├── cortex_m3_port.h
+│   ├── critical_section.h
+│   ├── gpio.h
+│   ├── panic.h
+│   ├── scheduler.h
+│   ├── scheduler_trace.h
+│   ├── stm32f1.h
+│   ├── systick.h
+│   ├── task.h
+│   └── uart.h
 ├── src/
 │   ├── clock.c
 │   ├── cortex_m3_port.c
@@ -79,31 +94,18 @@ Sau khi hoàn thành repository này, người học có thể:
 │   ├── systick.c
 │   ├── task.c
 │   └── uart.c
-├── include/
-│   ├── clock.h
-│   ├── compiler.h
-│   ├── cortex_m3_port.h
-│   ├── critical_section.h
-│   ├── gpio.h
-│   ├── panic.h
-│   ├── scheduler.h
-│   ├── scheduler_trace.h
-│   ├── stm32f1.h
-│   ├── systick.h
-│   ├── task.h
-│   └── uart.h
 ├── labs/
 │   ├── README.md
-│   ├── 01-exception-stack-inspection
-│   ├── 02-initial-task-stack
-│   ├── 03-svc-first-task
-│   ├── 04-cooperative-pendsv
-│   ├── 05-priority-scheduler-host
-│   ├── 06-fixed-priority-target
-│   ├── 07-systick-time-slice
-│   ├── 08-isr-preemption
-│   ├── 09-round-robin
-│   └── 10-context-switch-stress
+│   ├── 01-exception-stack-inspection/
+│   ├── 02-initial-task-stack/
+│   ├── 03-svc-first-task/
+│   ├── 04-cooperative-pendsv/
+│   ├── 05-priority-scheduler-host/
+│   ├── 06-fixed-priority-target/
+│   ├── 07-systick-time-slice/
+│   ├── 08-isr-preemption/
+│   ├── 09-round-robin/
+│   └── 10-context-switch-stress/
 ├── docs/
 │   ├── cortex-m3-exception-model.md
 │   ├── gdb-context-switch.md
@@ -124,7 +126,7 @@ Sau khi hoàn thành repository này, người học có thể:
 
 ## 3. Firmware root làm gì?
 
-Firmware root là **HairRTOS Scheduler Playground** chạy trên STM32F103:
+Firmware root là **RTOS Scheduler Playground** chạy trên STM32F103:
 
 ```text
 Reset
@@ -145,7 +147,7 @@ main()
   |-- Tạo 5 task tĩnh
   |-- SysTick 1 kHz
   v
-hr_scheduler_start()
+rtos_scheduler_start()
   |
   v
 SVC_Handler
@@ -172,7 +174,7 @@ Scheduler dùng static TCB và static task stack. Project không dùng dynamic a
 
 ## 4. Cài toolchain
 
-Ubuntu/Debian với GNU Arm Embedded Toolchain:
+Ubuntu/Debian:
 
 ```bash
 sudo apt update
@@ -183,7 +185,7 @@ sudo apt install \
     gcc
 ```
 
-Có thể dùng Clang/LLD khi không có GNU Arm:
+Clang/LLD dùng làm toolchain thay thế:
 
 ```bash
 sudo apt install clang lld llvm
@@ -204,7 +206,7 @@ arm-none-eabi-size --version
 make --version
 ```
 
-Makefile tự chọn GNU Arm nếu tìm thấy `arm-none-eabi-gcc`; nếu không, nó chuyển sang Clang/LLD.
+Makefile ưu tiên GNU Arm Embedded Toolchain; nếu không tìm thấy `arm-none-eabi-gcc`, nó tự chuyển sang Clang/LLD.
 
 ---
 
@@ -298,25 +300,17 @@ picocom -b 9600 /dev/ttyUSB0
 Banner dự kiến:
 
 ```text
-HairRTOS Scheduler Playground
+RTOS Scheduler Playground
 h=help s=stats t=trace
 ```
 
 Các lệnh:
 
-```text
-h
-s
-t
-```
-
-Ý nghĩa:
-
-```text
-h -> In hướng dẫn lệnh.
-s -> In kernel tick, switch count, ready bitmap và trạng thái task.
-t -> In snapshot scheduler trace gần nhất.
-```
+| Lệnh | Chức năng |
+|---|---|
+| `h` | In hướng dẫn lệnh. |
+| `s` | In kernel tick, switch count, ready bitmap và trạng thái task. |
+| `t` | In snapshot scheduler trace gần nhất. |
 
 Không in UART trong PendSV hoặc trong mỗi lần context switch.
 
@@ -324,14 +318,9 @@ Không in UART trong PendSV hoặc trong mỗi lần context switch.
 
 ## 8. Build các lab
 
-Makefile ở thư mục gốc **chỉ quản lý project tổng kết Scheduler Playground**. Nó không gọi hoặc điều khiển Makefile của các lab.
+Makefile ở thư mục gốc **chỉ quản lý project tổng kết RTOS Scheduler Playground**. Nó không gọi hoặc điều khiển Makefile của các lab.
 
-Mỗi lab được build ngay trong thư mục của chính lab đó:
-
-```bash
-cd labs/01-exception-stack-inspection
-make
-```
+Mỗi lab được build ngay trong thư mục của chính lab đó.
 
 Ví dụ với lab chạy trên host:
 
@@ -341,12 +330,11 @@ make test
 make run
 ```
 
-Ví dụ với lab target:
+Ví dụ với lab chạy trên STM32:
 
 ```bash
 cd labs/04-cooperative-pendsv
 make
-make disasm
 make flash-stlink
 ```
 
@@ -358,12 +346,13 @@ cd ../..
 
 Quy ước:
 
-- Lab 02 và 05 build, test và chạy trực tiếp trên Ubuntu.
-- Các lab còn lại tự tạo firmware STM32 trong thư mục `build/` của lab đó.
+- Host labs: `02-initial-task-stack`, `05-priority-scheduler-host`.
+- Target labs: `01-exception-stack-inspection`, `03-svc-first-task`, `04-cooperative-pendsv`, `06-fixed-priority-target`, `07-systick-time-slice`, `08-isr-preemption`, `09-round-robin`, `10-context-switch-stress`.
 - Các lab host chạy AddressSanitizer và UndefinedBehaviorSanitizer.
+- Mỗi lab tạo output trong thư mục `build/` của chính lab đó.
 - `make clean` tại root chỉ xóa output của project tổng kết.
 - `make clean` trong một lab chỉ xóa output của lab đó.
-- Root Makefile không có rule `lab01`, `all-labs` hoặc `run-labs`.
+- Root Makefile không có rule tổng hợp như `lab01`, `all-labs`, `run-labs` hoặc `run-host-labs`.
 
 ---
 
@@ -393,22 +382,22 @@ Quy ước:
 Build và chạy lab
       |
       v
-Quan sát UART, GDB hoặc unit test
+Quan sát output, UART, GDB hoặc unit test
       |
       v
 Trả lời câu hỏi cuối lab
       |
       v
-Cố ý tạo một lỗi
+Cố ý tạo một lỗi hoặc phá một invariant
       |
       v
 Giải thích nguyên nhân
       |
       v
-Chuyển sang lab tiếp theo
+Khôi phục và chuyển sang lab tiếp theo
 ```
 
-Không nên chỉ quan sát LED. Với context switch, cần kiểm tra thêm PSP, MSP, saved stack pointer, local variable và register frame bằng GDB.
+Không nên chỉ chạy code có sẵn. Với context switch, cần kiểm tra thêm PSP, MSP, saved stack pointer, local variable và register frame bằng GDB.
 
 ---
 

@@ -14,11 +14,11 @@
 #define STACK_WORDS_SMALL   (160U)
 #define STACK_WORDS_MONITOR (256U)
 
-static hr_task_t g_high_task;
-static hr_task_t g_worker_a_task;
-static hr_task_t g_worker_b_task;
-static hr_task_t g_monitor_task;
-static hr_task_t g_idle_task;
+static rtos_task_t g_high_task;
+static rtos_task_t g_worker_a_task;
+static rtos_task_t g_worker_b_task;
+static rtos_task_t g_monitor_task;
+static rtos_task_t g_idle_task;
 
 static uint32_t g_high_stack[STACK_WORDS_SMALL] __attribute__((aligned(8)));
 static uint32_t g_worker_a_stack[STACK_WORDS_SMALL] __attribute__((aligned(8)));
@@ -36,7 +36,7 @@ static void print_newline(void)
     uart1_write_string("\r\n");
 }
 
-static void print_task(const hr_task_t *task)
+static void print_task(const rtos_task_t *task)
 {
     uart1_write_string("id=");
     uart1_write_u32(task->id);
@@ -51,7 +51,7 @@ static void print_task(const hr_task_t *task)
     uart1_write_string(" runtime_ticks=");
     uart1_write_u32(task->runtime_ticks);
     uart1_write_string(" unused_stack_words=");
-    uart1_write_u32((uint32_t)hr_task_stack_unused_words(task));
+    uart1_write_u32((uint32_t)rtos_task_stack_unused_words(task));
     print_newline();
 }
 
@@ -62,7 +62,7 @@ static void print_stats(void)
     uart1_write_string(" switches=");
     uart1_write_u32(g_context_switch_count);
     uart1_write_string(" ready_bitmap=");
-    uart1_write_hex32(hr_scheduler_ready_bitmap());
+    uart1_write_hex32(rtos_scheduler_ready_bitmap());
     print_newline();
 
     uart1_write_string("high=");
@@ -75,10 +75,10 @@ static void print_stats(void)
     uart1_write_u32(g_idle_counter);
     print_newline();
 
-    for (size_t index = 0U; index < hr_scheduler_task_count(); ++index)
+    for (size_t index = 0U; index < rtos_scheduler_task_count(); ++index)
     {
-        const hr_task_t *task = hr_scheduler_task_at(index);
-        if (task != (const hr_task_t *)0)
+        const rtos_task_t *task = rtos_scheduler_task_at(index);
+        if (task != (const rtos_task_t *)0)
         {
             print_task(task);
         }
@@ -87,8 +87,8 @@ static void print_stats(void)
 
 static void print_trace(void)
 {
-    hr_trace_record_t records[16];
-    const size_t count = hr_trace_snapshot(records, 16U);
+    rtos_trace_record_t records[16];
+    const size_t count = rtos_trace_snapshot(records, 16U);
 
     for (size_t index = 0U; index < count; ++index)
     {
@@ -114,7 +114,7 @@ static void high_event_task(void *argument)
     {
         ++g_high_runs;
         gpio_led_toggle();
-        hr_task_delay(500U);
+        rtos_task_delay(500U);
     }
 }
 
@@ -130,7 +130,7 @@ static void worker_a_task(void *argument)
 
         if ((local & 0x3FFFUL) == 0U)
         {
-            hr_task_delay(50U);
+            rtos_task_delay(50U);
         }
     }
 }
@@ -147,7 +147,7 @@ static void worker_b_task(void *argument)
 
         if ((local & 0x3FFFUL) == 0U)
         {
-            hr_task_delay(50U);
+            rtos_task_delay(50U);
         }
     }
 }
@@ -157,7 +157,7 @@ static void monitor_task(void *argument)
     (void)argument;
 
     uart1_write_string(
-        "\r\nHairRTOS Scheduler Playground\r\n"
+        "\r\nRTOS Scheduler Playground\r\n"
         "h=help s=stats t=trace\r\n");
 
     for (;;)
@@ -184,7 +184,7 @@ static void monitor_task(void *argument)
             }
         }
 
-        hr_task_delay(20U);
+        rtos_task_delay(20U);
     }
 }
 
@@ -195,13 +195,13 @@ static void idle_task(void *argument)
     for (;;)
     {
         ++g_idle_counter;
-        hr_port_wait_for_interrupt();
+        rtos_port_wait_for_interrupt();
     }
 }
 
 static void create_tasks(void)
 {
-    HR_ASSERT(hr_task_create_static(&g_high_task,
+    RTOS_ASSERT(rtos_task_create_static(&g_high_task,
                                     "high",
                                     0U,
                                     0U,
@@ -209,7 +209,7 @@ static void create_tasks(void)
                                     (void *)0,
                                     g_high_stack,
                                     STACK_WORDS_SMALL));
-    HR_ASSERT(hr_task_create_static(&g_worker_a_task,
+    RTOS_ASSERT(rtos_task_create_static(&g_worker_a_task,
                                     "worker-a",
                                     1U,
                                     1U,
@@ -217,7 +217,7 @@ static void create_tasks(void)
                                     (void *)0,
                                     g_worker_a_stack,
                                     STACK_WORDS_SMALL));
-    HR_ASSERT(hr_task_create_static(&g_worker_b_task,
+    RTOS_ASSERT(rtos_task_create_static(&g_worker_b_task,
                                     "worker-b",
                                     2U,
                                     1U,
@@ -225,7 +225,7 @@ static void create_tasks(void)
                                     (void *)0,
                                     g_worker_b_stack,
                                     STACK_WORDS_SMALL));
-    HR_ASSERT(hr_task_create_static(&g_monitor_task,
+    RTOS_ASSERT(rtos_task_create_static(&g_monitor_task,
                                     "monitor",
                                     3U,
                                     2U,
@@ -233,7 +233,7 @@ static void create_tasks(void)
                                     (void *)0,
                                     g_monitor_stack,
                                     STACK_WORDS_MONITOR));
-    HR_ASSERT(hr_task_create_static(&g_idle_task,
+    RTOS_ASSERT(rtos_task_create_static(&g_idle_task,
                                     "idle",
                                     4U,
                                     3U,
@@ -242,11 +242,11 @@ static void create_tasks(void)
                                     g_idle_stack,
                                     STACK_WORDS_SMALL));
 
-    HR_ASSERT(hr_scheduler_add_task(&g_high_task));
-    HR_ASSERT(hr_scheduler_add_task(&g_worker_a_task));
-    HR_ASSERT(hr_scheduler_add_task(&g_worker_b_task));
-    HR_ASSERT(hr_scheduler_add_task(&g_monitor_task));
-    HR_ASSERT(hr_scheduler_add_task(&g_idle_task));
+    RTOS_ASSERT(rtos_scheduler_add_task(&g_high_task));
+    RTOS_ASSERT(rtos_scheduler_add_task(&g_worker_a_task));
+    RTOS_ASSERT(rtos_scheduler_add_task(&g_worker_b_task));
+    RTOS_ASSERT(rtos_scheduler_add_task(&g_monitor_task));
+    RTOS_ASSERT(rtos_scheduler_add_task(&g_idle_task));
 }
 
 int main(void)
@@ -255,8 +255,8 @@ int main(void)
     gpio_led_init();
     uart1_init_9600_hsi8();
 
-    hr_scheduler_init();
+    rtos_scheduler_init();
     create_tasks();
     systick_init_1khz();
-    hr_scheduler_start();
+    rtos_scheduler_start();
 }

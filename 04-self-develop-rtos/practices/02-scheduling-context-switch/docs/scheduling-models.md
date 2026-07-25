@@ -1,6 +1,6 @@
 # Scheduling models
 
-HairRTOS trong project này dùng fixed-priority preemptive scheduling:
+RTOS trong project này dùng fixed-priority preemptive scheduling:
 
 - Priority số nhỏ hơn là cao hơn.
 - Mỗi priority có một FIFO ready queue.

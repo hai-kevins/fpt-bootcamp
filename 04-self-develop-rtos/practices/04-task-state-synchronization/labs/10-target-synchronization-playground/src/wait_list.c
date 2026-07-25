@@ -1,50 +1,50 @@
 #include "wait_list.h"
 
-void hr_wait_list_init(hr_list_t *list) { hr_list_init(list); }
+void rtos_wait_list_init(rtos_list_t *list) { rtos_list_init(list); }
 
-bool hr_wait_list_insert(hr_list_t *list, hr_task_t *task)
+bool rtos_wait_list_insert(rtos_list_t *list, rtos_task_t *task)
 {
-    hr_list_node_t *node;
-    if ((list == (hr_list_t *)0) || !hr_task_is_valid(task) ||
+    rtos_list_node_t *node;
+    if ((list == (rtos_list_t *)0) || !rtos_task_is_valid(task) ||
         (task->wait_node.owner != (const void *)0)) { return false; }
 
-    node = hr_list_front(list);
-    while (node != (hr_list_node_t *)0)
+    node = rtos_list_front(list);
+    while (node != (rtos_list_node_t *)0)
     {
-        hr_task_t *other = HR_CONTAINER_OF(node, hr_task_t, wait_node);
+        rtos_task_t *other = RTOS_CONTAINER_OF(node, rtos_task_t, wait_node);
         if (task->effective_priority < other->effective_priority)
         {
-            return hr_list_insert_before(list, node, &task->wait_node);
+            return rtos_list_insert_before(list, node, &task->wait_node);
         }
         node = node->next;
     }
-    return hr_list_push_back(list, &task->wait_node);
+    return rtos_list_push_back(list, &task->wait_node);
 }
 
-bool hr_wait_list_remove(hr_list_t *list, hr_task_t *task)
+bool rtos_wait_list_remove(rtos_list_t *list, rtos_task_t *task)
 {
-    return (list != (hr_list_t *)0) && hr_task_is_valid(task) &&
-           hr_list_remove(list, &task->wait_node);
+    return (list != (rtos_list_t *)0) && rtos_task_is_valid(task) &&
+           rtos_list_remove(list, &task->wait_node);
 }
 
-hr_task_t *hr_wait_list_front(const hr_list_t *list)
+rtos_task_t *rtos_wait_list_front(const rtos_list_t *list)
 {
-    hr_list_node_t *node = hr_list_front(list);
-    return (node != (hr_list_node_t *)0) ?
-           HR_CONTAINER_OF(node, hr_task_t, wait_node) : (hr_task_t *)0;
+    rtos_list_node_t *node = rtos_list_front(list);
+    return (node != (rtos_list_node_t *)0) ?
+           RTOS_CONTAINER_OF(node, rtos_task_t, wait_node) : (rtos_task_t *)0;
 }
 
-bool hr_wait_list_validate(const hr_list_t *list)
+bool rtos_wait_list_validate(const rtos_list_t *list)
 {
-    const hr_list_node_t *node;
+    const rtos_list_node_t *node;
     uint8_t previous_priority = 0U;
     bool first = true;
-    if (!hr_list_validate(list)) { return false; }
+    if (!rtos_list_validate(list)) { return false; }
     node = list->head;
-    while (node != (const hr_list_node_t *)0)
+    while (node != (const rtos_list_node_t *)0)
     {
-        const hr_task_t *task = HR_CONTAINER_OF(node, hr_task_t, wait_node);
-        if (!hr_task_is_valid(task) || (task->state != HR_TASK_BLOCKED)) { return false; }
+        const rtos_task_t *task = RTOS_CONTAINER_OF(node, rtos_task_t, wait_node);
+        if (!rtos_task_is_valid(task) || (task->state != RTOS_TASK_BLOCKED)) { return false; }
         if (!first && (task->effective_priority < previous_priority)) { return false; }
         previous_priority = task->effective_priority;
         first = false;

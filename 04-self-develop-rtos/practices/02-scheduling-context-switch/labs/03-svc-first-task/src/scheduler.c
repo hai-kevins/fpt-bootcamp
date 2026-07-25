@@ -8,17 +8,17 @@
 
 typedef struct
 {
-    hr_task_t *head;
-    hr_task_t *tail;
+    rtos_task_t *head;
+    rtos_task_t *tail;
     uint8_t count;
-} hr_ready_queue_t;
+} rtos_ready_queue_t;
 
-static hr_ready_queue_t g_ready_queues[HR_PRIORITY_COUNT];
-static hr_task_t *g_all_tasks[HR_MAX_TASKS];
+static rtos_ready_queue_t g_ready_queues[RTOS_PRIORITY_COUNT];
+static rtos_task_t *g_all_tasks[RTOS_MAX_TASKS];
 static size_t g_task_count;
 static uint32_t g_ready_bitmap;
 
-hr_task_t *g_current_task;
+rtos_task_t *g_current_task;
 volatile uint32_t g_kernel_tick;
 volatile uint32_t g_context_switch_count;
 
@@ -30,7 +30,7 @@ static bool tick_due(uint32_t now, uint32_t wake_tick)
 static uint8_t highest_ready_priority(void)
 {
     for (uint8_t priority = 0U;
-         priority < (uint8_t)HR_PRIORITY_COUNT;
+         priority < (uint8_t)RTOS_PRIORITY_COUNT;
          ++priority)
     {
         if ((g_ready_bitmap & (1UL << priority)) != 0U)
@@ -39,7 +39,7 @@ static uint8_t highest_ready_priority(void)
         }
     }
 
-    hr_panic(HR_PANIC_NO_READY_TASK, g_ready_bitmap);
+    rtos_panic(RTOS_PANIC_NO_READY_TASK, g_ready_bitmap);
 }
 
 static void ready_set_bitmap(uint8_t priority)
@@ -55,19 +55,19 @@ static void ready_clear_bitmap_if_empty(uint8_t priority)
     }
 }
 
-static void ready_enqueue_tail(hr_task_t *task)
+static void ready_enqueue_tail(rtos_task_t *task)
 {
-    hr_ready_queue_t *queue;
+    rtos_ready_queue_t *queue;
 
-    HR_ASSERT(task != (hr_task_t *)0);
-    HR_ASSERT(task->priority < HR_PRIORITY_COUNT);
-    HR_ASSERT(!task->in_ready_queue);
+    RTOS_ASSERT(task != (rtos_task_t *)0);
+    RTOS_ASSERT(task->priority < RTOS_PRIORITY_COUNT);
+    RTOS_ASSERT(!task->in_ready_queue);
 
     queue = &g_ready_queues[task->priority];
-    task->ready_next = (hr_task_t *)0;
+    task->ready_next = (rtos_task_t *)0;
     task->ready_previous = queue->tail;
 
-    if (queue->tail != (hr_task_t *)0)
+    if (queue->tail != (rtos_task_t *)0)
     {
         queue->tail->ready_next = task;
     }
@@ -82,17 +82,17 @@ static void ready_enqueue_tail(hr_task_t *task)
     ready_set_bitmap(task->priority);
 }
 
-static void ready_remove(hr_task_t *task)
+static void ready_remove(rtos_task_t *task)
 {
-    hr_ready_queue_t *queue;
+    rtos_ready_queue_t *queue;
 
-    HR_ASSERT(task != (hr_task_t *)0);
-    HR_ASSERT(task->priority < HR_PRIORITY_COUNT);
-    HR_ASSERT(task->in_ready_queue);
+    RTOS_ASSERT(task != (rtos_task_t *)0);
+    RTOS_ASSERT(task->priority < RTOS_PRIORITY_COUNT);
+    RTOS_ASSERT(task->in_ready_queue);
 
     queue = &g_ready_queues[task->priority];
 
-    if (task->ready_previous != (hr_task_t *)0)
+    if (task->ready_previous != (rtos_task_t *)0)
     {
         task->ready_previous->ready_next = task->ready_next;
     }
@@ -101,7 +101,7 @@ static void ready_remove(hr_task_t *task)
         queue->head = task->ready_next;
     }
 
-    if (task->ready_next != (hr_task_t *)0)
+    if (task->ready_next != (rtos_task_t *)0)
     {
         task->ready_next->ready_previous = task->ready_previous;
     }
@@ -110,18 +110,18 @@ static void ready_remove(hr_task_t *task)
         queue->tail = task->ready_previous;
     }
 
-    task->ready_previous = (hr_task_t *)0;
-    task->ready_next = (hr_task_t *)0;
+    task->ready_previous = (rtos_task_t *)0;
+    task->ready_next = (rtos_task_t *)0;
     task->in_ready_queue = false;
-    HR_ASSERT(queue->count > 0U);
+    RTOS_ASSERT(queue->count > 0U);
     --queue->count;
     ready_clear_bitmap_if_empty(task->priority);
 }
 
 static void ready_rotate(uint8_t priority)
 {
-    hr_ready_queue_t *queue = &g_ready_queues[priority];
-    hr_task_t *first;
+    rtos_ready_queue_t *queue = &g_ready_queues[priority];
+    rtos_task_t *first;
 
     if (queue->count <= 1U)
     {
@@ -129,139 +129,139 @@ static void ready_rotate(uint8_t priority)
     }
 
     first = queue->head;
-    HR_ASSERT(first != (hr_task_t *)0);
+    RTOS_ASSERT(first != (rtos_task_t *)0);
 
     queue->head = first->ready_next;
-    queue->head->ready_previous = (hr_task_t *)0;
+    queue->head->ready_previous = (rtos_task_t *)0;
 
-    first->ready_next = (hr_task_t *)0;
+    first->ready_next = (rtos_task_t *)0;
     first->ready_previous = queue->tail;
     queue->tail->ready_next = first;
     queue->tail = first;
 }
 
-static hr_task_t *select_next(void)
+static rtos_task_t *select_next(void)
 {
     const uint8_t priority = highest_ready_priority();
-    hr_task_t *next = g_ready_queues[priority].head;
+    rtos_task_t *next = g_ready_queues[priority].head;
 
-    HR_ASSERT(next != (hr_task_t *)0);
-    HR_ASSERT(next->in_ready_queue);
-    HR_ASSERT(hr_task_stack_guard_ok(next));
-    HR_ASSERT(next->saved_sp >= next->stack_low);
-    HR_ASSERT(next->saved_sp < next->stack_high);
+    RTOS_ASSERT(next != (rtos_task_t *)0);
+    RTOS_ASSERT(next->in_ready_queue);
+    RTOS_ASSERT(rtos_task_stack_guard_ok(next));
+    RTOS_ASSERT(next->saved_sp >= next->stack_low);
+    RTOS_ASSERT(next->saved_sp < next->stack_high);
 
     return next;
 }
 
-void hr_scheduler_init(void)
+void rtos_scheduler_init(void)
 {
-    for (size_t index = 0U; index < HR_PRIORITY_COUNT; ++index)
+    for (size_t index = 0U; index < RTOS_PRIORITY_COUNT; ++index)
     {
-        g_ready_queues[index].head = (hr_task_t *)0;
-        g_ready_queues[index].tail = (hr_task_t *)0;
+        g_ready_queues[index].head = (rtos_task_t *)0;
+        g_ready_queues[index].tail = (rtos_task_t *)0;
         g_ready_queues[index].count = 0U;
     }
 
-    for (size_t index = 0U; index < HR_MAX_TASKS; ++index)
+    for (size_t index = 0U; index < RTOS_MAX_TASKS; ++index)
     {
-        g_all_tasks[index] = (hr_task_t *)0;
+        g_all_tasks[index] = (rtos_task_t *)0;
     }
 
     g_task_count = 0U;
     g_ready_bitmap = 0U;
-    g_current_task = (hr_task_t *)0;
+    g_current_task = (rtos_task_t *)0;
     g_kernel_tick = 0U;
     g_context_switch_count = 0U;
-    hr_trace_reset();
+    rtos_trace_reset();
 }
 
-bool hr_scheduler_add_task(hr_task_t *task)
+bool rtos_scheduler_add_task(rtos_task_t *task)
 {
-    hr_irq_state_t irq_state;
+    rtos_irq_state_t irq_state;
 
-    if ((task == (hr_task_t *)0) ||
-        (task->priority >= HR_PRIORITY_COUNT) ||
-        (task->state != HR_TASK_CREATED) ||
-        (g_task_count >= HR_MAX_TASKS))
+    if ((task == (rtos_task_t *)0) ||
+        (task->priority >= RTOS_PRIORITY_COUNT) ||
+        (task->state != RTOS_TASK_CREATED) ||
+        (g_task_count >= RTOS_MAX_TASKS))
     {
         return false;
     }
 
-    irq_state = hr_critical_enter();
-    task->state = HR_TASK_READY;
+    irq_state = rtos_critical_enter();
+    task->state = RTOS_TASK_READY;
     ready_enqueue_tail(task);
     g_all_tasks[g_task_count] = task;
     ++g_task_count;
-    hr_critical_exit(irq_state);
+    rtos_critical_exit(irq_state);
     return true;
 }
 
-void hr_scheduler_start(void)
+void rtos_scheduler_start(void)
 {
-    hr_port_init();
+    rtos_port_init();
     g_current_task = select_next();
-    g_current_task->state = HR_TASK_RUNNING;
+    g_current_task->state = RTOS_TASK_RUNNING;
     ++g_current_task->switch_count;
-    hr_trace_record(HR_TRACE_KERNEL_START,
+    rtos_trace_record(RTOS_TRACE_KERNEL_START,
                     0xFFU,
                     g_current_task->id,
                     g_kernel_tick);
-    hr_port_start_first_task();
+    rtos_port_start_first_task();
 }
 
-void hr_scheduler_commit_switch(void)
+void rtos_scheduler_commit_switch(void)
 {
-    hr_task_t *old_task = g_current_task;
-    hr_task_t *next_task = select_next();
+    rtos_task_t *old_task = g_current_task;
+    rtos_task_t *next_task = select_next();
 
-    if ((old_task != (hr_task_t *)0) &&
+    if ((old_task != (rtos_task_t *)0) &&
         (old_task != next_task) &&
-        (old_task->state == HR_TASK_RUNNING))
+        (old_task->state == RTOS_TASK_RUNNING))
     {
-        old_task->state = HR_TASK_READY;
+        old_task->state = RTOS_TASK_READY;
     }
 
-    next_task->state = HR_TASK_RUNNING;
+    next_task->state = RTOS_TASK_RUNNING;
     g_current_task = next_task;
 
     if (old_task != next_task)
     {
         ++g_context_switch_count;
         ++next_task->switch_count;
-        hr_trace_record(HR_TRACE_SWITCH,
-                        (old_task != (hr_task_t *)0) ? old_task->id : 0xFFU,
+        rtos_trace_record(RTOS_TRACE_SWITCH,
+                        (old_task != (rtos_task_t *)0) ? old_task->id : 0xFFU,
                         next_task->id,
                         g_kernel_tick);
     }
 }
 
-void hr_scheduler_on_tick(void)
+void rtos_scheduler_on_tick(void)
 {
     bool switch_required = false;
-    const hr_irq_state_t irq_state = hr_critical_enter();
+    const rtos_irq_state_t irq_state = rtos_critical_enter();
 
     ++g_kernel_tick;
 
     for (size_t index = 0U; index < g_task_count; ++index)
     {
-        hr_task_t *task = g_all_tasks[index];
+        rtos_task_t *task = g_all_tasks[index];
 
-        if ((task != (hr_task_t *)0) &&
-            (task->state == HR_TASK_BLOCKED) &&
-            (task->wake_tick != HR_WAIT_FOREVER) &&
+        if ((task != (rtos_task_t *)0) &&
+            (task->state == RTOS_TASK_BLOCKED) &&
+            (task->wake_tick != RTOS_WAIT_FOREVER) &&
             tick_due(g_kernel_tick, task->wake_tick))
         {
-            task->wake_tick = HR_WAIT_FOREVER;
-            task->state = HR_TASK_READY;
+            task->wake_tick = RTOS_WAIT_FOREVER;
+            task->state = RTOS_TASK_READY;
             ready_enqueue_tail(task);
-            hr_trace_record(HR_TRACE_WAKE,
-                            (g_current_task != (hr_task_t *)0) ?
+            rtos_trace_record(RTOS_TRACE_WAKE,
+                            (g_current_task != (rtos_task_t *)0) ?
                                 g_current_task->id : 0xFFU,
                             task->id,
                             g_kernel_tick);
 
-            if ((g_current_task == (hr_task_t *)0) ||
+            if ((g_current_task == (rtos_task_t *)0) ||
                 (task->priority < g_current_task->priority))
             {
                 switch_required = true;
@@ -269,8 +269,8 @@ void hr_scheduler_on_tick(void)
         }
     }
 
-    if ((g_current_task != (hr_task_t *)0) &&
-        (g_current_task->state == HR_TASK_RUNNING))
+    if ((g_current_task != (rtos_task_t *)0) &&
+        (g_current_task->state == RTOS_TASK_RUNNING))
     {
         ++g_current_task->runtime_ticks;
 
@@ -282,14 +282,14 @@ void hr_scheduler_on_tick(void)
         if (g_current_task->time_slice_remaining == 0U)
         {
             g_current_task->time_slice_remaining =
-                HR_DEFAULT_TIME_SLICE_TICKS;
+                RTOS_DEFAULT_TIME_SLICE_TICKS;
 
             if (g_ready_queues[g_current_task->priority].count > 1U)
             {
                 const uint8_t old_id = g_current_task->id;
                 ready_rotate(g_current_task->priority);
-                g_current_task->state = HR_TASK_READY;
-                hr_trace_record(HR_TRACE_TICK_ROTATE,
+                g_current_task->state = RTOS_TASK_READY;
+                rtos_trace_record(RTOS_TRACE_TICK_ROTATE,
                                 old_id,
                                 g_ready_queues[g_current_task->priority].head->id,
                                 g_kernel_tick);
@@ -300,146 +300,146 @@ void hr_scheduler_on_tick(void)
 
     if (switch_required)
     {
-        hr_port_request_context_switch();
+        rtos_port_request_context_switch();
     }
 
-    hr_critical_exit(irq_state);
+    rtos_critical_exit(irq_state);
 }
 
-void hr_task_yield(void)
+void rtos_task_yield(void)
 {
-    const hr_irq_state_t irq_state = hr_critical_enter();
+    const rtos_irq_state_t irq_state = rtos_critical_enter();
 
-    HR_ASSERT(g_current_task != (hr_task_t *)0);
-    HR_ASSERT(g_current_task->in_ready_queue);
+    RTOS_ASSERT(g_current_task != (rtos_task_t *)0);
+    RTOS_ASSERT(g_current_task->in_ready_queue);
 
     if (g_ready_queues[g_current_task->priority].count > 1U)
     {
         const uint8_t old_id = g_current_task->id;
         ready_rotate(g_current_task->priority);
-        g_current_task->state = HR_TASK_READY;
+        g_current_task->state = RTOS_TASK_READY;
         g_current_task->time_slice_remaining =
-            HR_DEFAULT_TIME_SLICE_TICKS;
-        hr_trace_record(HR_TRACE_YIELD,
+            RTOS_DEFAULT_TIME_SLICE_TICKS;
+        rtos_trace_record(RTOS_TRACE_YIELD,
                         old_id,
                         g_ready_queues[g_current_task->priority].head->id,
                         g_kernel_tick);
-        hr_port_request_context_switch();
+        rtos_port_request_context_switch();
     }
 
-    hr_critical_exit(irq_state);
+    rtos_critical_exit(irq_state);
 }
 
-void hr_task_delay(uint32_t ticks)
+void rtos_task_delay(uint32_t ticks)
 {
-    hr_irq_state_t irq_state;
+    rtos_irq_state_t irq_state;
 
     if (ticks == 0U)
     {
-        hr_task_yield();
+        rtos_task_yield();
         return;
     }
 
-    irq_state = hr_critical_enter();
-    HR_ASSERT(g_current_task != (hr_task_t *)0);
-    HR_ASSERT(g_current_task->in_ready_queue);
+    irq_state = rtos_critical_enter();
+    RTOS_ASSERT(g_current_task != (rtos_task_t *)0);
+    RTOS_ASSERT(g_current_task->in_ready_queue);
 
     ready_remove(g_current_task);
     g_current_task->wake_tick = g_kernel_tick + ticks;
-    g_current_task->state = HR_TASK_BLOCKED;
-    hr_trace_record(HR_TRACE_DELAY,
+    g_current_task->state = RTOS_TASK_BLOCKED;
+    rtos_trace_record(RTOS_TRACE_DELAY,
                     g_current_task->id,
                     0xFFU,
                     g_kernel_tick);
-    hr_port_request_context_switch();
-    hr_critical_exit(irq_state);
+    rtos_port_request_context_switch();
+    rtos_critical_exit(irq_state);
 }
 
-void hr_task_block_current(void)
+void rtos_task_block_current(void)
 {
-    const hr_irq_state_t irq_state = hr_critical_enter();
+    const rtos_irq_state_t irq_state = rtos_critical_enter();
 
-    HR_ASSERT(g_current_task != (hr_task_t *)0);
-    HR_ASSERT(g_current_task->in_ready_queue);
+    RTOS_ASSERT(g_current_task != (rtos_task_t *)0);
+    RTOS_ASSERT(g_current_task->in_ready_queue);
 
     ready_remove(g_current_task);
-    g_current_task->wake_tick = HR_WAIT_FOREVER;
-    g_current_task->state = HR_TASK_BLOCKED;
-    hr_port_request_context_switch();
-    hr_critical_exit(irq_state);
+    g_current_task->wake_tick = RTOS_WAIT_FOREVER;
+    g_current_task->state = RTOS_TASK_BLOCKED;
+    rtos_port_request_context_switch();
+    rtos_critical_exit(irq_state);
 }
 
-bool hr_task_wake(hr_task_t *task)
+bool rtos_task_wake(rtos_task_t *task)
 {
     bool switch_required = false;
-    const hr_irq_state_t irq_state = hr_critical_enter();
+    const rtos_irq_state_t irq_state = rtos_critical_enter();
 
-    if ((task != (hr_task_t *)0) &&
-        (task->state == HR_TASK_BLOCKED))
+    if ((task != (rtos_task_t *)0) &&
+        (task->state == RTOS_TASK_BLOCKED))
     {
-        task->wake_tick = HR_WAIT_FOREVER;
-        task->state = HR_TASK_READY;
+        task->wake_tick = RTOS_WAIT_FOREVER;
+        task->state = RTOS_TASK_READY;
         ready_enqueue_tail(task);
-        switch_required = (g_current_task == (hr_task_t *)0) ||
+        switch_required = (g_current_task == (rtos_task_t *)0) ||
                           (task->priority < g_current_task->priority);
         if (switch_required)
         {
-            hr_port_request_context_switch();
+            rtos_port_request_context_switch();
         }
     }
 
-    hr_critical_exit(irq_state);
+    rtos_critical_exit(irq_state);
     return switch_required;
 }
 
-bool hr_task_wake_from_isr(hr_task_t *task)
+bool rtos_task_wake_from_isr(rtos_task_t *task)
 {
     bool switch_required = false;
-    const hr_irq_state_t irq_state = hr_critical_enter();
+    const rtos_irq_state_t irq_state = rtos_critical_enter();
 
-    if ((task != (hr_task_t *)0) &&
-        (task->state == HR_TASK_BLOCKED))
+    if ((task != (rtos_task_t *)0) &&
+        (task->state == RTOS_TASK_BLOCKED))
     {
-        task->wake_tick = HR_WAIT_FOREVER;
-        task->state = HR_TASK_READY;
+        task->wake_tick = RTOS_WAIT_FOREVER;
+        task->state = RTOS_TASK_READY;
         ready_enqueue_tail(task);
-        switch_required = (g_current_task == (hr_task_t *)0) ||
+        switch_required = (g_current_task == (rtos_task_t *)0) ||
                           (task->priority < g_current_task->priority);
-        hr_trace_record(HR_TRACE_ISR_WAKE,
-                        (g_current_task != (hr_task_t *)0) ?
+        rtos_trace_record(RTOS_TRACE_ISR_WAKE,
+                        (g_current_task != (rtos_task_t *)0) ?
                             g_current_task->id : 0xFFU,
                         task->id,
                         g_kernel_tick);
         if (switch_required)
         {
-            hr_port_request_context_switch();
+            rtos_port_request_context_switch();
         }
     }
 
-    hr_critical_exit(irq_state);
+    rtos_critical_exit(irq_state);
     return switch_required;
 }
 
-hr_task_t *hr_scheduler_current(void)
+rtos_task_t *rtos_scheduler_current(void)
 {
     return g_current_task;
 }
 
-size_t hr_scheduler_task_count(void)
+size_t rtos_scheduler_task_count(void)
 {
     return g_task_count;
 }
 
-hr_task_t *hr_scheduler_task_at(size_t index)
+rtos_task_t *rtos_scheduler_task_at(size_t index)
 {
     if (index >= g_task_count)
     {
-        return (hr_task_t *)0;
+        return (rtos_task_t *)0;
     }
     return g_all_tasks[index];
 }
 
-uint32_t hr_scheduler_ready_bitmap(void)
+uint32_t rtos_scheduler_ready_bitmap(void)
 {
     return g_ready_bitmap;
 }

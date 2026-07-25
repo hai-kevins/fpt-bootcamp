@@ -9,7 +9,7 @@ Repository thực hành cho **Chủ đề 4** của lộ trình tự phát tri�
 - Mutex ownership, priority inversion và priority inheritance.
 - ISR-to-task synchronization và deferred context switch.
 
-Project được tổ chức theo cùng bố cục với `01-rtos-introduction-memory-management`:
+Project được tổ chức theo cùng một bố cục:
 
 - Phần root là firmware tổng kết cuối chủ đề.
 - `labs/` chứa từng bài thực hành độc lập.
@@ -64,31 +64,53 @@ Sau khi hoàn thành repository này, người học có thể:
 ├── README.md
 ├── Makefile
 ├── .gitignore
+├── LICENSE
+├── VALIDATION.md
 ├── linker/
 │   └── memory.ld
 ├── startup/
 │   └── startup.c
 ├── include/
+│   ├── clock.h
+│   ├── compiler.h
+│   ├── cortex_m3_port.h
+│   ├── critical_section.h
+│   ├── gpio.h
 │   ├── list.h
-│   ├── task.h
-│   ├── scheduler.h
-│   ├── timeout.h
-│   ├── wait_list.h
-│   ├── semaphore.h
 │   ├── mutex.h
+│   ├── panic.h
+│   ├── ready_queue.h
+│   ├── scheduler.h
+│   ├── semaphore.h
+│   ├── stm32f1.h
 │   ├── synchronization_inspector.h
-│   └── ... platform headers
+│   ├── systick.h
+│   ├── task.h
+│   ├── task_registry.h
+│   ├── timeout.h
+│   ├── uart.h
+│   └── wait_list.h
 ├── src/
-│   ├── list.c
-│   ├── task.c
-│   ├── scheduler.c
-│   ├── timeout.c
-│   ├── wait_list.c
-│   ├── semaphore.c
-│   ├── mutex.c
-│   ├── synchronization_inspector.c
+│   ├── clock.c
+│   ├── cortex_m3_port.c
 │   ├── cortex_m3_portasm.S
-│   └── ... platform sources
+│   ├── critical_section.c
+│   ├── gpio.c
+│   ├── list.c
+│   ├── main.c
+│   ├── mutex.c
+│   ├── panic.c
+│   ├── ready_queue.c
+│   ├── runtime.c
+│   ├── scheduler.c
+│   ├── semaphore.c
+│   ├── synchronization_inspector.c
+│   ├── systick.c
+│   ├── task.c
+│   ├── task_registry.c
+│   ├── timeout.c
+│   ├── uart.c
+│   └── wait_list.c
 ├── labs/
 │   ├── README.md
 │   ├── 01-task-state-machine/
@@ -102,7 +124,27 @@ Sau khi hoàn thành repository này, người học có thể:
 │   ├── 09-suspend-resume/
 │   └── 10-target-synchronization-playground/
 ├── docs/
+│   ├── delayed-list.md
+│   ├── efficient-blocking.md
+│   ├── intrusive-list.md
+│   ├── isr-safe-api.md
+│   ├── linked-list-types.md
+│   ├── list-invariants.md
+│   ├── mutex.md
+│   ├── priority-inheritance.md
+│   ├── ready-queues.md
+│   ├── semaphore.md
+│   ├── static-task-creation.md
+│   ├── target-validation.md
+│   ├── task-registry.md
+│   ├── task-stack.md
+│   ├── task-state-machine.md
+│   ├── tcb-layout.md
+│   └── timeout-model.md
 ├── tools/
+│   ├── check_all.sh
+│   ├── check_structure.py
+│   └── run_host_tests.sh
 └── build/
 ```
 
@@ -110,7 +152,7 @@ Sau khi hoàn thành repository này, người học có thể:
 
 ## 3. Firmware root làm gì?
 
-Firmware root là **HairRTOS Synchronization Playground**:
+Firmware root là **RTOS Synchronization Playground**:
 
 ```text
 Reset
@@ -160,20 +202,35 @@ Ubuntu/Debian:
 
 ```bash
 sudo apt update
-sudo apt install gcc-arm-none-eabi binutils-arm-none-eabi make gcc
+sudo apt install \
+    gcc-arm-none-eabi \
+    binutils-arm-none-eabi \
+    make \
+    gcc
 ```
 
-Công cụ flash/debug tùy chọn:
+Clang/LLD dùng làm toolchain thay thế:
+
+```bash
+sudo apt install clang lld llvm
+```
+
+Công cụ flash và debug tùy chọn:
 
 ```bash
 sudo apt install openocd stlink-tools gdb-multiarch
 ```
 
-Makefile tự chuyển sang Clang/LLD khi không tìm thấy GNU Arm:
+Kiểm tra:
 
 ```bash
-sudo apt install clang lld llvm
+arm-none-eabi-gcc --version
+arm-none-eabi-objcopy --version
+arm-none-eabi-size --version
+make --version
 ```
+
+Makefile ưu tiên GNU Arm Embedded Toolchain; nếu không tìm thấy `arm-none-eabi-gcc`, nó tự chuyển sang Clang/LLD.
 
 ---
 
@@ -193,7 +250,7 @@ build/synchronization_playground.map
 build/synchronization_playground.lst
 ```
 
-Lệnh phân tích:
+Các lệnh phân tích:
 
 ```bash
 make size
@@ -205,15 +262,23 @@ make clean
 make rebuild
 ```
 
+Kiểm tra cấu trúc repository:
+
+```bash
+python3 tools/check_structure.py
+```
+
 ---
 
 ## 6. Flash firmware
+
+ST-Link tools:
 
 ```bash
 make flash-stlink
 ```
 
-Hoặc:
+OpenOCD:
 
 ```bash
 make flash-openocd
@@ -223,6 +288,18 @@ Mass erase:
 
 ```bash
 make erase
+```
+
+Debug bằng OpenOCD và GDB:
+
+```bash
+openocd -f interface/stlink.cfg -f target/stm32f1x.cfg
+```
+
+Ở terminal khác:
+
+```bash
+gdb-multiarch build/synchronization_playground.elf
 ```
 
 ---
@@ -244,27 +321,35 @@ Mở terminal:
 picocom -b 9600 /dev/ttyUSB0
 ```
 
-Các lệnh:
+Banner dự kiến:
 
 ```text
-h  help
-t  task states and priorities
-d  delayed list
-s  semaphore state
-m  mutex owner and waiters
-u  suspend/resume medium task
-v  validate kernel structures
+RTOS Synchronization Playground
 ```
 
-Task Inspector chỉ snapshot trong critical section ngắn; UART output được thực hiện bên ngoài PendSV.
+Các lệnh:
+
+| Lệnh | Chức năng |
+|---|---|
+| `h` | In hướng dẫn. |
+| `t` | In task states và priority. |
+| `d` | In delayed list. |
+| `s` | In trạng thái semaphore. |
+| `m` | In mutex owner và waiters. |
+| `u` | Suspend hoặc resume task `medium`. |
+| `v` | Validate kernel structures. |
+
+Synchronization Inspector chỉ tạo snapshot trong critical section ngắn; UART output được thực hiện ngoài PendSV và ngoài ISR.
 
 ---
 
 ## 8. Build các lab
 
-Makefile ở root chỉ quản lý project tổng kết.
+Makefile ở thư mục gốc **chỉ quản lý project tổng kết RTOS Synchronization Playground**. Nó không gọi hoặc điều khiển Makefile của các lab.
 
-Host lab:
+Mỗi lab được build ngay trong thư mục của chính lab đó.
+
+Ví dụ với lab chạy trên host:
 
 ```bash
 cd labs/03-delayed-list-tick-wrap
@@ -272,7 +357,7 @@ make test
 make run
 ```
 
-Target lab:
+Ví dụ với lab chạy trên STM32:
 
 ```bash
 cd labs/06-isr-semaphore-wake
@@ -280,12 +365,21 @@ make
 make flash-stlink
 ```
 
+Để quay lại thư mục gốc:
+
+```bash
+cd ../..
+```
+
 Quy ước:
 
-- Lab 01–05 và 07–09 chạy trên Ubuntu với ASan/UBSan.
-- Lab 06 và 10 là firmware STM32 độc lập.
-- `make clean` chỉ xóa `build/` của thư mục hiện tại.
-- Root Makefile không có rule `lab01`, `all-labs` hoặc `run-labs`.
+- Host labs: `01-task-state-machine`, `02-efficient-blocking`, `03-delayed-list-tick-wrap`, `04-delay-until`, `05-semaphore-host`, `07-mutex-ownership`, `08-priority-inheritance`, `09-suspend-resume`.
+- Target labs: `06-isr-semaphore-wake`, `10-target-synchronization-playground`.
+- Các lab host chạy AddressSanitizer và UndefinedBehaviorSanitizer.
+- Mỗi lab tạo output trong thư mục `build/` của chính lab đó.
+- `make clean` tại root chỉ xóa output của project tổng kết.
+- `make clean` trong một lab chỉ xóa output của lab đó.
+- Root Makefile không có rule tổng hợp như `lab01`, `all-labs`, `run-labs` hoặc `run-host-labs`.
 
 ---
 
@@ -309,25 +403,28 @@ Quy ước:
 ## 10. Quy trình học đề xuất
 
 ```text
-Đọc README lab
+Đọc README của lab
       |
       v
-Build và chạy test
+Build và chạy lab
       |
       v
-Quan sát state/list/object
+Quan sát output, UART, GDB hoặc unit test
       |
       v
-Cố ý phá một invariant
+Trả lời câu hỏi cuối lab
       |
       v
-Giải thích lỗi
+Cố ý tạo một lỗi hoặc phá một invariant
       |
       v
-Khôi phục và chuyển lab tiếp theo
+Giải thích nguyên nhân
+      |
+      v
+Khôi phục và chuyển sang lab tiếp theo
 ```
 
-Cần kiểm tra đồng thời state enum và list membership. Một task có state đúng nhưng vẫn nằm sai list vẫn là kernel corruption.
+Không nên chỉ chạy code có sẵn. Cần kiểm tra đồng thời state enum và list membership. Một task có state đúng nhưng vẫn nằm sai list vẫn là kernel corruption.
 
 ---
 

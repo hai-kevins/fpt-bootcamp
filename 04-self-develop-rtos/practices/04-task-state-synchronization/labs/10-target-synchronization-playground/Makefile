@@ -103,7 +103,7 @@ clean:
 	rm -rf $(BUILD_DIR)
 
 help:
-	@echo "make              Build HairRTOS Synchronization Playground"
+	@echo "make              Build RTOS Synchronization Playground"
 	@echo "make size         Show section sizes"
 	@echo "make sections     Show ELF sections"
 	@echo "make symbols      Show symbols by address"

@@ -1,8 +1,8 @@
 #include "critical_section.h"
 
-hr_irq_state_t hr_critical_enter(void)
+rtos_irq_state_t rtos_critical_enter(void)
 {
-    hr_irq_state_t state;
+    rtos_irq_state_t state;
 
     __asm volatile(
         "mrs %0, primask\n"
@@ -14,7 +14,7 @@ hr_irq_state_t hr_critical_enter(void)
     return state;
 }
 
-void hr_critical_exit(hr_irq_state_t state)
+void rtos_critical_exit(rtos_irq_state_t state)
 {
     __asm volatile(
         "msr primask, %0\n"

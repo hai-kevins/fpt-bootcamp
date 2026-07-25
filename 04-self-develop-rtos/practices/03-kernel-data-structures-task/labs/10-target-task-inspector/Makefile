@@ -103,7 +103,7 @@ clean:
 	rm -rf $(BUILD_DIR)
 
 help:
-	@echo "make              Build HairRTOS Task Inspector"
+	@echo "make              Build RTOS Task Inspector"
 	@echo "make size         Show section sizes"
 	@echo "make sections     Show ELF sections"
 	@echo "make symbols      Show symbols by address"

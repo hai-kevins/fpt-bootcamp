@@ -12,4 +12,4 @@ void systick_init_1khz(void)
                    SYSTICK_CTRL_ENABLE;
 }
 void systick_stop(void) { SYSTICK_CTRL = 0U; }
-void SysTick_Handler(void) { hr_scheduler_on_tick(); }
+void SysTick_Handler(void) { rtos_scheduler_on_tick(); }

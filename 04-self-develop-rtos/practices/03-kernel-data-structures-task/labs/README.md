@@ -1,9 +1,9 @@
-# Labs — independent Makefiles
+# Labs — Independent Makefiles
 
 Mỗi thư mục lab là một build unit độc lập.
 
 - Không build lab từ Makefile gốc.
-- Không dùng rule tổng hợp như `make lab01`, `make all-labs` hoặc `make run-host-labs`.
+- Không dùng rule tổng hợp như `make lab01`, `make all-labs`, `make run-labs` hoặc `make run-host-labs`.
 - Đi vào đúng thư mục lab rồi chạy Makefile của lab đó.
 - Output được tạo trong `build/` bên trong chính lab.
 - `make clean` chỉ xóa output của lab hiện tại.
@@ -50,12 +50,11 @@ make run
 
 Các lab host dùng AddressSanitizer và UndefinedBehaviorSanitizer.
 
-## Target lab
+## Target labs
 
 ```bash
 cd labs/10-target-task-inspector
 make
-make flash-stlink
 ```
 
-Makefile của lab target tự chuyển sang Clang/LLD khi không tìm thấy GNU Arm Embedded Toolchain.
+Makefile ưu tiên GNU Arm Embedded Toolchain; nếu không tìm thấy `arm-none-eabi-gcc`, nó tự chuyển sang Clang/LLD.

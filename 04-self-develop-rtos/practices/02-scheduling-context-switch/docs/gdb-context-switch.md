@@ -7,7 +7,7 @@ break SVC_Handler
 break PendSV_Handler
 break SysTick_Handler
 break HardFault_Handler
-break hr_scheduler_commit_switch
+break rtos_scheduler_commit_switch
 ```
 
 Quan sát `$msp`, `$psp`, `$control`, `g_current_task` và vùng nhớ tại

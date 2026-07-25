@@ -3,7 +3,7 @@
 .thumb
 
 .extern g_current_task
-.extern hr_scheduler_commit_switch
+.extern rtos_scheduler_commit_switch
 
 .global SVC_Handler
 .type SVC_Handler, %function
@@ -38,7 +38,7 @@ PendSV_Handler:
     str     r0, [r2]
 
     push    {r3, lr}
-    bl      hr_scheduler_commit_switch
+    bl      rtos_scheduler_commit_switch
     pop     {r3, lr}
 
     ldr     r1, =g_current_task

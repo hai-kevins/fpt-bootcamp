@@ -26,7 +26,7 @@ All host demo targets were also compiled and executed with `make run`.
 - Lab 08 per-priority ready queues tests/demo: PASS
 - Lab 09 multiple-list TCB membership tests/demo: PASS
 - Host AddressSanitizer/UndefinedBehaviorSanitizer checks: PASS
-- Root HairRTOS Task Inspector Cortex-M3 cross-build: PASS
+- Root RTOS Task Inspector Cortex-M3 cross-build: PASS
 - Lab 10 standalone Task Inspector Cortex-M3 cross-build: PASS
 
 Root cross-build size in this environment:

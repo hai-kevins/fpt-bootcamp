@@ -4,22 +4,22 @@
 #include <stddef.h>
 #include <stdint.h>
 
-_Static_assert(offsetof(hr_task_t, saved_sp) == 0U,
+_Static_assert(offsetof(rtos_task_t, saved_sp) == 0U,
                "saved_sp must be the first TCB field");
 
-bool hr_task_create_static(hr_task_t *task,
+bool rtos_task_create_static(rtos_task_t *task,
                            const char *name,
                            uint8_t id,
                            uint8_t priority,
-                           hr_task_entry_t entry,
+                           rtos_task_entry_t entry,
                            void *argument,
                            uint32_t *stack,
                            size_t stack_word_count)
 {
     uint32_t *sp;
 
-    if ((task == (hr_task_t *)0) ||
-        (entry == (hr_task_entry_t)0) ||
+    if ((task == (rtos_task_t *)0) ||
+        (entry == (rtos_task_entry_t)0) ||
         (stack == (uint32_t *)0) ||
         (stack_word_count < 40U) ||
         (stack_word_count > 65535U))
@@ -29,16 +29,16 @@ bool hr_task_create_static(hr_task_t *task,
 
     for (size_t index = 0U; index < stack_word_count; ++index)
     {
-        stack[index] = HR_TASK_STACK_FILL;
+        stack[index] = RTOS_TASK_STACK_FILL;
     }
-    stack[0] = HR_TASK_STACK_GUARD;
+    stack[0] = RTOS_TASK_STACK_GUARD;
 
     sp = stack + stack_word_count;
     sp = (uint32_t *)((uintptr_t)sp & ~(uintptr_t)0x7U);
 
     *(--sp) = 0x01000000UL;                       /* xPSR */
     *(--sp) = (uint32_t)(uintptr_t)entry;         /* PC */
-    *(--sp) = (uint32_t)(uintptr_t)hr_task_return_error; /* LR */
+    *(--sp) = (uint32_t)(uintptr_t)rtos_task_return_error; /* LR */
     *(--sp) = 0x12121212UL;                       /* R12 */
     *(--sp) = 0x03030303UL;                       /* R3 */
     *(--sp) = 0x02020202UL;                       /* R2 */
@@ -60,27 +60,27 @@ bool hr_task_create_static(hr_task_t *task,
     task->name = name;
     task->entry = entry;
     task->argument = argument;
-    task->ready_previous = (hr_task_t *)0;
-    task->ready_next = (hr_task_t *)0;
-    task->wake_tick = HR_WAIT_FOREVER;
+    task->ready_previous = (rtos_task_t *)0;
+    task->ready_next = (rtos_task_t *)0;
+    task->wake_tick = RTOS_WAIT_FOREVER;
     task->runtime_ticks = 0U;
     task->switch_count = 0U;
-    task->time_slice_remaining = HR_DEFAULT_TIME_SLICE_TICKS;
+    task->time_slice_remaining = RTOS_DEFAULT_TIME_SLICE_TICKS;
     task->stack_word_count = (uint16_t)stack_word_count;
     task->id = id;
     task->priority = priority;
-    task->state = HR_TASK_CREATED;
+    task->state = RTOS_TASK_CREATED;
     task->in_ready_queue = false;
 
     return true;
 }
 
-size_t hr_task_stack_unused_words(const hr_task_t *task)
+size_t rtos_task_stack_unused_words(const rtos_task_t *task)
 {
     size_t unused = 0U;
     const uint32_t *cursor;
 
-    if ((task == (const hr_task_t *)0) ||
+    if ((task == (const rtos_task_t *)0) ||
         (task->stack_low == (uint32_t *)0))
     {
         return 0U;
@@ -88,7 +88,7 @@ size_t hr_task_stack_unused_words(const hr_task_t *task)
 
     cursor = task->stack_low + 1;
     while ((cursor < task->stack_high) &&
-           (*cursor == HR_TASK_STACK_FILL))
+           (*cursor == RTOS_TASK_STACK_FILL))
     {
         ++unused;
         ++cursor;
@@ -97,14 +97,14 @@ size_t hr_task_stack_unused_words(const hr_task_t *task)
     return unused;
 }
 
-bool hr_task_stack_guard_ok(const hr_task_t *task)
+bool rtos_task_stack_guard_ok(const rtos_task_t *task)
 {
-    return (task != (const hr_task_t *)0) &&
+    return (task != (const rtos_task_t *)0) &&
            (task->stack_low != (uint32_t *)0) &&
-           (task->stack_low[0] == HR_TASK_STACK_GUARD);
+           (task->stack_low[0] == RTOS_TASK_STACK_GUARD);
 }
 
-void hr_task_return_error(void)
+void rtos_task_return_error(void)
 {
-    hr_panic(HR_PANIC_TASK_RETURNED, 0U);
+    rtos_panic(RTOS_PANIC_TASK_RETURNED, 0U);
 }

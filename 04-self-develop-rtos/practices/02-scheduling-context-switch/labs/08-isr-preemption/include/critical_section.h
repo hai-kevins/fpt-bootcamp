@@ -3,9 +3,9 @@
 
 #include <stdint.h>
 
-typedef uint32_t hr_irq_state_t;
+typedef uint32_t rtos_irq_state_t;
 
-hr_irq_state_t hr_critical_enter(void);
-void hr_critical_exit(hr_irq_state_t state);
+rtos_irq_state_t rtos_critical_enter(void);
+void rtos_critical_exit(rtos_irq_state_t state);
 
 #endif
