@@ -121,7 +121,7 @@ Cấu trúc dữ liệu trong kernel + Task
     +-- Case study linked list trong AK-mOS
 ```
 
-Trong README này, phạm vi được mở rộng theo hướng HairRTOS:
+Trong README này, phạm vi được mở rộng theo hướng thực hành:
 
 ```text
 Linked-list theory
@@ -337,7 +337,7 @@ list_push_back(list, task);
 
 rồi bên trong tự gọi `malloc()` để tạo node.
 
-HairRTOS theo static-first, vì vậy node được nhúng trực tiếp trong object.
+Thiết kế kernel theo hướng static-first, vì vậy node được nhúng trực tiếp trong object.
 
 ## 5.3 Không callback khi list đang bị khóa
 
@@ -493,7 +493,7 @@ Không có `NULL` ở cuối.
 - round-robin ready queue;
 - cyclic object iteration.
 
-HairRTOS có thể dùng doubly list tuyến tính hoặc circular list. Điều quan trọng là API và invariant phải nhất quán.
+Kernel có thể dùng doubly list tuyến tính hoặc circular list. Điều quan trọng là API và invariant phải nhất quán.
 
 ---
 
@@ -698,7 +698,7 @@ typedef struct list_node
     struct list_node *previous;
     struct list_node *next;
 
-#if HR_CONFIG_LIST_DEBUG
+#if RTOS_CONFIG_LIST_DEBUG
     const void *owner;
 #endif
 } list_node_t;
@@ -707,14 +707,14 @@ typedef struct list_node
 Khi insert:
 
 ```c
-HR_ASSERT(node->owner == NULL);
+RTOS_ASSERT(node->owner == NULL);
 node->owner = list;
 ```
 
 Khi remove:
 
 ```c
-HR_ASSERT(node->owner == list);
+RTOS_ASSERT(node->owner == list);
 node->owner = NULL;
 ```
 
@@ -760,53 +760,53 @@ Không nên chạy full O(n) validator trong mọi scheduler operation của rel
 Public API gợi ý:
 
 ```c
-typedef struct hr_list_node
+typedef struct rtos_list_node
 {
-    struct hr_list_node *previous;
-    struct hr_list_node *next;
+    struct rtos_list_node *previous;
+    struct rtos_list_node *next;
 
-#if HR_CONFIG_LIST_DEBUG
+#if RTOS_CONFIG_LIST_DEBUG
     const void *owner;
 #endif
-} hr_list_node_t;
+} rtos_list_node_t;
 
 typedef struct
 {
-    hr_list_node_t *head;
-    hr_list_node_t *tail;
+    rtos_list_node_t *head;
+    rtos_list_node_t *tail;
     size_t count;
-} hr_list_t;
+} rtos_list_t;
 
-void hr_list_init(hr_list_t *list);
-void hr_list_node_init(hr_list_node_t *node);
+void rtos_list_init(rtos_list_t *list);
+void rtos_list_node_init(rtos_list_node_t *node);
 
-bool hr_list_is_empty(const hr_list_t *list);
-size_t hr_list_count(const hr_list_t *list);
+bool rtos_list_is_empty(const rtos_list_t *list);
+size_t rtos_list_count(const rtos_list_t *list);
 
-hr_list_node_t *hr_list_front(const hr_list_t *list);
-hr_list_node_t *hr_list_back(const hr_list_t *list);
+rtos_list_node_t *rtos_list_front(const rtos_list_t *list);
+rtos_list_node_t *rtos_list_back(const rtos_list_t *list);
 
-bool hr_list_push_front(hr_list_t *list,
-                        hr_list_node_t *node);
+bool rtos_list_push_front(rtos_list_t *list,
+                        rtos_list_node_t *node);
 
-bool hr_list_push_back(hr_list_t *list,
-                       hr_list_node_t *node);
+bool rtos_list_push_back(rtos_list_t *list,
+                       rtos_list_node_t *node);
 
-hr_list_node_t *hr_list_pop_front(hr_list_t *list);
-hr_list_node_t *hr_list_pop_back(hr_list_t *list);
+rtos_list_node_t *rtos_list_pop_front(rtos_list_t *list);
+rtos_list_node_t *rtos_list_pop_back(rtos_list_t *list);
 
-bool hr_list_insert_before(hr_list_t *list,
-                           hr_list_node_t *position,
-                           hr_list_node_t *node);
+bool rtos_list_insert_before(rtos_list_t *list,
+                           rtos_list_node_t *position,
+                           rtos_list_node_t *node);
 
-bool hr_list_insert_after(hr_list_t *list,
-                          hr_list_node_t *position,
-                          hr_list_node_t *node);
+bool rtos_list_insert_after(rtos_list_t *list,
+                          rtos_list_node_t *position,
+                          rtos_list_node_t *node);
 
-bool hr_list_remove(hr_list_t *list,
-                    hr_list_node_t *node);
+bool rtos_list_remove(rtos_list_t *list,
+                    rtos_list_node_t *node);
 
-bool hr_list_validate(const hr_list_t *list);
+bool rtos_list_validate(const rtos_list_t *list);
 ```
 
 ## API design principles
@@ -826,9 +826,9 @@ bool hr_list_validate(const hr_list_t *list);
 ## 17.1 Init list
 
 ```c
-void hr_list_init(hr_list_t *list)
+void rtos_list_init(rtos_list_t *list)
 {
-    HR_ASSERT(list != NULL);
+    RTOS_ASSERT(list != NULL);
 
     list->head = NULL;
     list->tail = NULL;
@@ -839,14 +839,14 @@ void hr_list_init(hr_list_t *list)
 ## 17.2 Init node
 
 ```c
-void hr_list_node_init(hr_list_node_t *node)
+void rtos_list_node_init(rtos_list_node_t *node)
 {
-    HR_ASSERT(node != NULL);
+    RTOS_ASSERT(node != NULL);
 
     node->previous = NULL;
     node->next = NULL;
 
-#if HR_CONFIG_LIST_DEBUG
+#if RTOS_CONFIG_LIST_DEBUG
     node->owner = NULL;
 #endif
 }
@@ -855,15 +855,15 @@ void hr_list_node_init(hr_list_node_t *node)
 ## 17.3 Push back
 
 ```c
-bool hr_list_push_back(hr_list_t *list,
-                       hr_list_node_t *node)
+bool rtos_list_push_back(rtos_list_t *list,
+                       rtos_list_node_t *node)
 {
     if ((list == NULL) || (node == NULL))
     {
         return false;
     }
 
-#if HR_CONFIG_LIST_DEBUG
+#if RTOS_CONFIG_LIST_DEBUG
     if (node->owner != NULL)
     {
         return false;
@@ -885,7 +885,7 @@ bool hr_list_push_back(hr_list_t *list,
     list->tail = node;
     list->count++;
 
-#if HR_CONFIG_LIST_DEBUG
+#if RTOS_CONFIG_LIST_DEBUG
     node->owner = list;
 #endif
 
@@ -896,15 +896,15 @@ bool hr_list_push_back(hr_list_t *list,
 ## 17.4 Remove
 
 ```c
-bool hr_list_remove(hr_list_t *list,
-                    hr_list_node_t *node)
+bool rtos_list_remove(rtos_list_t *list,
+                    rtos_list_node_t *node)
 {
     if ((list == NULL) || (node == NULL))
     {
         return false;
     }
 
-#if HR_CONFIG_LIST_DEBUG
+#if RTOS_CONFIG_LIST_DEBUG
     if (node->owner != list)
     {
         return false;
@@ -932,11 +932,11 @@ bool hr_list_remove(hr_list_t *list,
     node->previous = NULL;
     node->next = NULL;
 
-#if HR_CONFIG_LIST_DEBUG
+#if RTOS_CONFIG_LIST_DEBUG
     node->owner = NULL;
 #endif
 
-    HR_ASSERT(list->count > 0U);
+    RTOS_ASSERT(list->count > 0U);
     list->count--;
 
     return true;
@@ -946,9 +946,9 @@ bool hr_list_remove(hr_list_t *list,
 ## 17.5 Pop front
 
 ```c
-hr_list_node_t *hr_list_pop_front(hr_list_t *list)
+rtos_list_node_t *rtos_list_pop_front(rtos_list_t *list)
 {
-    hr_list_node_t *node;
+    rtos_list_node_t *node;
 
     if ((list == NULL) || (list->head == NULL))
     {
@@ -957,7 +957,7 @@ hr_list_node_t *hr_list_pop_front(hr_list_t *list)
 
     node = list->head;
 
-    if (!hr_list_remove(list, node))
+    if (!rtos_list_remove(list, node))
     {
         return NULL;
     }
@@ -977,18 +977,18 @@ Kernel cần lấy object chứa node.
 Macro:
 
 ```c
-#define HR_CONTAINER_OF(pointer, type, member) \
+#define RTOS_CONTAINER_OF(pointer, type, member) \
     ((type *)((uint8_t *)(pointer) - offsetof(type, member)))
 ```
 
 Ví dụ:
 
 ```c
-hr_list_node_t *node = hr_list_front(&all_tasks);
+rtos_list_node_t *node = rtos_list_front(&all_tasks);
 
-hr_task_t *task =
-    HR_CONTAINER_OF(node,
-                    hr_task_t,
+rtos_task_t *task =
+    RTOS_CONTAINER_OF(node,
+                    rtos_task_t,
                     all_task_node);
 ```
 
@@ -1005,7 +1005,7 @@ hr_task_t *task =
 Có thể kiểm tra layout quan trọng:
 
 ```c
-_Static_assert(offsetof(hr_task_t, saved_sp) == 0U,
+_Static_assert(offsetof(rtos_task_t, saved_sp) == 0U,
                "saved_sp must be at offset zero");
 ```
 
@@ -1091,7 +1091,7 @@ pop back
 Sau mỗi operation:
 
 ```c
-assert(hr_list_validate(&list));
+assert(rtos_list_validate(&list));
 ```
 
 ---
@@ -1122,7 +1122,7 @@ static void sensor_task(void *argument)
     for (;;)
     {
         sensor_sample(config);
-        hr_task_delay(10U);
+        rtos_task_delay(10U);
     }
 }
 ```
@@ -1175,10 +1175,10 @@ TCB
 
 # 22. TCB lưu những gì?
 
-Một TCB HairRTOS có thể chứa:
+Một TCB có thể chứa:
 
 ```c
-typedef struct hr_task
+typedef struct rtos_task
 {
     uint32_t *saved_sp;
 
@@ -1186,28 +1186,28 @@ typedef struct hr_task
     uint32_t *stack_high;
     size_t stack_word_count;
 
-    hr_task_entry_t entry;
+    rtos_task_entry_t entry;
     void *argument;
 
     const char *name;
 
-    hr_task_state_t state;
+    rtos_task_state_t state;
     uint8_t base_priority;
     uint8_t effective_priority;
 
     uint32_t wake_tick;
     uint32_t time_slice_remaining;
 
-    hr_list_node_t ready_node;
-    hr_list_node_t wait_node;
-    hr_list_node_t timeout_node;
-    hr_list_node_t all_task_node;
+    rtos_list_node_t ready_node;
+    rtos_list_node_t wait_node;
+    rtos_list_node_t timeout_node;
+    rtos_list_node_t all_task_node;
 
     uint32_t runtime_counter;
     size_t stack_high_water_words;
 
     uint32_t magic;
-} hr_task_t;
+} rtos_task_t;
 ```
 
 Không phải field nào cũng phải được dùng ngay ở Chủ đề 3.
@@ -1283,7 +1283,7 @@ typedef struct
 {
     const char *name;
     uint32_t *saved_sp;
-} hr_task_t;
+} rtos_task_t;
 ```
 
 assembly cũ sẽ ghi PSP vào `name`.
@@ -1298,7 +1298,7 @@ Hậu quả:
 ## Contract bắt buộc
 
 ```c
-_Static_assert(offsetof(hr_task_t, saved_sp) == 0U,
+_Static_assert(offsetof(rtos_task_t, saved_sp) == 0U,
                "TCB saved_sp offset changed");
 ```
 
@@ -1335,7 +1335,7 @@ Low address = stack_low
 ## Kiểm tra range
 
 ```c
-bool hr_task_saved_sp_is_valid(const hr_task_t *task)
+bool rtos_task_saved_sp_is_valid(const rtos_task_t *task)
 {
     uintptr_t sp;
     uintptr_t low;
@@ -1360,7 +1360,7 @@ bool hr_task_saved_sp_is_valid(const hr_task_t *task)
 
 # 25. Priority trong TCB
 
-HairRTOS dùng:
+Trong tài liệu này, quy ước priority:
 
 ```text
 Số nhỏ hơn = priority cao hơn
@@ -1392,9 +1392,9 @@ Sau này mutex priority inheritance có thể thay đổi effective priority t�
 ## Validation
 
 ```c
-if (priority >= HR_PRIORITY_COUNT)
+if (priority >= RTOS_PRIORITY_COUNT)
 {
-    return HR_STATUS_INVALID_PRIORITY;
+    return RTOS_STATUS_INVALID_PRIORITY;
 }
 ```
 
@@ -1409,11 +1409,11 @@ Tuy nhiên, Chủ đề 3 cần enum tối thiểu để tổ chức object:
 ```c
 typedef enum
 {
-    HR_TASK_STATE_UNUSED = 0,
-    HR_TASK_STATE_CREATED,
-    HR_TASK_STATE_READY,
-    HR_TASK_STATE_RUNNING
-} hr_task_state_t;
+    RTOS_TASK_STATE_UNUSED = 0,
+    RTOS_TASK_STATE_CREATED,
+    RTOS_TASK_STATE_READY,
+    RTOS_TASK_STATE_RUNNING
+} rtos_task_state_t;
 ```
 
 Có thể khai báo đầy đủ enum ngay từ đầu:
@@ -1421,13 +1421,13 @@ Có thể khai báo đầy đủ enum ngay từ đầu:
 ```c
 typedef enum
 {
-    HR_TASK_STATE_UNUSED = 0,
-    HR_TASK_STATE_CREATED,
-    HR_TASK_STATE_READY,
-    HR_TASK_STATE_RUNNING,
-    HR_TASK_STATE_BLOCKED,
-    HR_TASK_STATE_SUSPENDED
-} hr_task_state_t;
+    RTOS_TASK_STATE_UNUSED = 0,
+    RTOS_TASK_STATE_CREATED,
+    RTOS_TASK_STATE_READY,
+    RTOS_TASK_STATE_RUNNING,
+    RTOS_TASK_STATE_BLOCKED,
+    RTOS_TASK_STATE_SUSPENDED
+} rtos_task_state_t;
 ```
 
 Nhưng trong Chủ đề 3 chỉ kiểm thử:
@@ -1447,7 +1447,7 @@ Không triển khai đầy đủ blocking/suspend transition tại đây.
 Task entry type:
 
 ```c
-typedef void (*hr_task_entry_t)(void *argument);
+typedef void (*rtos_task_entry_t)(void *argument);
 ```
 
 Task creation lưu:
@@ -1470,7 +1470,7 @@ LR = task-return handler
 ```c
 if (entry == NULL)
 {
-    return HR_STATUS_INVALID_ARGUMENT;
+    return RTOS_STATUS_INVALID_ARGUMENT;
 }
 ```
 
@@ -1495,7 +1495,7 @@ task-return handler -> panic
 
 # 28. Static task creation
 
-HairRTOS static-first.
+Thiết kế sử dụng hướng static-first.
 
 Application cung cấp:
 
@@ -1511,17 +1511,17 @@ Name
 Ví dụ:
 
 ```c
-static hr_task_t g_worker_task;
+static rtos_task_t g_worker_task;
 static uint32_t g_worker_stack[128];
 ```
 
 Creation API:
 
 ```c
-hr_status_t hr_task_create_static(
-    hr_task_t *task,
+rtos_status_t rtos_task_create_static(
+    rtos_task_t *task,
     const char *name,
-    hr_task_entry_t entry,
+    rtos_task_entry_t entry,
     void *argument,
     uint8_t priority,
     uint32_t *stack_memory,
@@ -1533,7 +1533,7 @@ hr_status_t hr_task_create_static(
 Không nên:
 
 ```c
-hr_task_t *task = hr_task_create(...);
+rtos_task_t *task = rtos_task_create(...);
 ```
 
 nếu bên trong gọi heap mà policy không nói rõ.
@@ -1576,7 +1576,7 @@ Architecture-specific frame nên nằm trong port:
 
 ```c
 task->saved_sp =
-    hr_port_build_initial_stack(
+    rtos_port_build_initial_stack(
         stack_memory,
         stack_word_count,
         entry,
@@ -1648,7 +1648,7 @@ Mỗi task READY nằm đúng một ready queue.
 TCB chứa:
 
 ```c
-hr_list_node_t ready_node;
+rtos_list_node_t ready_node;
 ```
 
 Không dùng `all_task_node` thay cho `ready_node`.
@@ -1678,20 +1678,20 @@ Không được dùng cùng node cho cả hai list.
 Sai:
 
 ```c
-hr_list_push_back(&all_tasks,
+rtos_list_push_back(&all_tasks,
                   &task->ready_node);
 
-hr_list_push_back(&ready_queue,
+rtos_list_push_back(&ready_queue,
                   &task->ready_node);
 ```
 
 Đúng:
 
 ```c
-hr_list_push_back(&all_tasks,
+rtos_list_push_back(&all_tasks,
                   &task->all_task_node);
 
-hr_list_push_back(&ready_queue,
+rtos_list_push_back(&ready_queue,
                   &task->ready_node);
 ```
 
@@ -1702,17 +1702,17 @@ hr_list_push_back(&ready_queue,
 TCB mở rộng:
 
 ```c
-typedef struct hr_task
+typedef struct rtos_task
 {
     uint32_t *saved_sp;
 
-    hr_list_node_t ready_node;
-    hr_list_node_t all_task_node;
-    hr_list_node_t wait_node;
-    hr_list_node_t timeout_node;
+    rtos_list_node_t ready_node;
+    rtos_list_node_t all_task_node;
+    rtos_list_node_t wait_node;
+    rtos_list_node_t timeout_node;
 
     ...
-} hr_task_t;
+} rtos_task_t;
 ```
 
 ## Node responsibility
@@ -1738,14 +1738,14 @@ Các node khác có thể khai báo sau khi bắt đầu Chủ đề 4.
 Global scheduler state:
 
 ```c
-static hr_task_t *g_current_task;
+static rtos_task_t *g_current_task;
 ```
 
 Scheduler chọn:
 
 ```c
-hr_task_t *next =
-    hr_scheduler_select_next();
+rtos_task_t *next =
+    rtos_scheduler_select_next();
 ```
 
 Context switch:
@@ -1826,7 +1826,7 @@ Task name giúp:
 API:
 
 ```c
-const char *hr_task_name(const hr_task_t *task);
+const char *rtos_task_name(const rtos_task_t *task);
 ```
 
 ## Name lifetime
@@ -1851,7 +1851,7 @@ Không tốt:
 void create(void)
 {
     char name[16] = "worker";
-    hr_task_create_static(..., name, ...);
+    rtos_task_create_static(..., name, ...);
 }
 ```
 
@@ -1888,7 +1888,7 @@ stack_memory[0] = 0xDEADBEEFUL;
 Guard được kiểm tra:
 
 ```c
-bool hr_task_stack_guard_ok(const hr_task_t *task);
+bool rtos_task_stack_guard_ok(const rtos_task_t *task);
 ```
 
 ## High-water mark
@@ -1919,12 +1919,12 @@ Có thể quét:
 Assertions cho TCB và list:
 
 ```c
-HR_ASSERT(task != NULL);
-HR_ASSERT(task->magic == HR_TASK_MAGIC);
-HR_ASSERT(task->state != HR_TASK_STATE_UNUSED);
-HR_ASSERT(task->effective_priority < HR_PRIORITY_COUNT);
-HR_ASSERT(hr_task_saved_sp_is_valid(task));
-HR_ASSERT(hr_list_validate(&g_all_tasks));
+RTOS_ASSERT(task != NULL);
+RTOS_ASSERT(task->magic == RTOS_TASK_MAGIC);
+RTOS_ASSERT(task->state != RTOS_TASK_STATE_UNUSED);
+RTOS_ASSERT(task->effective_priority < RTOS_PRIORITY_COUNT);
+RTOS_ASSERT(rtos_task_saved_sp_is_valid(task));
+RTOS_ASSERT(rtos_list_validate(&g_all_tasks));
 ```
 
 Assertions nên:
@@ -1944,15 +1944,15 @@ Status enum:
 ```c
 typedef enum
 {
-    HR_STATUS_OK = 0,
-    HR_STATUS_INVALID_ARGUMENT,
-    HR_STATUS_INVALID_PRIORITY,
-    HR_STATUS_STACK_TOO_SMALL,
-    HR_STATUS_STACK_ALIGNMENT_ERROR,
-    HR_STATUS_TASK_ALREADY_CREATED,
-    HR_STATUS_LIST_ERROR,
-    HR_STATUS_PORT_ERROR
-} hr_status_t;
+    RTOS_STATUS_OK = 0,
+    RTOS_STATUS_INVALID_ARGUMENT,
+    RTOS_STATUS_INVALID_PRIORITY,
+    RTOS_STATUS_STACK_TOO_SMALL,
+    RTOS_STATUS_STACK_ALIGNMENT_ERROR,
+    RTOS_STATUS_TASK_ALREADY_CREATED,
+    RTOS_STATUS_LIST_ERROR,
+    RTOS_STATUS_PORT_ERROR
+} rtos_status_t;
 ```
 
 ## Input validation
@@ -1982,29 +1982,29 @@ Nếu creation fail sau khi đã init một phần:
 # 40. Mã khung TCB và task API
 
 ```c
-#ifndef HR_TASK_H
-#define HR_TASK_H
+#ifndef RTOS_TASK_H
+#define RTOS_TASK_H
 
 #include <stddef.h>
 #include <stdint.h>
 
-#include "hr_list.h"
+#include "rtos_list.h"
 
-#define HR_TASK_MAGIC (0x5441534BUL)
+#define RTOS_TASK_MAGIC (0x5441534BUL)
 
-typedef void (*hr_task_entry_t)(void *argument);
+typedef void (*rtos_task_entry_t)(void *argument);
 
 typedef enum
 {
-    HR_TASK_STATE_UNUSED = 0,
-    HR_TASK_STATE_CREATED,
-    HR_TASK_STATE_READY,
-    HR_TASK_STATE_RUNNING,
-    HR_TASK_STATE_BLOCKED,
-    HR_TASK_STATE_SUSPENDED
-} hr_task_state_t;
+    RTOS_TASK_STATE_UNUSED = 0,
+    RTOS_TASK_STATE_CREATED,
+    RTOS_TASK_STATE_READY,
+    RTOS_TASK_STATE_RUNNING,
+    RTOS_TASK_STATE_BLOCKED,
+    RTOS_TASK_STATE_SUSPENDED
+} rtos_task_state_t;
 
-typedef struct hr_task
+typedef struct rtos_task
 {
     uint32_t *saved_sp;
 
@@ -2012,39 +2012,39 @@ typedef struct hr_task
     uint32_t *stack_high;
     size_t stack_word_count;
 
-    hr_task_entry_t entry;
+    rtos_task_entry_t entry;
     void *argument;
     const char *name;
 
-    hr_task_state_t state;
+    rtos_task_state_t state;
     uint8_t base_priority;
     uint8_t effective_priority;
 
-    hr_list_node_t ready_node;
-    hr_list_node_t all_task_node;
+    rtos_list_node_t ready_node;
+    rtos_list_node_t all_task_node;
 
     uint32_t runtime_counter;
     uint32_t magic;
-} hr_task_t;
+} rtos_task_t;
 
-_Static_assert(offsetof(hr_task_t, saved_sp) == 0U,
+_Static_assert(offsetof(rtos_task_t, saved_sp) == 0U,
                "saved_sp must remain at offset zero");
 
-hr_status_t hr_task_create_static(
-    hr_task_t *task,
+rtos_status_t rtos_task_create_static(
+    rtos_task_t *task,
     const char *name,
-    hr_task_entry_t entry,
+    rtos_task_entry_t entry,
     void *argument,
     uint8_t priority,
     uint32_t *stack_memory,
     size_t stack_word_count);
 
-const char *hr_task_name(const hr_task_t *task);
+const char *rtos_task_name(const rtos_task_t *task);
 
-bool hr_task_is_valid(const hr_task_t *task);
-bool hr_task_stack_guard_ok(const hr_task_t *task);
-size_t hr_task_stack_high_water_words(
-    const hr_task_t *task);
+bool rtos_task_is_valid(const rtos_task_t *task);
+bool rtos_task_stack_guard_ok(const rtos_task_t *task);
+size_t rtos_task_stack_high_water_words(
+    const rtos_task_t *task);
 
 #endif
 ```
@@ -2054,10 +2054,10 @@ size_t hr_task_stack_high_water_words(
 # 41. Mã khung static task creation
 
 ```c
-hr_status_t hr_task_create_static(
-    hr_task_t *task,
+rtos_status_t rtos_task_create_static(
+    rtos_task_t *task,
     const char *name,
-    hr_task_entry_t entry,
+    rtos_task_entry_t entry,
     void *argument,
     uint8_t priority,
     uint32_t *stack_memory,
@@ -2070,42 +2070,42 @@ hr_status_t hr_task_create_static(
         (entry == NULL) ||
         (stack_memory == NULL))
     {
-        return HR_STATUS_INVALID_ARGUMENT;
+        return RTOS_STATUS_INVALID_ARGUMENT;
     }
 
-    if (priority >= HR_PRIORITY_COUNT)
+    if (priority >= RTOS_PRIORITY_COUNT)
     {
-        return HR_STATUS_INVALID_PRIORITY;
+        return RTOS_STATUS_INVALID_PRIORITY;
     }
 
-    if (stack_word_count < HR_MIN_STACK_WORDS)
+    if (stack_word_count < RTOS_MIN_STACK_WORDS)
     {
-        return HR_STATUS_STACK_TOO_SMALL;
+        return RTOS_STATUS_STACK_TOO_SMALL;
     }
 
     if (((uintptr_t)stack_memory & 0x7U) != 0U)
     {
-        return HR_STATUS_STACK_ALIGNMENT_ERROR;
+        return RTOS_STATUS_STACK_ALIGNMENT_ERROR;
     }
 
-    if (task->magic == HR_TASK_MAGIC)
+    if (task->magic == RTOS_TASK_MAGIC)
     {
-        return HR_STATUS_TASK_ALREADY_CREATED;
+        return RTOS_STATUS_TASK_ALREADY_CREATED;
     }
 
     memset(task, 0, sizeof(*task));
 
-    hr_list_node_init(&task->ready_node);
-    hr_list_node_init(&task->all_task_node);
+    rtos_list_node_init(&task->ready_node);
+    rtos_list_node_init(&task->all_task_node);
 
-    hr_stack_fill_pattern(stack_memory,
+    rtos_stack_fill_pattern(stack_memory,
                           stack_word_count);
 
-    hr_stack_write_guard(stack_memory,
+    rtos_stack_write_guard(stack_memory,
                          stack_word_count);
 
     initial_sp =
-        hr_port_build_initial_stack(
+        rtos_port_build_initial_stack(
             stack_memory,
             stack_word_count,
             entry,
@@ -2113,7 +2113,7 @@ hr_status_t hr_task_create_static(
 
     if (initial_sp == NULL)
     {
-        return HR_STATUS_PORT_ERROR;
+        return RTOS_STATUS_PORT_ERROR;
     }
 
     task->saved_sp = initial_sp;
@@ -2126,21 +2126,21 @@ hr_status_t hr_task_create_static(
     task->argument = argument;
     task->name = name;
 
-    task->state = HR_TASK_STATE_CREATED;
+    task->state = RTOS_TASK_STATE_CREATED;
     task->base_priority = priority;
     task->effective_priority = priority;
 
     task->runtime_counter = 0U;
-    task->magic = HR_TASK_MAGIC;
+    task->magic = RTOS_TASK_MAGIC;
 
-    if (!hr_task_registry_add(task))
+    if (!rtos_task_registry_add(task))
     {
         task->magic = 0U;
-        task->state = HR_TASK_STATE_UNUSED;
-        return HR_STATUS_LIST_ERROR;
+        task->state = RTOS_TASK_STATE_UNUSED;
+        return RTOS_STATUS_LIST_ERROR;
     }
 
-    return HR_STATUS_OK;
+    return RTOS_STATUS_OK;
 }
 ```
 
@@ -2156,48 +2156,48 @@ Ghi chú:
 # 42. Mã khung task registry
 
 ```c
-static hr_list_t g_all_tasks;
+static rtos_list_t g_all_tasks;
 
-void hr_task_registry_init(void)
+void rtos_task_registry_init(void)
 {
-    hr_list_init(&g_all_tasks);
+    rtos_list_init(&g_all_tasks);
 }
 
-bool hr_task_registry_add(hr_task_t *task)
+bool rtos_task_registry_add(rtos_task_t *task)
 {
-    if (!hr_task_is_valid(task))
+    if (!rtos_task_is_valid(task))
     {
         return false;
     }
 
-    return hr_list_push_back(
+    return rtos_list_push_back(
         &g_all_tasks,
         &task->all_task_node);
 }
 
-size_t hr_task_registry_count(void)
+size_t rtos_task_registry_count(void)
 {
-    return hr_list_count(&g_all_tasks);
+    return rtos_list_count(&g_all_tasks);
 }
 ```
 
 ## Iterate
 
 ```c
-void hr_task_registry_dump(void)
+void rtos_task_registry_dump(void)
 {
-    hr_list_node_t *node;
+    rtos_list_node_t *node;
 
-    node = hr_list_front(&g_all_tasks);
+    node = rtos_list_front(&g_all_tasks);
 
     while (node != NULL)
     {
-        hr_task_t *task =
-            HR_CONTAINER_OF(node,
-                            hr_task_t,
+        rtos_task_t *task =
+            RTOS_CONTAINER_OF(node,
+                            rtos_task_t,
                             all_task_node);
 
-        hr_task_report(task);
+        rtos_task_report(task);
 
         node = node->next;
     }
@@ -2213,11 +2213,11 @@ Không nên in UART khi đang giữ scheduler critical section.
 ```c
 typedef struct
 {
-    hr_list_t tasks;
-} hr_ready_queue_t;
+    rtos_list_t tasks;
+} rtos_ready_queue_t;
 
-static hr_ready_queue_t
-    g_ready_queues[HR_PRIORITY_COUNT];
+static rtos_ready_queue_t
+    g_ready_queues[RTOS_PRIORITY_COUNT];
 
 static uint32_t g_ready_bitmap;
 ```
@@ -2225,13 +2225,13 @@ static uint32_t g_ready_bitmap;
 ## Init
 
 ```c
-void hr_ready_queues_init(void)
+void rtos_ready_queues_init(void)
 {
     for (size_t i = 0U;
-         i < HR_PRIORITY_COUNT;
+         i < RTOS_PRIORITY_COUNT;
          ++i)
     {
-        hr_list_init(&g_ready_queues[i].tasks);
+        rtos_list_init(&g_ready_queues[i].tasks);
     }
 
     g_ready_bitmap = 0U;
@@ -2241,23 +2241,23 @@ void hr_ready_queues_init(void)
 ## Insert ready
 
 ```c
-bool hr_ready_insert(hr_task_t *task)
+bool rtos_ready_insert(rtos_task_t *task)
 {
     uint8_t priority;
 
-    if (!hr_task_is_valid(task))
+    if (!rtos_task_is_valid(task))
     {
         return false;
     }
 
     priority = task->effective_priority;
 
-    if (priority >= HR_PRIORITY_COUNT)
+    if (priority >= RTOS_PRIORITY_COUNT)
     {
         return false;
     }
 
-    if (!hr_list_push_back(
+    if (!rtos_list_push_back(
             &g_ready_queues[priority].tasks,
             &task->ready_node))
     {
@@ -2265,7 +2265,7 @@ bool hr_ready_insert(hr_task_t *task)
     }
 
     g_ready_bitmap |= (1UL << priority);
-    task->state = HR_TASK_STATE_READY;
+    task->state = RTOS_TASK_STATE_READY;
 
     return true;
 }
@@ -2274,12 +2274,12 @@ bool hr_ready_insert(hr_task_t *task)
 ## Remove ready
 
 ```c
-bool hr_ready_remove(hr_task_t *task)
+bool rtos_ready_remove(rtos_task_t *task)
 {
     uint8_t priority;
-    hr_list_t *list;
+    rtos_list_t *list;
 
-    if (!hr_task_is_valid(task))
+    if (!rtos_task_is_valid(task))
     {
         return false;
     }
@@ -2287,13 +2287,13 @@ bool hr_ready_remove(hr_task_t *task)
     priority = task->effective_priority;
     list = &g_ready_queues[priority].tasks;
 
-    if (!hr_list_remove(list,
+    if (!rtos_list_remove(list,
                         &task->ready_node))
     {
         return false;
     }
 
-    if (hr_list_is_empty(list))
+    if (rtos_list_is_empty(list))
     {
         g_ready_bitmap &=
             ~(1UL << priority);
@@ -2385,8 +2385,8 @@ validate
 Sau mỗi operation:
 
 ```c
-assert(hr_list_validate(&g_all_tasks));
-assert(hr_ready_validate_all());
+assert(rtos_list_validate(&g_all_tasks));
+assert(rtos_ready_validate_all());
 ```
 
 ---
@@ -2422,7 +2422,7 @@ for (node = list->head;
      node != NULL;
      node = node->next)
 {
-    hr_list_remove(list, node);
+    rtos_list_remove(list, node);
 }
 ```
 
@@ -2432,7 +2432,7 @@ Sau remove, `node->next` có thể đã bị clear.
 
 ```c
 next = node->next;
-hr_list_remove(list, node);
+rtos_list_remove(list, node);
 node = next;
 ```
 
@@ -2602,8 +2602,8 @@ Chạy backward traversal và validator.
 
 ### Yêu cầu
 
-- `hr_task_t`;
-- `hr_task_state_t`;
+- `rtos_task_t`;
+- `rtos_task_state_t`;
 - priority;
 - stack metadata;
 - list nodes;
@@ -2615,7 +2615,7 @@ Chạy backward traversal và validator.
 In:
 
 ```text
-sizeof(hr_task_t)
+sizeof(rtos_task_t)
 offsetof(saved_sp)
 offsetof(ready_node)
 offsetof(all_task_node)
@@ -2954,7 +2954,7 @@ reset
 ## 47.5 Output mẫu
 
 ```text
-HairRTOS Task Inspector
+Task Inspector
 -----------------------
 
 Task count: 4
@@ -3358,4 +3358,4 @@ Cấu trúc dữ liệu trong kernel + Task
     - Case study danh sách liên kết trong AK-mOS
 ```
 
-Những phần như intrusive list API, HairRTOS TCB layout, static task creation, host testing, Task Inspector và cấu trúc repository là phần mở rộng thực hành dành cho HairRTOS; chúng không được mô tả chi tiết trong bảng chương trình một trang của AKOS.
+Những phần như intrusive list API, TCB layout, static task creation, host testing, Task Inspector và cấu trúc repository là phần mở rộng thực hành; chúng không được mô tả chi tiết trong bảng chương trình một trang của AKOS.

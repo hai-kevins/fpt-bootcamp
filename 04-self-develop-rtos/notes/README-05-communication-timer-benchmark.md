@@ -646,7 +646,7 @@ typedef struct
     size_t head;
     size_t tail;
     size_t count;
-} hr_queue_t;
+} rtos_queue_t;
 ```
 
 Storage do application cấp:
@@ -663,8 +663,8 @@ static uint8_t queue_storage[
 Creation API:
 
 ```c
-hr_status_t hr_queue_init_static(
-    hr_queue_t *queue,
+rtos_status_t rtos_queue_init_static(
+    rtos_queue_t *queue,
     void *storage,
     size_t capacity,
     size_t item_size);
@@ -809,7 +809,7 @@ Cần bảo đảm source còn hợp lệ trong suốt block.
 
 Tốn RAM.
 
-HairRTOS nên document rõ design đã chọn.
+Thiết kế RTOS nên mô tả rõ phương án đã chọn.
 
 ---
 
@@ -833,8 +833,8 @@ Khi wake:
 # 25. No-wait và finite timeout
 
 ```c
-#define HR_NO_WAIT      (0U)
-#define HR_WAIT_FOREVER (UINT32_MAX)
+#define RTOS_NO_WAIT      (0U)
+#define RTOS_WAIT_FOREVER (UINT32_MAX)
 ```
 
 Finite timeout phải nhỏ hơn maximum horizon nếu dùng signed tick difference.
@@ -857,8 +857,8 @@ Task chỉ nằm:
 Queue có:
 
 ```c
-hr_list_t send_waiters;
-hr_list_t receive_waiters;
+rtos_list_t send_waiters;
+rtos_list_t receive_waiters;
 ```
 
 TCB dùng:
@@ -954,8 +954,8 @@ Không reorder message FIFO theo task priority. Task wake ordering và message o
 API:
 
 ```c
-hr_status_t hr_queue_send_from_isr(
-    hr_queue_t *queue,
+rtos_status_t rtos_queue_send_from_isr(
+    rtos_queue_t *queue,
     const void *item,
     bool *higher_priority_task_woken);
 ```
@@ -978,9 +978,9 @@ ISR không có task stack/lifecycle để chờ.
 Không gọi:
 
 ```c
-hr_queue_send(&queue,
+rtos_queue_send(&queue,
               item,
-              HR_WAIT_FOREVER);
+              RTOS_WAIT_FOREVER);
 ```
 
 từ ISR.
@@ -999,11 +999,11 @@ Pool:
 API:
 
 ```c
-void *hr_message_pool_alloc(
-    hr_message_pool_t *pool);
+void *rtos_message_pool_alloc(
+    rtos_message_pool_t *pool);
 
-bool hr_message_pool_free(
-    hr_message_pool_t *pool,
+bool rtos_message_pool_free(
+    rtos_message_pool_t *pool,
     void *block);
 ```
 
@@ -1198,15 +1198,15 @@ nếu muốn giữ phase.
 Timer object chứa intrusive node:
 
 ```c
-typedef struct hr_timer
+typedef struct rtos_timer
 {
-    hr_list_node_t node;
+    rtos_list_node_t node;
     uint32_t expiry_tick;
     uint32_t period_ticks;
-    hr_timer_callback_t callback;
+    rtos_timer_callback_t callback;
     void *argument;
-    hr_timer_state_t state;
-} hr_timer_t;
+    rtos_timer_state_t state;
+} rtos_timer_t;
 ```
 
 ---
@@ -1261,7 +1261,7 @@ Phù hợp:
 - bounded insertion;
 - coarse timing.
 
-Không bắt buộc cho HairRTOS phiên bản học tập.
+Không bắt buộc cho phiên bản RTOS phục vụ học tập.
 
 ---
 
@@ -1413,7 +1413,7 @@ Nếu callback trễ, có các policy:
 - run once rồi schedule future phase;
 - count missed expiries.
 
-HairRTOS cần document một policy.
+Thiết kế RTOS cần mô tả rõ một policy.
 
 ---
 
@@ -1936,23 +1936,23 @@ typedef struct
     size_t tail;
     size_t count;
 
-    hr_list_t send_waiters;
-    hr_list_t receive_waiters;
-} hr_queue_t;
+    rtos_list_t send_waiters;
+    rtos_list_t receive_waiters;
+} rtos_queue_t;
 ```
 
 Immediate enqueue:
 
 ```c
-static void hr_queue_copy_in(
-    hr_queue_t *queue,
+static void rtos_queue_copy_in(
+    rtos_queue_t *queue,
     const void *item)
 {
     uint8_t *destination =
         queue->storage +
         (queue->tail * queue->item_size);
 
-    hr_memory_copy(
+    rtos_memory_copy(
         destination,
         item,
         queue->item_size);
@@ -1973,10 +1973,10 @@ static void hr_queue_copy_in(
 # 81. Mã khung message pool
 
 ```c
-typedef struct hr_pool_block
+typedef struct rtos_pool_block
 {
-    struct hr_pool_block *next;
-} hr_pool_block_t;
+    struct rtos_pool_block *next;
+} rtos_pool_block_t;
 
 typedef struct
 {
@@ -1984,9 +1984,9 @@ typedef struct
     size_t block_size;
     size_t block_count;
 
-    hr_pool_block_t *free_list;
+    rtos_pool_block_t *free_list;
     size_t free_count;
-} hr_message_pool_t;
+} rtos_message_pool_t;
 ```
 
 Init cần align block size đủ chứa pointer.
@@ -1996,30 +1996,30 @@ Init cần align block size đủ chứa pointer.
 # 82. Mã khung software timer
 
 ```c
-typedef void (*hr_timer_callback_t)(
+typedef void (*rtos_timer_callback_t)(
     void *argument);
 
 typedef enum
 {
-    HR_TIMER_INACTIVE = 0,
-    HR_TIMER_ACTIVE,
-    HR_TIMER_CALLBACK_PENDING
-} hr_timer_state_t;
+    RTOS_TIMER_INACTIVE = 0,
+    RTOS_TIMER_ACTIVE,
+    RTOS_TIMER_CALLBACK_PENDING
+} rtos_timer_state_t;
 
-typedef struct hr_timer
+typedef struct rtos_timer
 {
-    hr_list_node_t node;
+    rtos_list_node_t node;
 
     const char *name;
     uint32_t expiry_tick;
     uint32_t period_ticks;
 
-    hr_timer_callback_t callback;
+    rtos_timer_callback_t callback;
     void *argument;
 
-    hr_timer_state_t state;
+    rtos_timer_state_t state;
     bool periodic;
-} hr_timer_t;
+} rtos_timer_t;
 ```
 
 ---
@@ -2027,21 +2027,21 @@ typedef struct hr_timer
 # 83. Mã khung timer service
 
 ```c
-static void hr_timer_service_task(
+static void rtos_timer_service_task(
     void *argument)
 {
     (void)argument;
 
     for (;;)
     {
-        hr_semaphore_take(
+        rtos_semaphore_take(
             &g_timer_service_signal,
-            HR_WAIT_FOREVER);
+            RTOS_WAIT_FOREVER);
 
         for (;;)
         {
-            hr_timer_t *timer =
-                hr_timer_take_due();
+            rtos_timer_t *timer =
+                rtos_timer_take_due();
 
             if (timer == NULL)
             {
@@ -2049,12 +2049,12 @@ static void hr_timer_service_task(
             }
 
             timer->state =
-                HR_TIMER_CALLBACK_PENDING;
+                RTOS_TIMER_CALLBACK_PENDING;
 
             timer->callback(
                 timer->argument);
 
-            hr_timer_complete_expiry(
+            rtos_timer_complete_expiry(
                 timer);
         }
     }
@@ -2197,8 +2197,8 @@ expire
 Sau mỗi operation:
 
 ```c
-assert(hr_queue_validate());
-assert(hr_timer_validate());
+assert(rtos_queue_validate());
+assert(rtos_timer_validate());
 ```
 
 ---
@@ -2628,7 +2628,7 @@ Firmware tổng hợp:
                           |
                           v
 +---------------------------------------------------+
-| HairRTOS Kernel                                   |
+| RTOS Kernel                                       |
 |                                                   |
 | Scheduler  PendSV  SysTick  Timeout  Sync         |
 +-------------------------+-------------------------+
@@ -3040,4 +3040,4 @@ Communication + Timer + Benchmark
         - Event/message latency
 ```
 
-Những phần như queue API, message ownership, message pool, timer service task, benchmark statistics, DWT/TIM2/GPIO backend, hệ thống lab và project tổng kết là phần mở rộng thực hành dành cho HairRTOS.
+Những phần như queue API, message ownership, message pool, timer service task, benchmark statistics, DWT/TIM2/GPIO backend, hệ thống lab và project tổng kết là phần mở rộng thực hành dành cho chủ đề này.

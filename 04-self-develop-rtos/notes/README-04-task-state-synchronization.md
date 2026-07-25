@@ -369,7 +369,7 @@ READY/RUNNING/BLOCKED
 Sai:
 
 ```c
-task->state = HR_TASK_BLOCKED;
+task->state = RTOS_TASK_BLOCKED;
 ```
 
 mà không:
@@ -430,8 +430,8 @@ là busy-wait.
 Blocking đúng:
 
 ```c
-hr_semaphore_take(&semaphore,
-                  HR_WAIT_FOREVER);
+rtos_semaphore_take(&semaphore,
+                  RTOS_WAIT_FOREVER);
 ```
 
 Kernel:
@@ -474,8 +474,8 @@ Use cases:
 API:
 
 ```c
-hr_status_t hr_task_suspend(hr_task_t *task);
-hr_status_t hr_task_resume(hr_task_t *task);
+rtos_status_t rtos_task_suspend(rtos_task_t *task);
+rtos_status_t rtos_task_resume(rtos_task_t *task);
 ```
 
 Task SUSPENDED không được tự wake bởi object hoặc timeout.
@@ -493,7 +493,7 @@ Blocked
 Suspended
 ```
 
-HairRTOS có thể thêm:
+Kernel có thể thêm:
 
 ```text
 CREATED
@@ -515,7 +515,7 @@ TCB chưa đại diện task hợp lệ.
 
 Chỉ cần nếu kernel hỗ trợ task exit/delete.
 
-HairRTOS static-first phiên bản đầu có thể không hỗ trợ delete task.
+Kernel theo hướng static-first ở phiên bản đầu có thể không hỗ trợ delete task.
 
 ---
 
@@ -588,8 +588,8 @@ Nhược điểm:
 ## Blocking
 
 ```c
-hr_semaphore_take(&uart_rx_sem,
-                  HR_WAIT_FOREVER);
+rtos_semaphore_take(&uart_rx_sem,
+                  RTOS_WAIT_FOREVER);
 ```
 
 Ưu điểm:
@@ -736,7 +736,7 @@ Không được so sánh tuyệt đối bằng logic naive.
 Với khoảng thời gian nhỏ hơn nửa range, dùng signed difference:
 
 ```c
-static bool hr_tick_reached(uint32_t now,
+static bool rtos_tick_reached(uint32_t now,
                             uint32_t deadline)
 {
     return (int32_t)(now - deadline) >= 0;
@@ -746,7 +746,7 @@ static bool hr_tick_reached(uint32_t now,
 Kiểm tra trước deadline:
 
 ```c
-static bool hr_tick_before(uint32_t a,
+static bool rtos_tick_before(uint32_t a,
                            uint32_t b)
 {
     return (int32_t)(a - b) < 0;
@@ -772,7 +772,7 @@ Không hỗ trợ timeout tùy ý gần toàn bộ 32-bit range nếu dùng sign
 API:
 
 ```c
-hr_status_t hr_task_delay(uint32_t ticks);
+rtos_status_t rtos_task_delay(uint32_t ticks);
 ```
 
 Behavior:
@@ -807,7 +807,7 @@ current task
 API:
 
 ```c
-hr_status_t hr_task_delay_until(
+rtos_status_t rtos_task_delay_until(
     uint32_t *previous_wake_tick,
     uint32_t period_ticks);
 ```
@@ -815,12 +815,12 @@ hr_status_t hr_task_delay_until(
 Cách dùng:
 
 ```c
-uint32_t next = hr_tick_now();
+uint32_t next = rtos_tick_now();
 
 for (;;)
 {
     sample_sensor();
-    hr_task_delay_until(&next, 10U);
+    rtos_task_delay_until(&next, 10U);
 }
 ```
 
@@ -879,9 +879,9 @@ Nếu task quá hạn:
 Ba kiểu timeout:
 
 ```text
-HR_NO_WAIT
+RTOS_NO_WAIT
 finite ticks
-HR_WAIT_FOREVER
+RTOS_WAIT_FOREVER
 ```
 
 Kết quả wait:
@@ -895,7 +895,7 @@ OBJECT_DELETED
 INVALID
 ```
 
-HairRTOS static-first có thể chưa hỗ trợ object deletion, nhưng enum nên được thiết kế có chủ đích.
+Kernel theo hướng static-first có thể chưa hỗ trợ object deletion, nhưng enum nên được thiết kế có chủ đích.
 
 ---
 
@@ -904,13 +904,13 @@ HairRTOS static-first có thể chưa hỗ trợ object deletion, nhưng enum n�
 ## No-wait
 
 ```c
-hr_semaphore_take(&sem, HR_NO_WAIT);
+rtos_semaphore_take(&sem, RTOS_NO_WAIT);
 ```
 
 Nếu resource chưa có:
 
 ```text
-return HR_STATUS_WOULD_BLOCK
+return RTOS_STATUS_WOULD_BLOCK
 ```
 
 Task không đổi state.
@@ -918,7 +918,7 @@ Task không đổi state.
 ## Wait forever
 
 ```c
-hr_semaphore_take(&sem, HR_WAIT_FOREVER);
+rtos_semaphore_take(&sem, RTOS_WAIT_FOREVER);
 ```
 
 Task vào object wait list nhưng không vào delayed list.
@@ -937,8 +937,8 @@ Task vào cả:
 TCB cần hai node:
 
 ```c
-hr_list_node_t wait_node;
-hr_list_node_t timeout_node;
+rtos_list_node_t wait_node;
+rtos_list_node_t timeout_node;
 ```
 
 Một finite wait:
@@ -997,7 +997,7 @@ Chỉ một path được quyền chuyển task từ BLOCKED sang READY.
 Có thể kiểm tra:
 
 ```c
-if (task->state != HR_TASK_STATE_BLOCKED)
+if (task->state != RTOS_TASK_STATE_BLOCKED)
 {
     return false;
 }
@@ -1080,11 +1080,11 @@ Kernel list transitions phải atomic với ISR/kernel context có thể truy c�
 Critical section:
 
 ```c
-uint32_t state = hr_port_critical_enter();
+uint32_t state = rtos_port_critical_enter();
 
 /* update list, state, bitmap */
 
-hr_port_critical_exit(state);
+rtos_port_critical_exit(state);
 ```
 
 Không được:
@@ -1242,7 +1242,7 @@ Phiên bản đầu nên dùng non-recursive mutex.
 Nếu owner lock lại:
 
 ```text
-return HR_STATUS_DEADLOCK
+return RTOS_STATUS_DEADLOCK
 ```
 
 Recursive mutex cần:
@@ -1345,7 +1345,7 @@ Wait list có thể:
 - priority ordered;
 - hybrid priority + FIFO.
 
-HairRTOS đề xuất:
+Thiết kế đề xuất:
 
 ```text
 effective priority cao hơn đứng trước
@@ -1384,8 +1384,8 @@ Insert after các waiter cùng priority.
 Ví dụ:
 
 ```c
-hr_status_t hr_semaphore_give_from_isr(
-    hr_semaphore_t *semaphore,
+rtos_status_t rtos_semaphore_give_from_isr(
+    rtos_semaphore_t *semaphore,
     bool *higher_priority_task_woken);
 ```
 
@@ -1406,8 +1406,8 @@ ISR không có TCB như task.
 Không được:
 
 ```c
-hr_mutex_lock(&mutex,
-              HR_WAIT_FOREVER);
+rtos_mutex_lock(&mutex,
+              RTOS_WAIT_FOREVER);
 ```
 
 từ ISR.
@@ -1453,26 +1453,26 @@ PendSV switches
 TCB mở rộng:
 
 ```c
-typedef struct hr_task
+typedef struct rtos_task
 {
     uint32_t *saved_sp;
 
-    hr_task_state_t state;
+    rtos_task_state_t state;
 
     uint8_t base_priority;
     uint8_t effective_priority;
 
     uint32_t wake_tick;
-    hr_wait_result_t wait_result;
+    rtos_wait_result_t wait_result;
     void *waiting_object;
 
-    hr_list_node_t ready_node;
-    hr_list_node_t wait_node;
-    hr_list_node_t timeout_node;
-    hr_list_node_t all_task_node;
+    rtos_list_node_t ready_node;
+    rtos_list_node_t wait_node;
+    rtos_list_node_t timeout_node;
+    rtos_list_node_t all_task_node;
 
     ...
-} hr_task_t;
+} rtos_task_t;
 ```
 
 ---
@@ -1498,12 +1498,12 @@ Enum:
 ```c
 typedef enum
 {
-    HR_WAIT_RESULT_NONE = 0,
-    HR_WAIT_RESULT_SUCCESS,
-    HR_WAIT_RESULT_TIMEOUT,
-    HR_WAIT_RESULT_CANCELLED,
-    HR_WAIT_RESULT_SUSPENDED
-} hr_wait_result_t;
+    RTOS_WAIT_RESULT_NONE = 0,
+    RTOS_WAIT_RESULT_SUCCESS,
+    RTOS_WAIT_RESULT_TIMEOUT,
+    RTOS_WAIT_RESULT_CANCELLED,
+    RTOS_WAIT_RESULT_SUSPENDED
+} rtos_wait_result_t;
 ```
 
 Task sau khi wake đọc kết quả.
@@ -1517,20 +1517,20 @@ Không dùng return value tạm nằm trên stack kernel nếu context switch x�
 API nội bộ:
 
 ```c
-bool hr_task_make_ready(
-    hr_task_t *task,
-    hr_wait_result_t result);
+bool rtos_task_make_ready(
+    rtos_task_t *task,
+    rtos_wait_result_t result);
 
-bool hr_task_block_current(
+bool rtos_task_block_current(
     void *object,
-    hr_list_t *wait_list,
+    rtos_list_t *wait_list,
     uint32_t timeout_ticks);
 
-bool hr_task_suspend_internal(
-    hr_task_t *task);
+bool rtos_task_suspend_internal(
+    rtos_task_t *task);
 
-bool hr_task_resume_internal(
-    hr_task_t *task);
+bool rtos_task_resume_internal(
+    rtos_task_t *task);
 ```
 
 Chỉ helper được sửa:
@@ -1548,45 +1548,45 @@ Chỉ helper được sửa:
 Pseudo-code:
 
 ```c
-bool hr_task_block_current(
+bool rtos_task_block_current(
     void *object,
-    hr_list_t *wait_list,
+    rtos_list_t *wait_list,
     uint32_t timeout_ticks)
 {
-    hr_task_t *task = hr_scheduler_current();
+    rtos_task_t *task = rtos_scheduler_current();
 
-    HR_ASSERT(task != NULL);
-    HR_ASSERT(task->state == HR_TASK_RUNNING);
+    RTOS_ASSERT(task != NULL);
+    RTOS_ASSERT(task->state == RTOS_TASK_RUNNING);
 
-    if (!hr_ready_remove(task))
+    if (!rtos_ready_remove(task))
     {
         return false;
     }
 
     task->waiting_object = object;
-    task->wait_result = HR_WAIT_RESULT_NONE;
+    task->wait_result = RTOS_WAIT_RESULT_NONE;
 
-    if (!hr_wait_list_insert(wait_list, task))
+    if (!rtos_wait_list_insert(wait_list, task))
     {
-        hr_ready_insert(task);
+        rtos_ready_insert(task);
         return false;
     }
 
-    if (timeout_ticks != HR_WAIT_FOREVER)
+    if (timeout_ticks != RTOS_WAIT_FOREVER)
     {
         task->wake_tick =
-            hr_tick_now() + timeout_ticks;
+            rtos_tick_now() + timeout_ticks;
 
-        if (!hr_timeout_insert(task))
+        if (!rtos_timeout_insert(task))
         {
-            hr_wait_list_remove(wait_list, task);
-            hr_ready_insert(task);
+            rtos_wait_list_remove(wait_list, task);
+            rtos_ready_insert(task);
             return false;
         }
     }
 
-    task->state = HR_TASK_STATE_BLOCKED;
-    hr_port_request_context_switch();
+    task->state = RTOS_TASK_STATE_BLOCKED;
+    rtos_port_request_context_switch();
 
     return true;
 }
@@ -1599,24 +1599,24 @@ Toàn bộ transition phải ở critical section.
 # 49. Wake blocked task
 
 ```c
-bool hr_task_wake(
-    hr_task_t *task,
-    hr_wait_result_t result)
+bool rtos_task_wake(
+    rtos_task_t *task,
+    rtos_wait_result_t result)
 {
     if ((task == NULL) ||
-        (task->state != HR_TASK_STATE_BLOCKED))
+        (task->state != RTOS_TASK_STATE_BLOCKED))
     {
         return false;
     }
 
-    hr_wait_remove_if_linked(task);
-    hr_timeout_remove_if_linked(task);
+    rtos_wait_remove_if_linked(task);
+    rtos_timeout_remove_if_linked(task);
 
     task->waiting_object = NULL;
     task->wait_result = result;
-    task->state = HR_TASK_STATE_READY;
+    task->state = RTOS_TASK_STATE_READY;
 
-    return hr_ready_insert(task);
+    return rtos_ready_insert(task);
 }
 ```
 
@@ -1627,13 +1627,13 @@ bool hr_task_wake(
 Suspend:
 
 ```c
-hr_status_t hr_task_suspend(hr_task_t *task);
+rtos_status_t rtos_task_suspend(rtos_task_t *task);
 ```
 
 Resume:
 
 ```c
-hr_status_t hr_task_resume(hr_task_t *task);
+rtos_status_t rtos_task_resume(rtos_task_t *task);
 ```
 
 Suspend current task:
@@ -1684,7 +1684,7 @@ Không cho suspend BLOCKED task.
 - clear object;
 - state SUSPENDED.
 
-HairRTOS nên chọn và document rõ. Không để task vẫn nằm trong wait list khi state SUSPENDED.
+Kernel nên chọn và document rõ. Không để task vẫn nằm trong wait list khi state SUSPENDED.
 
 ---
 
@@ -1826,42 +1826,42 @@ Không in trực tiếp trong critical path. Lưu ring buffer rồi snapshot.
 ```c
 typedef enum
 {
-    HR_TASK_STATE_UNUSED = 0,
-    HR_TASK_STATE_CREATED,
-    HR_TASK_STATE_READY,
-    HR_TASK_STATE_RUNNING,
-    HR_TASK_STATE_BLOCKED,
-    HR_TASK_STATE_SUSPENDED
-} hr_task_state_t;
+    RTOS_TASK_STATE_UNUSED = 0,
+    RTOS_TASK_STATE_CREATED,
+    RTOS_TASK_STATE_READY,
+    RTOS_TASK_STATE_RUNNING,
+    RTOS_TASK_STATE_BLOCKED,
+    RTOS_TASK_STATE_SUSPENDED
+} rtos_task_state_t;
 ```
 
 Transition validator:
 
 ```c
-bool hr_task_transition_allowed(
-    hr_task_state_t from,
-    hr_task_state_t to)
+bool rtos_task_transition_allowed(
+    rtos_task_state_t from,
+    rtos_task_state_t to)
 {
     switch (from)
     {
-        case HR_TASK_STATE_CREATED:
-            return to == HR_TASK_STATE_READY;
+        case RTOS_TASK_STATE_CREATED:
+            return to == RTOS_TASK_STATE_READY;
 
-        case HR_TASK_STATE_READY:
-            return (to == HR_TASK_STATE_RUNNING) ||
-                   (to == HR_TASK_STATE_SUSPENDED);
+        case RTOS_TASK_STATE_READY:
+            return (to == RTOS_TASK_STATE_RUNNING) ||
+                   (to == RTOS_TASK_STATE_SUSPENDED);
 
-        case HR_TASK_STATE_RUNNING:
-            return (to == HR_TASK_STATE_READY) ||
-                   (to == HR_TASK_STATE_BLOCKED) ||
-                   (to == HR_TASK_STATE_SUSPENDED);
+        case RTOS_TASK_STATE_RUNNING:
+            return (to == RTOS_TASK_STATE_READY) ||
+                   (to == RTOS_TASK_STATE_BLOCKED) ||
+                   (to == RTOS_TASK_STATE_SUSPENDED);
 
-        case HR_TASK_STATE_BLOCKED:
-            return (to == HR_TASK_STATE_READY) ||
-                   (to == HR_TASK_STATE_SUSPENDED);
+        case RTOS_TASK_STATE_BLOCKED:
+            return (to == RTOS_TASK_STATE_READY) ||
+                   (to == RTOS_TASK_STATE_SUSPENDED);
 
-        case HR_TASK_STATE_SUSPENDED:
-            return to == HR_TASK_STATE_READY;
+        case RTOS_TASK_STATE_SUSPENDED:
+            return to == RTOS_TASK_STATE_READY;
 
         default:
             return false;
@@ -1874,14 +1874,14 @@ bool hr_task_transition_allowed(
 # 59. Mã khung tick comparison
 
 ```c
-static inline bool hr_tick_reached(
+static inline bool rtos_tick_reached(
     uint32_t now,
     uint32_t deadline)
 {
     return (int32_t)(now - deadline) >= 0;
 }
 
-static inline bool hr_tick_before(
+static inline bool rtos_tick_before(
     uint32_t a,
     uint32_t b)
 {
@@ -1892,7 +1892,7 @@ static inline bool hr_tick_before(
 Contract:
 
 ```c
-#define HR_MAX_FINITE_TIMEOUT_TICKS \
+#define RTOS_MAX_FINITE_TIMEOUT_TICKS \
     ((uint32_t)INT32_MAX)
 ```
 
@@ -1901,27 +1901,27 @@ Contract:
 # 60. Mã khung delayed list
 
 ```c
-static hr_list_t g_delayed_tasks;
+static rtos_list_t g_delayed_tasks;
 
-bool hr_timeout_insert(hr_task_t *task)
+bool rtos_timeout_insert(rtos_task_t *task)
 {
-    hr_list_node_t *node;
+    rtos_list_node_t *node;
 
-    node = hr_list_front(&g_delayed_tasks);
+    node = rtos_list_front(&g_delayed_tasks);
 
     while (node != NULL)
     {
-        hr_task_t *other =
-            HR_CONTAINER_OF(
+        rtos_task_t *other =
+            RTOS_CONTAINER_OF(
                 node,
-                hr_task_t,
+                rtos_task_t,
                 timeout_node);
 
-        if (hr_tick_before(
+        if (rtos_tick_before(
                 task->wake_tick,
                 other->wake_tick))
         {
-            return hr_list_insert_before(
+            return rtos_list_insert_before(
                 &g_delayed_tasks,
                 node,
                 &task->timeout_node);
@@ -1930,7 +1930,7 @@ bool hr_timeout_insert(hr_task_t *task)
         node = node->next;
     }
 
-    return hr_list_push_back(
+    return rtos_list_push_back(
         &g_delayed_tasks,
         &task->timeout_node);
 }
@@ -1943,41 +1943,41 @@ Lưu ý wrap-around ordering cần contract rõ về maximum horizon. Một sort
 # 61. Mã khung task delay
 
 ```c
-hr_status_t hr_task_delay(uint32_t ticks)
+rtos_status_t rtos_task_delay(uint32_t ticks)
 {
     uint32_t state;
-    hr_task_t *task;
+    rtos_task_t *task;
 
     if (ticks == 0U)
     {
-        hr_task_yield();
-        return HR_STATUS_OK;
+        rtos_task_yield();
+        return RTOS_STATUS_OK;
     }
 
-    state = hr_port_critical_enter();
+    state = rtos_port_critical_enter();
 
-    task = hr_scheduler_current();
+    task = rtos_scheduler_current();
 
     if ((task == NULL) ||
-        (task->state != HR_TASK_STATE_RUNNING))
+        (task->state != RTOS_TASK_STATE_RUNNING))
     {
-        hr_port_critical_exit(state);
-        return HR_STATUS_INVALID_STATE;
+        rtos_port_critical_exit(state);
+        return RTOS_STATUS_INVALID_STATE;
     }
 
-    task->wake_tick = hr_tick_now() + ticks;
+    task->wake_tick = rtos_tick_now() + ticks;
     task->waiting_object = NULL;
-    task->wait_result = HR_WAIT_RESULT_NONE;
+    task->wait_result = RTOS_WAIT_RESULT_NONE;
 
-    hr_ready_remove(task);
-    hr_timeout_insert(task);
+    rtos_ready_remove(task);
+    rtos_timeout_insert(task);
 
-    task->state = HR_TASK_STATE_BLOCKED;
+    task->state = RTOS_TASK_STATE_BLOCKED;
 
-    hr_port_request_context_switch();
-    hr_port_critical_exit(state);
+    rtos_port_request_context_switch();
+    rtos_port_critical_exit(state);
 
-    return HR_STATUS_OK;
+    return RTOS_STATUS_OK;
 }
 ```
 
@@ -1989,47 +1989,47 @@ hr_status_t hr_task_delay(uint32_t ticks)
 typedef struct
 {
     bool available;
-    hr_list_t waiters;
-} hr_binary_semaphore_t;
+    rtos_list_t waiters;
+} rtos_binary_semaphore_t;
 ```
 
 Take:
 
 ```c
-hr_status_t hr_binary_semaphore_take(
-    hr_binary_semaphore_t *sem,
+rtos_status_t rtos_binary_semaphore_take(
+    rtos_binary_semaphore_t *sem,
     uint32_t timeout)
 {
     uint32_t state;
 
     if (sem == NULL)
     {
-        return HR_STATUS_INVALID_ARGUMENT;
+        return RTOS_STATUS_INVALID_ARGUMENT;
     }
 
-    state = hr_port_critical_enter();
+    state = rtos_port_critical_enter();
 
     if (sem->available)
     {
         sem->available = false;
-        hr_port_critical_exit(state);
-        return HR_STATUS_OK;
+        rtos_port_critical_exit(state);
+        return RTOS_STATUS_OK;
     }
 
-    if (timeout == HR_NO_WAIT)
+    if (timeout == RTOS_NO_WAIT)
     {
-        hr_port_critical_exit(state);
-        return HR_STATUS_WOULD_BLOCK;
+        rtos_port_critical_exit(state);
+        return RTOS_STATUS_WOULD_BLOCK;
     }
 
-    hr_block_current_on_object(
+    rtos_block_current_on_object(
         sem,
         &sem->waiters,
         timeout);
 
-    hr_port_critical_exit(state);
+    rtos_port_critical_exit(state);
 
-    return hr_current_wait_result();
+    return rtos_current_wait_result();
 }
 ```
 
@@ -2044,52 +2044,52 @@ typedef struct
 {
     uint32_t count;
     uint32_t max_count;
-    hr_list_t waiters;
-} hr_counting_semaphore_t;
+    rtos_list_t waiters;
+} rtos_counting_semaphore_t;
 ```
 
 Give:
 
 ```c
-hr_status_t hr_counting_semaphore_give(
-    hr_counting_semaphore_t *sem)
+rtos_status_t rtos_counting_semaphore_give(
+    rtos_counting_semaphore_t *sem)
 {
     uint32_t state;
-    hr_task_t *waiter;
+    rtos_task_t *waiter;
 
     if (sem == NULL)
     {
-        return HR_STATUS_INVALID_ARGUMENT;
+        return RTOS_STATUS_INVALID_ARGUMENT;
     }
 
-    state = hr_port_critical_enter();
+    state = rtos_port_critical_enter();
 
-    waiter = hr_wait_list_take_first(
+    waiter = rtos_wait_list_take_first(
         &sem->waiters);
 
     if (waiter != NULL)
     {
-        hr_task_wake(
+        rtos_task_wake(
             waiter,
-            HR_WAIT_RESULT_SUCCESS);
+            RTOS_WAIT_RESULT_SUCCESS);
 
-        hr_scheduler_request_preemption_if_needed(
+        rtos_scheduler_request_preemption_if_needed(
             waiter);
 
-        hr_port_critical_exit(state);
-        return HR_STATUS_OK;
+        rtos_port_critical_exit(state);
+        return RTOS_STATUS_OK;
     }
 
     if (sem->count >= sem->max_count)
     {
-        hr_port_critical_exit(state);
-        return HR_STATUS_OVERFLOW;
+        rtos_port_critical_exit(state);
+        return RTOS_STATUS_OVERFLOW;
     }
 
     sem->count++;
 
-    hr_port_critical_exit(state);
-    return HR_STATUS_OK;
+    rtos_port_critical_exit(state);
+    return RTOS_STATUS_OK;
 }
 ```
 
@@ -2100,64 +2100,64 @@ hr_status_t hr_counting_semaphore_give(
 ```c
 typedef struct
 {
-    hr_task_t *owner;
-    hr_list_t waiters;
-} hr_mutex_t;
+    rtos_task_t *owner;
+    rtos_list_t waiters;
+} rtos_mutex_t;
 ```
 
 Lock:
 
 ```c
-hr_status_t hr_mutex_lock(
-    hr_mutex_t *mutex,
+rtos_status_t rtos_mutex_lock(
+    rtos_mutex_t *mutex,
     uint32_t timeout)
 {
     uint32_t state;
-    hr_task_t *current;
+    rtos_task_t *current;
 
     if (mutex == NULL)
     {
-        return HR_STATUS_INVALID_ARGUMENT;
+        return RTOS_STATUS_INVALID_ARGUMENT;
     }
 
-    state = hr_port_critical_enter();
-    current = hr_scheduler_current();
+    state = rtos_port_critical_enter();
+    current = rtos_scheduler_current();
 
     if (mutex->owner == NULL)
     {
         mutex->owner = current;
-        hr_task_owned_mutex_add(
+        rtos_task_owned_mutex_add(
             current,
             mutex);
 
-        hr_port_critical_exit(state);
-        return HR_STATUS_OK;
+        rtos_port_critical_exit(state);
+        return RTOS_STATUS_OK;
     }
 
     if (mutex->owner == current)
     {
-        hr_port_critical_exit(state);
-        return HR_STATUS_DEADLOCK;
+        rtos_port_critical_exit(state);
+        return RTOS_STATUS_DEADLOCK;
     }
 
-    if (timeout == HR_NO_WAIT)
+    if (timeout == RTOS_NO_WAIT)
     {
-        hr_port_critical_exit(state);
-        return HR_STATUS_WOULD_BLOCK;
+        rtos_port_critical_exit(state);
+        return RTOS_STATUS_WOULD_BLOCK;
     }
 
-    hr_priority_inherit(
+    rtos_priority_inherit(
         mutex->owner,
         current->effective_priority);
 
-    hr_block_current_on_object(
+    rtos_block_current_on_object(
         mutex,
         &mutex->waiters,
         timeout);
 
-    hr_port_critical_exit(state);
+    rtos_port_critical_exit(state);
 
-    return hr_current_wait_result();
+    return rtos_current_wait_result();
 }
 ```
 
@@ -2166,8 +2166,8 @@ hr_status_t hr_mutex_lock(
 # 65. Mã khung priority inheritance
 
 ```c
-void hr_priority_inherit(
-    hr_task_t *owner,
+void rtos_priority_inherit(
+    rtos_task_t *owner,
     uint8_t waiter_priority)
 {
     if ((owner == NULL) ||
@@ -2177,7 +2177,7 @@ void hr_priority_inherit(
         return;
     }
 
-    hr_scheduler_change_effective_priority(
+    rtos_scheduler_change_effective_priority(
         owner,
         waiter_priority);
 }
@@ -2186,19 +2186,19 @@ void hr_priority_inherit(
 Restore:
 
 ```c
-void hr_priority_recompute(
-    hr_task_t *task)
+void rtos_priority_recompute(
+    rtos_task_t *task)
 {
     uint8_t effective =
         task->base_priority;
 
-    hr_mutex_t *mutex =
-        hr_task_first_owned_mutex(task);
+    rtos_mutex_t *mutex =
+        rtos_task_first_owned_mutex(task);
 
     while (mutex != NULL)
     {
-        hr_task_t *waiter =
-            hr_mutex_highest_waiter(mutex);
+        rtos_task_t *waiter =
+            rtos_mutex_highest_waiter(mutex);
 
         if ((waiter != NULL) &&
             (waiter->effective_priority <
@@ -2209,18 +2209,18 @@ void hr_priority_recompute(
         }
 
         mutex =
-            hr_task_next_owned_mutex(
+            rtos_task_next_owned_mutex(
                 task,
                 mutex);
     }
 
-    hr_scheduler_change_effective_priority(
+    rtos_scheduler_change_effective_priority(
         task,
         effective);
 }
 ```
 
-Đây là phần mở rộng HairRTOS, không phải chi tiết được nêu trong bảng AKOS.
+Đây là phần mở rộng thực hành, không phải chi tiết được nêu trong bảng AKOS.
 
 ---
 
@@ -2272,7 +2272,7 @@ timeout
 Sau mỗi operation:
 
 ```c
-assert(hr_kernel_validate());
+assert(rtos_kernel_validate());
 ```
 
 ---
@@ -3068,4 +3068,4 @@ Task state + Synchronization
     - Synchronization and mutual exclusion mechanisms
 ```
 
-Những phần như timeout race handling, semaphore API, mutex ownership, priority inversion, priority inheritance, ISR-safe API, hệ thống lab và project tổng kết là phần mở rộng thực hành dành cho HairRTOS.
+Những phần như timeout race handling, semaphore API, mutex ownership, priority inversion, priority inheritance, ISR-safe API, hệ thống lab và project tổng kết là phần mở rộng thực hành dành cho chủ đề này.

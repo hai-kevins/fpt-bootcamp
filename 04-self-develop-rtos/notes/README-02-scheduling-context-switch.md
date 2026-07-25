@@ -15,7 +15,7 @@
 6. [Cooperative và preemptive scheduling](#6-cooperative-và-preemptive-scheduling)
 7. [Priority-based scheduling](#7-priority-based-scheduling)
 8. [Round-robin giữa các task cùng priority](#8-round-robin-giữa-các-task-cùng-priority)
-9. [Kiến trúc scheduler của HairRTOS](#9-kiến-trúc-scheduler-của-hairrtos)
+9. [Kiến trúc scheduler](#9-kiến-trúc-scheduler)
 10. [Task, TCB và saved stack pointer](#10-task-tcb-và-saved-stack-pointer)
 11. [Kiến trúc ARM Cortex-M3 cần biết](#11-kiến-trúc-arm-cortex-m3-cần-biết)
 12. [Thread mode và Handler mode](#12-thread-mode-và-handler-mode)
@@ -281,7 +281,7 @@ CPU runs selected task
 
 Scheduler không nhất thiết trực tiếp lưu hoặc phục hồi register.
 
-Trong thiết kế HairRTOS:
+Trong thiết kế RTOS được trình bày trong chủ đề này:
 
 ```text
 Scheduler
@@ -387,7 +387,7 @@ Nhược điểm:
 
 Mỗi task có priority cố định hoặc có effective priority được tính từ base priority.
 
-HairRTOS định nghĩa:
+Trong chủ đề này quy ước:
 
 ```text
 Số priority nhỏ hơn
@@ -422,7 +422,7 @@ After A time slice:
 
 EDF chọn task có deadline gần nhất.
 
-EDF là một mô hình scheduling quan trọng nhưng không phải policy đầu tiên của HairRTOS. Chủ đề này tập trung fixed-priority scheduling.
+EDF là một mô hình scheduling quan trọng nhưng không phải policy được triển khai trong chủ đề này. Chủ đề này tập trung fixed-priority scheduling.
 
 ---
 
@@ -433,7 +433,7 @@ EDF là một mô hình scheduling quan trọng nhưng không phải policy đ�
 Trigger:
 
 ```text
-hr_task_yield()
+rtos_task_yield()
 ```
 
 Luồng:
@@ -442,7 +442,7 @@ Luồng:
 Task A
   |
   v
-hr_task_yield()
+rtos_task_yield()
   |
   v
 Pend PendSV
@@ -637,9 +637,9 @@ B và C không chạy.
 
 ---
 
-# 9. Kiến trúc scheduler của HairRTOS
+# 9. Kiến trúc scheduler
 
-HairRTOS sử dụng:
+Scheduler trong chủ đề này sử dụng:
 
 ```text
 Fixed-priority preemptive scheduler
@@ -672,7 +672,7 @@ Kiến trúc:
 Scheduler chỉ chọn TCB:
 
 ```c
-hr_task_t *hr_scheduler_select_next(void);
+rtos_task_t *rtos_scheduler_select_next(void);
 ```
 
 PendSV sử dụng TCB được chọn để đổi stack context.
@@ -692,7 +692,7 @@ Task stack
 TCB khái quát:
 
 ```c
-typedef struct hr_task
+typedef struct rtos_task
 {
     uint32_t *saved_sp;          /* Phải ở field đầu tiên nếu assembly phụ thuộc offset 0. */
 
@@ -707,9 +707,9 @@ typedef struct hr_task
 
     uint32_t time_slice_remaining;
 
-    struct hr_task *ready_next;
-    struct hr_task *ready_previous;
-} hr_task_t;
+    struct rtos_task *ready_next;
+    struct rtos_task *ready_previous;
+} rtos_task_t;
 ```
 
 ## 10.1 Tại sao `saved_sp` quan trọng?
@@ -754,7 +754,7 @@ Context switch corruption
 Nên có compile-time assert:
 
 ```c
-_Static_assert(offsetof(hr_task_t, saved_sp) == 0U,
+_Static_assert(offsetof(rtos_task_t, saved_sp) == 0U,
                "saved_sp must be the first TCB field");
 ```
 
@@ -834,7 +834,7 @@ Thread mode chạy:
 - task code;
 - application code.
 
-Task HairRTOS chạy ở Thread mode.
+Task của RTOS chạy ở Thread mode.
 
 ## Handler mode
 
@@ -894,7 +894,7 @@ Task A -> PSP points into Stack A
 Task B -> PSP points into Stack B
 ```
 
-## 13.3 Contract của HairRTOS
+## 13.3 Contract giữa task và exception
 
 ```text
 Task code       -> PSP
@@ -1112,12 +1112,12 @@ R4-R11     -> initial values
 ## 17.2 Mã khung
 
 ```c
-typedef void (*hr_task_entry_t)(void *argument);
+typedef void (*rtos_task_entry_t)(void *argument);
 
-static uint32_t *hr_port_build_initial_stack(
+static uint32_t *rtos_port_build_initial_stack(
     uint32_t *stack_begin,
     size_t stack_word_count,
-    hr_task_entry_t entry,
+    rtos_task_entry_t entry,
     void *argument)
 {
     uint32_t *sp;
@@ -1136,7 +1136,7 @@ static uint32_t *hr_port_build_initial_stack(
     *(--sp) = 0x01000000UL;                  /* xPSR */
     *(--sp) = (uint32_t)(uintptr_t)entry;    /* PC */
     *(--sp) = (uint32_t)(uintptr_t)
-              hr_task_return_error;          /* LR */
+              rtos_task_return_error;          /* LR */
     *(--sp) = 0x12121212UL;                  /* R12 */
     *(--sp) = 0x03030303UL;                  /* R3 */
     *(--sp) = 0x02020202UL;                  /* R2 */
@@ -1163,9 +1163,9 @@ Task entry không nên return trong RTOS nhỏ.
 
 ```c
 __attribute__((noreturn))
-void hr_task_return_error(void)
+void rtos_task_return_error(void)
 {
-    hr_kernel_panic(HR_PANIC_TASK_RETURNED);
+    rtos_kernel_panic(RTOS_PANIC_TASK_RETURNED);
 
     for (;;)
     {
@@ -1237,22 +1237,22 @@ First task on PSP
 ## 18.2 Kernel start contract
 
 ```c
-void hr_kernel_start(void)
+void rtos_kernel_start(void)
 {
-    hr_task_t *first;
+    rtos_task_t *first;
 
-    hr_kernel_validate();
+    rtos_kernel_validate();
 
-    first = hr_scheduler_select_next();
+    first = rtos_scheduler_select_next();
     g_current_task = first;
 
-    hr_port_start_first_task();
+    rtos_port_start_first_task();
 
-    hr_kernel_panic(HR_PANIC_KERNEL_START_RETURNED);
+    rtos_kernel_panic(RTOS_PANIC_KERNEL_START_RETURNED);
 }
 ```
 
-`hr_kernel_start()` không được return trong hoạt động bình thường.
+`rtos_kernel_start()` không được return trong hoạt động bình thường.
 
 ---
 
@@ -1521,7 +1521,7 @@ CPU chạy task, ISR và kernel exception.
 Task A gọi:
 
 ```c
-hr_task_yield();
+rtos_task_yield();
 ```
 
 Luồng:
@@ -1587,7 +1587,7 @@ void task_a(void *argument)
     for (;;)
     {
         local_a++;
-        hr_task_yield();
+        rtos_task_yield();
     }
 }
 ```
@@ -1600,7 +1600,7 @@ void task_b(void *argument)
     for (;;)
     {
         local_b += 2U;
-        hr_task_yield();
+        rtos_task_yield();
     }
 }
 ```
@@ -1680,16 +1680,16 @@ preemptive
 ```c
 typedef struct
 {
-    hr_task_t *head;
-    hr_task_t *tail;
+    rtos_task_t *head;
+    rtos_task_t *tail;
     size_t count;
-} hr_ready_queue_t;
+} rtos_ready_queue_t;
 ```
 
 Kernel có:
 
 ```c
-static hr_ready_queue_t g_ready_queues[HR_PRIORITY_COUNT];
+static rtos_ready_queue_t g_ready_queues[RTOS_PRIORITY_COUNT];
 ```
 
 ## 25.2 Ready bitmap
@@ -1726,9 +1726,9 @@ Idle task bảo đảm bitmap không bằng 0 khi kernel RUNNING.
 ## 25.4 Enqueue
 
 ```c
-static void ready_enqueue_tail(hr_task_t *task)
+static void ready_enqueue_tail(rtos_task_t *task)
 {
-    hr_ready_queue_t *queue;
+    rtos_ready_queue_t *queue;
 
     queue = &g_ready_queues[task->effective_priority];
 
@@ -1757,8 +1757,8 @@ static void ready_enqueue_tail(hr_task_t *task)
 ```c
 static void ready_rotate(uint8_t priority)
 {
-    hr_ready_queue_t *queue = &g_ready_queues[priority];
-    hr_task_t *first;
+    rtos_ready_queue_t *queue = &g_ready_queues[priority];
+    rtos_task_t *first;
 
     if (queue->count <= 1U)
     {
@@ -1805,13 +1805,13 @@ Scheduler cần bảo vệ các invariant:
 Application không được:
 
 ```c
-task->state = HR_TASK_READY;
+task->state = RTOS_TASK_READY;
 ```
 
 Nên dùng:
 
 ```c
-hr_task_transition_to_ready(task);
+rtos_task_transition_to_ready(task);
 ```
 
 Helper xử lý đồng thời:
@@ -1840,7 +1840,7 @@ Cần ngăn race.
 Phiên bản đầu có thể:
 
 ```c
-uint32_t hr_port_critical_enter(void)
+uint32_t rtos_port_critical_enter(void)
 {
     uint32_t primask;
 
@@ -1856,7 +1856,7 @@ uint32_t hr_port_critical_enter(void)
 ```
 
 ```c
-void hr_port_critical_exit(uint32_t state)
+void rtos_port_critical_exit(uint32_t state)
 {
     __asm volatile(
         "msr primask, %0\n"
@@ -1897,26 +1897,26 @@ Không nên dùng BASEPRI khi chưa hiểu:
 ## 28.1 Global state
 
 ```c
-static hr_ready_queue_t g_ready_queues[HR_PRIORITY_COUNT];
+static rtos_ready_queue_t g_ready_queues[RTOS_PRIORITY_COUNT];
 static uint32_t g_ready_bitmap;
-static hr_task_t *g_current_task;
+static rtos_task_t *g_current_task;
 static bool g_rotation_requested;
 ```
 
 ## 28.2 Select next
 
 ```c
-hr_task_t *hr_scheduler_select_next(void)
+rtos_task_t *rtos_scheduler_select_next(void)
 {
     uint8_t priority;
-    hr_ready_queue_t *queue;
+    rtos_ready_queue_t *queue;
 
-    HR_ASSERT(g_ready_bitmap != 0U);
+    RTOS_ASSERT(g_ready_bitmap != 0U);
 
     priority = highest_ready_priority(g_ready_bitmap);
     queue = &g_ready_queues[priority];
 
-    HR_ASSERT(queue->head != NULL);
+    RTOS_ASSERT(queue->head != NULL);
 
     if (g_rotation_requested &&
         (g_current_task != NULL) &&
@@ -1934,23 +1934,23 @@ hr_task_t *hr_scheduler_select_next(void)
 ## 28.3 Request yield
 
 ```c
-void hr_task_yield(void)
+void rtos_task_yield(void)
 {
     uint32_t state;
 
-    state = hr_port_critical_enter();
+    state = rtos_port_critical_enter();
 
     g_rotation_requested = true;
-    hr_port_request_context_switch();
+    rtos_port_request_context_switch();
 
-    hr_port_critical_exit(state);
+    rtos_port_critical_exit(state);
 }
 ```
 
 ## 28.4 Preemption decision
 
 ```c
-bool hr_scheduler_should_preempt(const hr_task_t *newly_ready)
+bool rtos_scheduler_should_preempt(const rtos_task_t *newly_ready)
 {
     if ((newly_ready == NULL) ||
         (g_current_task == NULL))
@@ -1966,9 +1966,9 @@ bool hr_scheduler_should_preempt(const hr_task_t *newly_ready)
 ## 28.5 Time-slice update
 
 ```c
-bool hr_scheduler_tick(void)
+bool rtos_scheduler_tick(void)
 {
-    hr_task_t *current = g_current_task;
+    rtos_task_t *current = g_current_task;
 
     if (current == NULL)
     {
@@ -1985,7 +1985,7 @@ bool hr_scheduler_tick(void)
         return false;
     }
 
-    current->time_slice_remaining = HR_TIME_SLICE_TICKS;
+    current->time_slice_remaining = RTOS_TIME_SLICE_TICKS;
 
     if (ready_count(current->effective_priority) > 1U)
     {
@@ -2010,7 +2010,7 @@ bool hr_scheduler_tick(void)
 #define SCB_ICSR_ADDRESS       (0xE000ED04UL)
 #define SCB_ICSR_PENDSVSET     (1UL << 28)
 
-static inline void hr_port_request_context_switch(void)
+static inline void rtos_port_request_context_switch(void)
 {
     *(volatile uint32_t *)SCB_ICSR_ADDRESS =
         SCB_ICSR_PENDSVSET;
@@ -2024,7 +2024,7 @@ static inline void hr_port_request_context_switch(void)
 
 ```c
 __attribute__((noreturn))
-void hr_port_start_first_task(void)
+void rtos_port_start_first_task(void)
 {
     __asm volatile("svc 0");
 
@@ -2084,7 +2084,7 @@ PendSV_Handler:
      * before calling C code.
      */
     push    {r3, lr}
-    bl      hr_scheduler_commit_switch
+    bl      rtos_scheduler_commit_switch
     pop     {r3, lr}
 
     ldr     r1, =g_current_task
@@ -2101,22 +2101,22 @@ PendSV_Handler:
 ## 29.5 Commit switch
 
 ```c
-void hr_scheduler_commit_switch(void)
+void rtos_scheduler_commit_switch(void)
 {
-    hr_task_t *next;
+    rtos_task_t *next;
 
-    next = hr_scheduler_select_next();
+    next = rtos_scheduler_select_next();
 
-    HR_ASSERT(next != NULL);
+    RTOS_ASSERT(next != NULL);
 
     if (g_current_task != next)
     {
         if (g_current_task != NULL)
         {
-            g_current_task->state = HR_TASK_READY;
+            g_current_task->state = RTOS_TASK_READY;
         }
 
-        next->state = HR_TASK_RUNNING;
+        next->state = RTOS_TASK_RUNNING;
         g_current_task = next;
     }
 }
@@ -2131,24 +2131,24 @@ void SysTick_Handler(void)
 
     g_kernel_tick++;
 
-    if (hr_scheduler_tick())
+    if (rtos_scheduler_tick())
     {
         switch_required = true;
     }
 
-    if (hr_release_due_tasks(g_kernel_tick))
+    if (rtos_release_due_tasks(g_kernel_tick))
     {
         switch_required = true;
     }
 
     if (switch_required)
     {
-        hr_port_request_context_switch();
+        rtos_port_request_context_switch();
     }
 }
 ```
 
-Trong lab đầu của Chủ đề 2, `hr_release_due_tasks()` có thể chỉ là mô phỏng release table. Delayed list hoàn chỉnh được phát triển ở chủ đề task state và blocking.
+Trong lab đầu của Chủ đề 2, `rtos_release_due_tasks()` có thể chỉ là mô phỏng release table. Delayed list hoàn chỉnh được phát triển ở chủ đề task state và blocking.
 
 ---
 
@@ -2161,7 +2161,7 @@ break SVC_Handler
 break PendSV_Handler
 break SysTick_Handler
 break HardFault_Handler
-break hr_scheduler_select_next
+break rtos_scheduler_select_next
 ```
 
 ## 30.2 Xem MSP và PSP
@@ -2601,7 +2601,7 @@ argument->magic == EXPECTED_MAGIC
 - Task chạy trên PSP.
 - Handler chạy trên MSP.
 - Argument đúng.
-- `hr_kernel_start()` không return.
+- `rtos_kernel_start()` không return.
 - GDB xác nhận PSP nằm trong task stack.
 
 ---
@@ -2631,7 +2631,7 @@ static void task_a(void *argument)
     {
         local++;
         g_task_a_observed = local;
-        hr_task_yield();
+        rtos_task_yield();
     }
 }
 ```
@@ -3505,14 +3505,3 @@ Scheduling + Context Switch
     - Context switch implementation
 ```
 
-Phần triển khai thực hành được mở rộng theo các specification của HairRTOS:
-
-```text
-Phase 2 — Intrusive lists and kernel data structures
-Phase 3 — TCB and initial task stack
-Phase 4 — Start first task using SVC
-Phase 5 — PendSV cooperative context switch
-Phase 6 — Fixed-priority scheduler
-Phase 7 — SysTick, delay and timeout base
-Phase 8 — Preemption and round-robin
-```

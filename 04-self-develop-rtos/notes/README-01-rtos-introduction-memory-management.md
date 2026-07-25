@@ -23,7 +23,7 @@
 14. [Cấp phát tĩnh và cấp phát động](#14-cấp-phát-tĩnh-và-cấp-phát-động)
 15. [Fragmentation và các vấn đề bộ nhớ](#15-fragmentation-và-các-vấn-đề-bộ-nhớ)
 16. [First-fit allocator](#16-first-fit-allocator)
-17. [Thiết kế allocator lab cho HairRTOS](#17-thiết-kế-allocator-lab-cho-hairrtos)
+17. [Thiết kế allocator lab](#17-thiết-kế-allocator-lab)
 18. [Luồng allocate và free](#18-luồng-allocate-và-free)
 19. [Mã khung first-fit allocator](#19-mã-khung-first-fit-allocator)
 20. [Thống kê và đo fragmentation](#20-thống-kê-và-đo-fragmentation)
@@ -79,7 +79,7 @@ Sau khi hoàn thành chủ đề này, người học cần có khả năng:
   - out-of-memory handling.
 - Viết được host test cho allocator.
 - Đo được mức sử dụng heap và fragmentation.
-- Giải thích được vì sao HairRTOS production kernel theo hướng `static-first`.
+- Giải thích được vì sao kernel real-time thường ưu tiên hướng `static-first`.
 
 ---
 
@@ -517,7 +517,7 @@ delay_ms(1000U);
 bằng:
 
 ```c
-hr_task_delay(1000U);
+rtos_task_delay(1000U);
 ```
 
 mà không thiết kế lại:
@@ -567,7 +567,7 @@ mà không thiết kế lại:
 +------------------------------------------------------+
 ```
 
-Trong chủ đề 1, chưa triển khai scheduler và context switch. Mục tiêu là chuẩn bị nền tảng để các phase sau không phụ thuộc vào code HAL hoặc môi trường build không rõ ràng.
+Trong chủ đề 1, chưa triển khai scheduler và context switch. Mục tiêu là chuẩn bị nền tảng để các chủ đề sau không phụ thuộc vào code HAL hoặc môi trường build không rõ ràng.
 
 ---
 
@@ -663,7 +663,7 @@ Không nên dùng UART `printf()` trong đoạn benchmark timing vì thời gian
 
 ## 11.4 SysTick tạm thời
 
-Ở Phase 1, SysTick có thể được dùng làm time base bare-metal.
+Trong nền tảng bare-metal ban đầu, SysTick có thể được dùng làm time base.
 
 Về sau, khi kernel tick được triển khai, trách nhiệm này được chuyển sang kernel time service.
 
@@ -724,7 +724,7 @@ uint32_t add(uint32_t a, uint32_t b)
 Chứa dữ liệu chỉ đọc.
 
 ```c
-static const char g_banner[] = "HairRTOS";
+static const char g_banner[] = "RTOS Memory Lab";
 ```
 
 ## 12.3 `.data`
@@ -887,7 +887,7 @@ Object được khai báo trước.
 
 ```c
 static uint8_t task_a_stack[512];
-static hr_task_t task_a_tcb;
+static rtos_task_t task_a_tcb;
 ```
 
 Ưu điểm:
@@ -1203,7 +1203,7 @@ typedef struct heap_block
 ## 17.3 Magic value
 
 ```c
-#define HR_HEAP_BLOCK_MAGIC (0x48454150UL)
+#define HEAP_BLOCK_MAGIC (0x48454150UL)
 ```
 
 `0x48454150` tương ứng dạng ASCII gần với `"HEAP"`.
@@ -1221,7 +1221,7 @@ Magic không thay thế hoàn toàn boundary checking.
 Giả sử alignment 8 byte:
 
 ```c
-#define HR_HEAP_ALIGNMENT (8U)
+#define HEAP_ALIGNMENT (8U)
 ```
 
 Công thức làm tròn:
@@ -1381,22 +1381,22 @@ Coalescing giúp giảm external fragmentation.
 ## 19.1 Public API
 
 ```c
-#ifndef HR_HEAP_LAB_H
-#define HR_HEAP_LAB_H
+#ifndef HEAP_LAB_H
+#define HEAP_LAB_H
 
 #include <stddef.h>
 #include <stdint.h>
 
 typedef enum
 {
-    HR_HEAP_STATUS_OK = 0,
-    HR_HEAP_STATUS_INVALID_ARGUMENT,
-    HR_HEAP_STATUS_NOT_INITIALIZED,
-    HR_HEAP_STATUS_POINTER_OUT_OF_RANGE,
-    HR_HEAP_STATUS_INVALID_POINTER,
-    HR_HEAP_STATUS_DOUBLE_FREE,
-    HR_HEAP_STATUS_CORRUPTED
-} hr_heap_status_t;
+    HEAP_STATUS_OK = 0,
+    HEAP_STATUS_INVALID_ARGUMENT,
+    HEAP_STATUS_NOT_INITIALIZED,
+    HEAP_STATUS_POINTER_OUT_OF_RANGE,
+    HEAP_STATUS_INVALID_POINTER,
+    HEAP_STATUS_DOUBLE_FREE,
+    HEAP_STATUS_CORRUPTED
+} heap_status_t;
 
 typedef struct
 {
@@ -1409,13 +1409,13 @@ typedef struct
     size_t allocation_count;
     size_t free_count;
     size_t failed_allocation_count;
-} hr_heap_stats_t;
+} heap_stats_t;
 
-hr_heap_status_t hr_heap_lab_init(void *memory, size_t size);
-void *hr_heap_lab_alloc(size_t size);
-hr_heap_status_t hr_heap_lab_free(void *pointer);
-hr_heap_status_t hr_heap_lab_get_stats(hr_heap_stats_t *stats);
-bool hr_heap_lab_validate(void);
+heap_status_t heap_lab_init(void *memory, size_t size);
+void *heap_lab_alloc(size_t size);
+heap_status_t heap_lab_free(void *pointer);
+heap_status_t heap_lab_get_stats(heap_stats_t *stats);
+bool heap_lab_validate(void);
 
 #endif
 ```
@@ -1427,31 +1427,31 @@ bool hr_heap_lab_validate(void);
 #include <stddef.h>
 #include <stdint.h>
 
-#define HR_HEAP_ALIGNMENT          (8U)
-#define HR_HEAP_BLOCK_MAGIC        (0x48454150UL)
-#define HR_HEAP_MIN_PAYLOAD_SIZE   (8U)
+#define HEAP_ALIGNMENT          (8U)
+#define HEAP_BLOCK_MAGIC        (0x48454150UL)
+#define HEAP_MIN_PAYLOAD_SIZE   (8U)
 
-typedef struct hr_heap_block
+typedef struct heap_block
 {
     size_t payload_size;
-    struct hr_heap_block *previous;
-    struct hr_heap_block *next;
+    struct heap_block *previous;
+    struct heap_block *next;
     uint32_t magic;
     bool is_free;
-} hr_heap_block_t;
+} heap_block_t;
 
 typedef struct
 {
     uint8_t *begin;
     uint8_t *end;
-    hr_heap_block_t *first;
+    heap_block_t *first;
     bool initialized;
     size_t allocation_count;
     size_t free_count;
     size_t failed_allocation_count;
-} hr_heap_context_t;
+} heap_context_t;
 
-static hr_heap_context_t g_heap;
+static heap_context_t g_heap;
 ```
 
 ## 19.3 Align size
@@ -1487,7 +1487,7 @@ static bool align_up_size(size_t value,
 ## 19.4 Lấy payload từ header
 
 ```c
-static void *block_to_payload(hr_heap_block_t *block)
+static void *block_to_payload(heap_block_t *block)
 {
     if (block == NULL)
     {
@@ -1495,35 +1495,35 @@ static void *block_to_payload(hr_heap_block_t *block)
     }
 
     return (void *)((uint8_t *)block +
-                    sizeof(hr_heap_block_t));
+                    sizeof(heap_block_t));
 }
 ```
 
 ## 19.5 Lấy header từ payload
 
 ```c
-static hr_heap_block_t *payload_to_block(void *payload)
+static heap_block_t *payload_to_block(void *payload)
 {
     if (payload == NULL)
     {
         return NULL;
     }
 
-    return (hr_heap_block_t *)((uint8_t *)payload -
-                               sizeof(hr_heap_block_t));
+    return (heap_block_t *)((uint8_t *)payload -
+                               sizeof(heap_block_t));
 }
 ```
 
 ## 19.6 Tìm block first-fit
 
 ```c
-static hr_heap_block_t *find_first_fit(size_t requested_size)
+static heap_block_t *find_first_fit(size_t requested_size)
 {
-    hr_heap_block_t *block = g_heap.first;
+    heap_block_t *block = g_heap.first;
 
     while (block != NULL)
     {
-        if (block->magic != HR_HEAP_BLOCK_MAGIC)
+        if (block->magic != HEAP_BLOCK_MAGIC)
         {
             return NULL;
         }
@@ -1544,7 +1544,7 @@ static hr_heap_block_t *find_first_fit(size_t requested_size)
 ## 19.7 Kiểm tra có thể split
 
 ```c
-static bool block_can_split(const hr_heap_block_t *block,
+static bool block_can_split(const heap_block_t *block,
                             size_t requested_size)
 {
     size_t required_size;
@@ -1555,15 +1555,15 @@ static bool block_can_split(const hr_heap_block_t *block,
     }
 
     if (requested_size >
-        (SIZE_MAX - sizeof(hr_heap_block_t) -
-         HR_HEAP_MIN_PAYLOAD_SIZE))
+        (SIZE_MAX - sizeof(heap_block_t) -
+         HEAP_MIN_PAYLOAD_SIZE))
     {
         return false;
     }
 
     required_size = requested_size +
-                    sizeof(hr_heap_block_t) +
-                    HR_HEAP_MIN_PAYLOAD_SIZE;
+                    sizeof(heap_block_t) +
+                    HEAP_MIN_PAYLOAD_SIZE;
 
     return block->payload_size >= required_size;
 }
@@ -1572,11 +1572,11 @@ static bool block_can_split(const hr_heap_block_t *block,
 ## 19.8 Split block
 
 ```c
-static void split_block(hr_heap_block_t *block,
+static void split_block(heap_block_t *block,
                         size_t requested_size)
 {
     uint8_t *new_header_address;
-    hr_heap_block_t *new_block;
+    heap_block_t *new_block;
 
     if ((block == NULL) ||
         !block_can_split(block, requested_size))
@@ -1588,16 +1588,16 @@ static void split_block(hr_heap_block_t *block,
         (uint8_t *)block_to_payload(block) +
         requested_size;
 
-    new_block = (hr_heap_block_t *)new_header_address;
+    new_block = (heap_block_t *)new_header_address;
 
     new_block->payload_size =
         block->payload_size -
         requested_size -
-        sizeof(hr_heap_block_t);
+        sizeof(heap_block_t);
 
     new_block->previous = block;
     new_block->next = block->next;
-    new_block->magic = HR_HEAP_BLOCK_MAGIC;
+    new_block->magic = HEAP_BLOCK_MAGIC;
     new_block->is_free = true;
 
     if (new_block->next != NULL)
@@ -1613,10 +1613,10 @@ static void split_block(hr_heap_block_t *block,
 ## 19.9 Allocate
 
 ```c
-void *hr_heap_lab_alloc(size_t size)
+void *heap_lab_alloc(size_t size)
 {
     size_t aligned_size;
-    hr_heap_block_t *block;
+    heap_block_t *block;
 
     if (!g_heap.initialized || (size == 0U))
     {
@@ -1624,7 +1624,7 @@ void *hr_heap_lab_alloc(size_t size)
     }
 
     if (!align_up_size(size,
-                       HR_HEAP_ALIGNMENT,
+                       HEAP_ALIGNMENT,
                        &aligned_size))
     {
         g_heap.failed_allocation_count++;
@@ -1654,9 +1654,9 @@ void *hr_heap_lab_alloc(size_t size)
 ## 19.10 Merge với block kế tiếp
 
 ```c
-static bool merge_with_next(hr_heap_block_t *block)
+static bool merge_with_next(heap_block_t *block)
 {
-    hr_heap_block_t *next;
+    heap_block_t *next;
 
     if (block == NULL)
     {
@@ -1672,14 +1672,14 @@ static bool merge_with_next(hr_heap_block_t *block)
         return false;
     }
 
-    if ((block->magic != HR_HEAP_BLOCK_MAGIC) ||
-        (next->magic != HR_HEAP_BLOCK_MAGIC))
+    if ((block->magic != HEAP_BLOCK_MAGIC) ||
+        (next->magic != HEAP_BLOCK_MAGIC))
     {
         return false;
     }
 
     block->payload_size +=
-        sizeof(hr_heap_block_t) +
+        sizeof(heap_block_t) +
         next->payload_size;
 
     block->next = next->next;
@@ -1701,24 +1701,24 @@ static bool merge_with_next(hr_heap_block_t *block)
 ## 19.11 Free
 
 ```c
-hr_heap_status_t hr_heap_lab_free(void *pointer)
+heap_status_t heap_lab_free(void *pointer)
 {
-    hr_heap_block_t *block;
+    heap_block_t *block;
 
     if (!g_heap.initialized)
     {
-        return HR_HEAP_STATUS_NOT_INITIALIZED;
+        return HEAP_STATUS_NOT_INITIALIZED;
     }
 
     if (pointer == NULL)
     {
-        return HR_HEAP_STATUS_INVALID_ARGUMENT;
+        return HEAP_STATUS_INVALID_ARGUMENT;
     }
 
     if (((uint8_t *)pointer < g_heap.begin) ||
         ((uint8_t *)pointer >= g_heap.end))
     {
-        return HR_HEAP_STATUS_POINTER_OUT_OF_RANGE;
+        return HEAP_STATUS_POINTER_OUT_OF_RANGE;
     }
 
     block = payload_to_block(pointer);
@@ -1726,17 +1726,17 @@ hr_heap_status_t hr_heap_lab_free(void *pointer)
     if (((uint8_t *)block < g_heap.begin) ||
         ((uint8_t *)block >= g_heap.end))
     {
-        return HR_HEAP_STATUS_INVALID_POINTER;
+        return HEAP_STATUS_INVALID_POINTER;
     }
 
-    if (block->magic != HR_HEAP_BLOCK_MAGIC)
+    if (block->magic != HEAP_BLOCK_MAGIC)
     {
-        return HR_HEAP_STATUS_INVALID_POINTER;
+        return HEAP_STATUS_INVALID_POINTER;
     }
 
     if (block->is_free)
     {
-        return HR_HEAP_STATUS_DOUBLE_FREE;
+        return HEAP_STATUS_DOUBLE_FREE;
     }
 
     block->is_free = true;
@@ -1751,7 +1751,7 @@ hr_heap_status_t hr_heap_lab_free(void *pointer)
         (void)merge_with_next(block);
     }
 
-    return HR_HEAP_STATUS_OK;
+    return HEAP_STATUS_OK;
 }
 ```
 
@@ -1864,10 +1864,10 @@ Allocator cần duy trì:
 ## 21.2 Heap validation
 
 ```c
-bool hr_heap_lab_validate(void)
+bool heap_lab_validate(void)
 {
-    const hr_heap_block_t *block;
-    const hr_heap_block_t *previous = NULL;
+    const heap_block_t *block;
+    const heap_block_t *previous = NULL;
     const uint8_t *cursor;
 
     if (!g_heap.initialized)
@@ -1885,7 +1885,7 @@ bool hr_heap_lab_validate(void)
             return false;
         }
 
-        if (block->magic != HR_HEAP_BLOCK_MAGIC)
+        if (block->magic != HEAP_BLOCK_MAGIC)
         {
             return false;
         }
@@ -1896,7 +1896,7 @@ bool hr_heap_lab_validate(void)
         }
 
         cursor = (const uint8_t *)block +
-                 sizeof(hr_heap_block_t) +
+                 sizeof(heap_block_t) +
                  block->payload_size;
 
         if (cursor > g_heap.end)
@@ -2026,7 +2026,7 @@ free
 Sau mỗi operation:
 
 ```c
-assert(hr_heap_lab_validate());
+assert(heap_lab_validate());
 ```
 
 ## 22.3 Fault injection
@@ -2353,7 +2353,7 @@ Ghi lại:
 
 ### Mục tiêu
 
-Tích hợp lab với Phase 1 platform.
+Tích hợp lab với nền tảng bare-metal.
 
 ### Yêu cầu
 
@@ -2482,9 +2482,9 @@ memory/
     stack_monitor.c
 
 heap_lab/
-    hr_heap_lab.c
-    hr_heap_validate.c
-    hr_heap_stats.c
+    heap_lab.c
+    heap_validate.c
+    heap_stats.c
 
 app/
     command_parser.c
@@ -2550,7 +2550,7 @@ Corrupted magic
 Project cần xuất được báo cáo dạng:
 
 ```text
-HairRTOS Memory Explorer
+Memory Explorer
 ------------------------
 Flash start       : 0x08000000
 Flash end         : ...
@@ -2670,14 +2670,14 @@ Thiết kế và kiểm chứng mới quyết định hệ thống có đạt de
 Không tốt:
 
 ```c
-object = hr_heap_lab_alloc(size);
+object = heap_lab_alloc(size);
 object->state = READY;
 ```
 
 Đúng:
 
 ```c
-object = hr_heap_lab_alloc(size);
+object = heap_lab_alloc(size);
 
 if (object == NULL)
 {
@@ -3000,7 +3000,7 @@ Các nguyên tắc cần nhớ:
 11. Allocator cần validator và statistics.
 12. Host tests nên chạy với ASan và UBSan.
 13. Không allocate trong ISR, PendSV hoặc SysTick.
-14. Allocator lab không được trở thành hidden dependency của HairRTOS.
+14. Allocator lab không được trở thành hidden dependency của production kernel.
 15. Chỉ khi hiểu rõ bộ nhớ mới nên tiếp tục sang TCB, scheduler và context switch.
 
 Sau chủ đề này, người học chưa cần có scheduler chạy thật. Kết quả cần đạt là:
@@ -3030,13 +3030,6 @@ README này được xây dựng theo phạm vi Chủ đề 1 trong tài liệu:
 ```text
 self-develop-rtos.pdf
 RTOS introduction, getting started with AKOS
-```
-
-Phần triển khai thực hành được điều chỉnh theo kiến trúc và roadmap của HairRTOS:
-
-```text
-Phase 1  — Bare-metal foundation
-Phase 14 — Memory allocator lab
 ```
 
 Thuật toán và mã minh họa trong README phục vụ mục đích đào tạo, không được xem là allocator production nếu chưa hoàn thiện kiểm thử concurrency, corruption protection, timing analysis và target validation.
