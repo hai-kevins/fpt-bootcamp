@@ -1,7 +1,9 @@
 # Chủ đề 4 - Các thành phần chính của hệ thống Event-Driven trong Embedded
+## Active Object, Mailbox, Event Pool và Data-Link Layer
 
-> Chủ đề này tập trung vào cấu trúc bên trong của một hệ thống Event-Driven hoàn chỉnh trong firmware nhúng, bao gồm **Active Object**, **Mailbox**, **Event Handler**, **State Machine**, **Event Pool** và **Data-Link Layer**.  
-> Mục tiêu cuối cùng là giúp người học hiểu cách một ứng dụng hướng sự kiện được tổ chức từ một MCU đơn lẻ cho tới hệ thống nhiều MCU, nhiều process hoặc nhiều node trong cùng một network.
+> Mục tiêu của chủ đề này là hiểu cấu trúc bên trong của một hệ thống Event-Driven hoàn chỉnh, từ một MCU đơn lẻ đến hệ thống nhiều MCU, nhiều process hoặc nhiều node.
+>
+> Nội dung trọng tâm gồm Active Object, Mailbox, Event Handler, State Machine, Event Pool, Event Routing, Data-Link Layer và kiến trúc phân tán.
 
 ---
 
@@ -56,6 +58,7 @@
 47. [Tiêu chí hoàn thành](#47-tiêu-chí-hoàn-thành)
 48. [Cấu trúc repository đề xuất](#48-cấu-trúc-repository-đề-xuất)
 49. [Tài liệu tham khảo](#49-tài-liệu-tham-khảo)
+50. [Tổng kết](#50-tổng-kết)
 
 ---
 
@@ -3043,6 +3046,8 @@ Vẽ state diagram trước khi code.
 
 # 43. Best Practices
 
+Các nguyên tắc nên áp dụng:
+
 ## Active Object sở hữu state của chính nó
 
 Không sửa state từ module khác.
@@ -3110,6 +3115,8 @@ Tránh event storm.
 ---
 
 # 44. Anti-pattern và lỗi thường gặp
+
+Các anti-pattern và lỗi sau cần được tránh:
 
 ## God Active Object
 
@@ -3186,6 +3193,8 @@ Mỗi subscriber tạo thêm event mới.
 ---
 
 # 45. Kiểm thử
+
+Các nội dung cần kiểm thử:
 
 ## Test Mailbox FIFO
 
@@ -3264,6 +3273,8 @@ Local AO
 ---
 
 # 46. Bài thực hành
+
+Các bài thực hành được sắp xếp từ cơ bản đến tích hợp:
 
 ## Bài 1 — Active Object cơ bản
 
@@ -3435,6 +3446,8 @@ Game event truyền qua Data-Link.
 
 # 47. Tiêu chí hoàn thành
 
+Người học được xem là hoàn thành chủ đề khi có thể:
+
 - Giải thích được Active Object.
 - Thiết kế mailbox.
 - Viết Event Handler run-to-completion.
@@ -3467,6 +3480,8 @@ Game event truyền qua Data-Link.
 ---
 
 # 48. Cấu trúc repository đề xuất
+
+Cấu trúc repository đề xuất:
 
 ```text
 04-event-driven-system-components/
@@ -3538,7 +3553,6 @@ Game event truyền qua Data-Link.
 ```
 
 ## Nội dung README của project
-
 - Mục tiêu hệ thống.
 - Board và MCU.
 - Danh sách Active Object.
@@ -3563,6 +3577,8 @@ Game event truyền qua Data-Link.
 ---
 
 # 49. Tài liệu tham khảo
+
+Các tài liệu nên tham khảo:
 
 ## Active Kernel Base Kit
 
@@ -3596,7 +3612,7 @@ Game event truyền qua Data-Link.
 
 ---
 
-# Tổng kết
+# 50. Tổng kết
 
 Các thành phần cốt lõi của một hệ thống Event-Driven hoàn chỉnh gồm:
 

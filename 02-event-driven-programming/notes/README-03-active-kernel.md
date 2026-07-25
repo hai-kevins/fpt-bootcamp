@@ -1,8 +1,9 @@
 # Chủ đề 3 - Active Kernel (AK)
 ## Khái niệm, tính năng và cách sử dụng
 
-> Chủ đề này tập trung vào cách sử dụng Active Kernel để tổ chức một firmware hướng sự kiện bằng **Task**, **Signal**, **Message**, **Timer** và **State Machine**.  
-> Sau khi hoàn thành, người học cần hiểu luồng xử lý bên trong AK, biết tạo task, gửi message, cấu hình timer, xây dựng state machine và sử dụng các công cụ debug cơ bản.
+> Mục tiêu của chủ đề này là sử dụng Active Kernel để tổ chức firmware hướng sự kiện và hiểu luồng xử lý bên trong framework.
+>
+> Nội dung trọng tâm gồm Task, Signal, Message, Message Pool, Timer, Scheduler, State Machine, UART Shell, log và debug.
 
 ---
 
@@ -47,12 +48,13 @@
 37. [Tiêu chí hoàn thành](#37-tiêu-chí-hoàn-thành)
 38. [Cấu trúc repository đề xuất](#38-cấu-trúc-repository-đề-xuất)
 39. [Tài liệu tham khảo](#39-tài-liệu-tham-khảo)
+40. [Tổng kết](#40-tổng-kết)
 
 ---
 
 # 1. Mục tiêu học tập
 
-Sau khi hoàn thành chủ đề, người học cần có khả năng:
+Sau khi hoàn thành chủ đề này, người học cần có khả năng:
 
 - Giải thích được vai trò của Active Kernel trong firmware hướng sự kiện.
 - Phân biệt AK với một RTOS preemptive truyền thống.
@@ -2680,6 +2682,8 @@ src, des, sig, timestamp
 
 # 34. Best Practices
 
+Các nguyên tắc nên áp dụng:
+
 ## Task handler phải ngắn
 
 Mục tiêu:
@@ -2866,6 +2870,8 @@ Giải pháp:
 ---
 
 # 36. Bài thực hành
+
+Các bài thực hành được sắp xếp từ cơ bản đến tích hợp:
 
 ## Bài 1 — Đọc cấu trúc AK
 
@@ -3059,6 +3065,8 @@ Yêu cầu:
 
 # 37. Tiêu chí hoàn thành
 
+Người học được xem là hoàn thành chủ đề khi có thể:
+
 - Giải thích được Active Kernel.
 - Phân biệt AK với RTOS preemptive.
 - Hiểu run-to-completion.
@@ -3089,6 +3097,8 @@ Yêu cầu:
 ---
 
 # 38. Cấu trúc repository đề xuất
+
+Cấu trúc repository đề xuất:
 
 ```text
 03-active-kernel/
@@ -3143,8 +3153,7 @@ Yêu cầu:
     └── memory-pools.md
 ```
 
-## README của project nên có
-
+## Nội dung README của project
 - Board và MCU.
 - Phiên bản AK hoặc commit đang sử dụng.
 - Sơ đồ kiến trúc.
@@ -3167,6 +3176,8 @@ Yêu cầu:
 ---
 
 # 39. Tài liệu tham khảo
+
+Các tài liệu nên tham khảo:
 
 ## AK Embedded Base Kit — STM32L151
 
@@ -3204,7 +3215,7 @@ application/sources/app/task_shell.cpp
 
 ---
 
-# Tổng kết
+# 40. Tổng kết
 
 Active Kernel cung cấp các thành phần giúp hiện thực hóa firmware hướng sự kiện:
 

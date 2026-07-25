@@ -1,7 +1,9 @@
 # Chủ đề 2 - Lập trình bất đồng bộ và hướng sự kiện
 ## Asynchronous & Event-Driven Programming
 
-> Mục tiêu của chủ đề này là hiểu vì sao firmware cần chuyển từ cách viết tuần tự, polling và blocking sang mô hình bất đồng bộ hướng sự kiện; đồng thời tự xây dựng được một Event-Driven Framework tối thiểu gồm Event, Event Queue, Dispatcher, Event Handler, Timer Event và State Machine.
+> Mục tiêu của chủ đề này là hiểu vì sao firmware cần chuyển từ cách viết tuần tự, polling và blocking sang mô hình bất đồng bộ hướng sự kiện; đồng thời tự xây dựng được một Event-Driven Framework tối thiểu.
+>
+> Nội dung trọng tâm gồm Event, Signal, Event Queue, Dispatcher, Event Handler, Timer Event, State Machine và deferred processing từ ISR.
 
 ---
 
@@ -32,6 +34,7 @@
 23. [Tiêu chí hoàn thành](#23-tiêu-chí-hoàn-thành)
 24. [Cấu trúc repository đề xuất](#24-cấu-trúc-repository-đề-xuất)
 25. [Tài liệu tham khảo](#25-tài-liệu-tham-khảo)
+26. [Tổng kết](#26-tổng-kết)
 
 ---
 
@@ -54,7 +57,7 @@ Sau khi hoàn thành chủ đề này, người học cần có khả năng:
 
 # 2. Kiến thức cần chuẩn bị
 
-Người học nên nắm:
+Trước khi bắt đầu, người học nên nắm:
 
 - C cơ bản: `struct`, `enum`, con trỏ, mảng, con trỏ hàm.
 - `static`, `const`, `volatile`.
@@ -1629,46 +1632,75 @@ Kết nối GPIO, UART, timer, sensor và interrupt.
 
 # 19. Best Practices
 
-1. Handler phải run-to-completion.
-2. ISR chỉ làm phần tối thiểu.
-3. Mỗi module sở hữu state của chính nó.
-4. Các module giao tiếp bằng event.
-5. Event nên mô tả ý nghĩa nghiệp vụ rõ ràng.
-6. Không dùng event tên mơ hồ như `DO_THING` hoặc `UPDATE`.
-7. Event payload phải có ownership rõ ràng.
-8. Không gửi pointer tới biến local.
-9. Queue phải có overflow policy.
-10. Không phụ thuộc vào thứ tự event ngầm định.
-11. Tách framework, application và platform.
-12. Ghi trace event để debug.
-13. Đo thời gian chạy handler nếu hệ thống có yêu cầu timing.
-14. Không dùng `malloc()` tùy tiện cho từng event.
-15. Thiết kế State Machine và transition table trước khi code.
+Các nguyên tắc nên áp dụng:
 
-Tổ chức layer:
+## Handler phải run-to-completion.
 
-```text
-framework/
-  event_queue.c
-  dispatcher.c
-  software_timer.c
+## ISR chỉ làm phần tối thiểu.
 
-application/
-  app.c
-  button.c
-  led.c
+## Mỗi module sở hữu state của chính nó.
 
-platform/
-  gpio.c
-  uart.c
-  systick.c
-```
+## Các module giao tiếp bằng event.
 
----
+## Event nên mô tả ý nghĩa nghiệp vụ rõ ràng.
+
+## Không dùng event tên mơ hồ như `DO_THING` hoặc `UPDATE`.
+
+## Event payload phải có ownership rõ ràng.
+
+## Không gửi pointer tới biến local.
+
+## Queue phải có overflow policy.
+
+## Không phụ thuộc vào thứ tự event ngầm định.
+
+## Tách framework, application và platform.
+
+## Ghi trace event để debug.
+
+## Đo thời gian chạy handler nếu hệ thống có yêu cầu timing.
+
+## Không dùng `malloc()` tùy tiện cho từng event.
+
+## Thiết kế State Machine và transition table trước khi code.
+
+## Tổ chức layer:
+
+## ```text
+
+## framework/
+
+## event_queue.c
+
+## dispatcher.c
+
+## software_timer.c
+
+## application/
+
+## app.c
+
+## button.c
+
+## led.c
+
+## platform/
+
+## gpio.c
+
+## uart.c
+
+## systick.c
+
+## ```
+
+## ---
 
 # 20. Anti-pattern và lỗi thường gặp
 
-## 20.1 Blocking trong handler
+Các anti-pattern và lỗi sau cần được tránh:
+
+## Blocking trong handler
 
 ```c
 void handle_event(const event_t *event)
@@ -1683,7 +1715,7 @@ Hậu quả:
 - Event latency tăng.
 - Queue có thể đầy.
 
-## 20.2 Gọi trực tiếp module khác quá sâu
+## Gọi trực tiếp module khác quá sâu
 
 Không tốt:
 
@@ -1698,7 +1730,7 @@ void button_handler(void)
 
 Nên post event nghiệp vụ cho Application.
 
-## 20.3 Event storm
+## Event storm
 
 Một event tạo quá nhiều event mới:
 
@@ -1715,7 +1747,7 @@ Giải pháp:
 - Coalescing.
 - Chỉ post khi state thực sự thay đổi.
 
-## 20.4 Duplicate Event
+## Duplicate Event
 
 Display refresh được post nhiều lần dù chỉ cần một event pending.
 
@@ -1726,7 +1758,7 @@ If REFRESH already pending:
     Do not enqueue another REFRESH
 ```
 
-## 20.5 Lost Event
+## Lost Event
 
 Nguyên nhân:
 
@@ -1736,7 +1768,7 @@ Nguyên nhân:
 - ISR clear flag sai.
 - Event bị overwrite.
 
-## 20.6 State không đồng bộ
+## State không đồng bộ
 
 Ví dụ Application nghĩ LED đang bật nhưng LED module đang tắt.
 
@@ -1746,7 +1778,7 @@ Giải pháp:
 - Command/confirmation event khi cần.
 - Không sao chép state không cần thiết.
 
-## 20.7 Heap không kiểm soát
+## Heap không kiểm soát
 
 Cấp phát động cho từng event có thể gây:
 
@@ -1761,7 +1793,9 @@ Nên dùng static queue hoặc memory pool.
 
 # 21. Kiểm thử
 
-## 21.1 Test FIFO
+Các nội dung cần kiểm thử:
+
+## Test FIFO
 
 ```c
 void test_queue_fifo(void)
@@ -1785,7 +1819,7 @@ void test_queue_fifo(void)
 }
 ```
 
-## 21.2 Test queue full
+## Test queue full
 
 ```c
 void test_queue_full(void)
@@ -1805,14 +1839,14 @@ void test_queue_full(void)
 }
 ```
 
-## 21.3 Test wraparound
+## Test wraparound
 
 1. Post một phần queue.
 2. Get một số event.
 3. Post thêm để `head` quay về đầu.
 4. Kiểm tra thứ tự FIFO vẫn đúng.
 
-## 21.4 Test State Machine
+## Test State Machine
 
 ```c
 void test_led_toggle(void)
@@ -1832,7 +1866,7 @@ void test_led_toggle(void)
 }
 ```
 
-## 21.5 Test invalid input
+## Test invalid input
 
 Handler không được crash khi nhận:
 
@@ -1841,11 +1875,11 @@ Handler không được crash khi nhận:
 - Destination sai.
 - Payload ngoài phạm vi.
 
-## 21.6 Test timer
+## Test timer
 
 Dùng fake tick thay vì chờ thời gian thật.
 
-## 21.7 Test event sequence
+## Test event sequence
 
 Chuỗi mong đợi:
 
@@ -1859,6 +1893,8 @@ LED_ON
 ---
 
 # 22. Bài thực hành
+
+Các bài thực hành được sắp xếp từ cơ bản đến tích hợp:
 
 ## Bài 1 — Chuyển blocking sang non-blocking
 
@@ -1989,6 +2025,8 @@ So sánh:
 
 # 23. Tiêu chí hoàn thành
 
+Người học được xem là hoàn thành chủ đề khi có thể:
+
 - Phân biệt synchronous và asynchronous.
 - Giải thích được Event-Driven Programming.
 - Phân tích được vấn đề của blocking delay.
@@ -2014,6 +2052,8 @@ So sánh:
 ---
 
 # 24. Cấu trúc repository đề xuất
+
+Cấu trúc repository đề xuất:
 
 ```text
 02-asynchronous-event-driven/
@@ -2056,8 +2096,7 @@ So sánh:
 └── build/
 ```
 
-README project thực hành nên có:
-
+## Nội dung README của project
 - Mục tiêu.
 - Board và MCU.
 - Sơ đồ kiến trúc.
@@ -2077,6 +2116,8 @@ README project thực hành nên có:
 ---
 
 # 25. Tài liệu tham khảo
+
+Các tài liệu nên tham khảo:
 
 ## Event Driven — Task & Signal
 
@@ -2100,7 +2141,7 @@ README project thực hành nên có:
 
 ---
 
-# Tổng kết
+# 26. Tổng kết
 
 Event-Driven Programming giúp chuyển firmware từ mô hình:
 

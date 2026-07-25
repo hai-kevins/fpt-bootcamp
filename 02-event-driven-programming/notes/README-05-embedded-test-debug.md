@@ -1,14 +1,9 @@
 # Chủ đề 5 - Xây dựng hệ thống kiểm thử và gỡ lỗi cho Embedded Programming
 ## Test, Debug, Trace và Automated Test trong hệ thống Event-Driven
 
-> Mục tiêu của chủ đề này là xây dựng một hệ thống kiểm thử và gỡ lỗi có thể sử dụng trong suốt vòng đời của firmware: từ lúc phát triển trên bàn làm việc, tích hợp phần cứng, kiểm thử use case, cho đến khi thiết bị đã được triển khai ngoài thực tế.
+> Mục tiêu của chủ đề này là xây dựng một hệ thống kiểm thử và gỡ lỗi có thể sử dụng trong suốt vòng đời của firmware, từ phát triển, tích hợp phần cứng đến vận hành thực tế.
 >
-> Nội dung tập trung vào bốn trụ cột:
->
-> 1. **Unit Test và kiểm thử qua Command Line trên UART**.
-> 2. **Event Log có chi phí bộ nhớ thấp**.
-> 3. **Trace và Record Event trên thiết bị thực tế**.
-> 4. **Tự động hóa kiểm thử các use case của sản phẩm**.
+> Nội dung trọng tâm gồm Unit Test và UART Command Line, Event Log chi phí thấp, Trace/Record Event, Crash Record và tự động hóa kiểm thử use case.
 
 ---
 
@@ -2558,6 +2553,8 @@ Giữ test trong suite.
 
 # 47. Best Practices
 
+Các nguyên tắc nên áp dụng:
+
 ## Thiết kế testability ngay từ đầu
 
 Không chờ project lớn mới thêm test.
@@ -2618,6 +2615,8 @@ Dùng RAM ring buffer và snapshot khi cần.
 ---
 
 # 48. Anti-pattern và lỗi thường gặp
+
+Các anti-pattern và lỗi sau cần được tránh:
 
 ## Chỉ dùng `printf()`
 
@@ -2868,6 +2867,8 @@ static int shell_cmd_test(
 
 # 50. Bài thực hành
 
+Các bài thực hành được sắp xếp từ cơ bản đến tích hợp:
+
 ## Bài 1 — Unit Test Event Queue
 
 Test:
@@ -3041,6 +3042,8 @@ PC script:
 
 # 51. Tiêu chí hoàn thành
 
+Người học được xem là hoàn thành chủ đề khi có thể:
+
 - Phân biệt các cấp độ test.
 - Thiết kế module có khả năng test.
 - Dùng dependency injection trong C.
@@ -3080,6 +3083,8 @@ PC script:
 ---
 
 # 52. Cấu trúc repository đề xuất
+
+Cấu trúc repository đề xuất:
 
 ```text
 05-embedded-test-debug/
@@ -3153,8 +3158,7 @@ PC script:
 └── build/
 ```
 
-## README của project nên có
-
+## Nội dung README của project
 - Mục tiêu kiểm thử.
 - Phạm vi test.
 - Kiến trúc Test/Debug.
@@ -3174,6 +3178,8 @@ PC script:
 ---
 
 # 53. Tài liệu tham khảo
+
+Các tài liệu nên tham khảo:
 
 ## Active Kernel Base Kit
 
