@@ -1,7 +1,7 @@
 # Chủ đề 1 - Giới thiệu RTOS và quản lý bộ nhớ trong Kernel
 ## RTOS Introduction, Getting Started
 
-> Chủ đề này được xây dựng theo nội dung **“RTOS introduction, getting started with AKOS”** trong chương trình tự phát triển AKOS.
+> Chủ đề này được xây dựng theo phạm vi **“RTOS introduction, getting started with AKOS”** trong chương trình tự phát triển AKOS.
 
 ---
 
