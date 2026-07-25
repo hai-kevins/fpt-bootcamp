@@ -3058,8 +3058,6 @@ sẽ tái sử dụng:
 Phạm vi gốc của README được lấy từ Chủ đề 4 trong tài liệu:
 
 ```text
-self-develop-rtos.pdf
-
 Task state + Synchronization
     - Efficient blocking of threads
     - Task state: Ready, Running, Blocked, Suspended

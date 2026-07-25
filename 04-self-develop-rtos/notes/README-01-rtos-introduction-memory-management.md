@@ -3028,7 +3028,6 @@ Scheduling + Context Switch
 README này được xây dựng theo phạm vi Chủ đề 1 trong tài liệu:
 
 ```text
-self-develop-rtos.pdf
 RTOS introduction, getting started with AKOS
 ```
 

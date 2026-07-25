@@ -3028,8 +3028,6 @@ Một Communication and Benchmark Console chạy trên STM32F103
 Phạm vi gốc của README được lấy từ Chủ đề 5 trong tài liệu:
 
 ```text
-self-develop-rtos.pdf
-
 Communication + Timer + Benchmark
     - Hệ thống truyền tin nhắn trong AK-mOS
     - Cơ chế hoạt động của message system

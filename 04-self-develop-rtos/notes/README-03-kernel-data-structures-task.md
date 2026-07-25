@@ -3349,8 +3349,6 @@ sẽ sử dụng trực tiếp:
 Phạm vi gốc của README được lấy từ Chủ đề 3 trong tài liệu:
 
 ```text
-self-develop-rtos.pdf
-
 Cấu trúc dữ liệu trong kernel + Task
     - Tasks trong AK-mOS
     - Task Control Block

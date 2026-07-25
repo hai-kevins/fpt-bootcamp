@@ -3495,8 +3495,6 @@ Task state + Blocking + Synchronization
 README này bám theo phạm vi Chủ đề 2 trong tài liệu:
 
 ```text
-self-develop-rtos.pdf
-
 Scheduling + Context Switch
     - Priority-based scheduling models
     - ARM Cortex-M3 architecture cơ bản
