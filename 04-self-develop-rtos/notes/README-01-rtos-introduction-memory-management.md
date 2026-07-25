@@ -3029,6 +3029,12 @@ README này được xây dựng theo phạm vi Chủ đề 1 trong tài liệu:
 
 ```text
 RTOS introduction, getting started with AKOS
+    - Setup base source to experiment RTOS concepts
+    - What is a Real-Time Operating System?
+    - Bài toán bộ nhớ trong RTOS
+    - Phân loại cấp phát bộ nhớ
+    - Fragmentation và memory issues
+    - First-fit schema implementation trong AK-mOS
 ```
 
 Thuật toán và mã minh họa trong README phục vụ mục đích đào tạo, không được xem là allocator production nếu chưa hoàn thiện kiểm thử concurrency, corruption protection, timing analysis và target validation.
