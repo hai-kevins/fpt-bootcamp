@@ -1,6 +1,7 @@
 TARGET := 01_memory_layout
 BUILD_DIR ?= build
 TOOLCHAIN ?= gcc
+
 ifeq ($(TOOLCHAIN),clang)
 CC := clang
 OBJCOPY := llvm-objcopy
@@ -62,5 +63,5 @@ rebuild: clean all
 
 clean:
 	rm -rf $(BUILD_DIR)
-	
+
 -include $(DEPS)
