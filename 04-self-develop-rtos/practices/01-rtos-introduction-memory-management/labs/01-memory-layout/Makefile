@@ -50,6 +50,8 @@ size: $(ELF)
 	$(SIZE) $<
 flash-stlink: $(BIN)
 	st-flash write $(BIN) 0x08000000
+flash-openocd: $(BIN)
+	openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program $(BIN) verify reset exit"
 rebuild: clean all
 clean:
 	rm -rf $(BUILD_DIR)
