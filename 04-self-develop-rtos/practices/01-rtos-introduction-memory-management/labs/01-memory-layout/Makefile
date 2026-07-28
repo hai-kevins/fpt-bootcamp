@@ -32,7 +32,9 @@ ELF := $(BUILD_DIR)/$(TARGET).elf
 BIN := $(BUILD_DIR)/$(TARGET).bin
 HEX := $(BUILD_DIR)/$(TARGET).hex
 LST := $(BUILD_DIR)/$(TARGET).lst
-.PHONY: all size flash-stlink clean rebuild
+
+.PHONY: all size flash-stlink flash-openocd clean rebuild
+
 all: $(ELF) $(BIN) $(HEX) $(LST) size
 $(ELF): $(OBJECTS) linker/memory.ld
 	@mkdir -p $(dir $@)
@@ -46,13 +48,19 @@ $(HEX): $(ELF)
 	$(OBJCOPY) -O ihex $< $@
 $(LST): $(ELF)
 	$(OBJDUMP) -d -S $< > $@
+
 size: $(ELF)
 	$(SIZE) $<
+
 flash-stlink: $(BIN)
 	st-flash write $(BIN) 0x08000000
+
 flash-openocd: $(BIN)
 	openocd -f interface/stlink.cfg -f target/stm32f1x.cfg -c "program $(BIN) verify reset exit"
+
 rebuild: clean all
+
 clean:
 	rm -rf $(BUILD_DIR)
+	
 -include $(DEPS)
