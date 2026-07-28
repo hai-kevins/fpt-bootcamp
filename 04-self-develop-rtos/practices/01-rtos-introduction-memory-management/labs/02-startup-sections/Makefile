@@ -17,6 +17,7 @@ SIZE := arm-none-eabi-size
 TARGET_FLAGS :=
 LINKER_DRIVER :=
 endif
+
 CPU_FLAGS := -mcpu=cortex-m3 -mthumb
 CFLAGS := $(TARGET_FLAGS) $(CPU_FLAGS) -std=c11 -Og -g3 \
 	-Wall -Wextra -Werror -Wshadow -Wundef -Wconversion -Wsign-conversion \
@@ -63,5 +64,5 @@ rebuild: clean all
 
 clean:
 	rm -rf $(BUILD_DIR)
-	
+
 -include $(DEPS)
