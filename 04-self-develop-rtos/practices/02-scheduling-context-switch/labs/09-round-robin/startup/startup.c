@@ -10,7 +10,7 @@ extern uint32_t _estack;
 int main(void);
 
 void Reset_Handler(void) __attribute__((noreturn));
-void Default_Handler(void) __attribute__((noreturn));
+void Default_Handler(void);
 
 #define WEAK_DEFAULT_HANDLER(name) \
     void name(void) __attribute__((weak, alias("Default_Handler")))
