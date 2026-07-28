@@ -9,14 +9,19 @@ SOURCES := src/main.c
 TEST_SOURCES := 
 DEMO := $(BUILD_DIR)/$(TARGET)
 TEST := $(BUILD_DIR)/$(TARGET)-tests
+
 .PHONY: all test run clean
+
 all: $(DEMO) test
 $(DEMO): $(SOURCES)
 	@mkdir -p $(BUILD_DIR)
 	$(CC) $(CFLAGS) $(SOURCES) $(LDFLAGS) -o $@
+
 test:
 	@echo "No separate unit-test binary for this lab."
+
 run: all
 	ASAN_OPTIONS=detect_leaks=1 $(DEMO)
+	
 clean:
 	rm -rf $(BUILD_DIR)
