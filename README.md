@@ -53,4 +53,5 @@
 | 4 | Task State và Synchronization | Hiểu task state machine trong RTOS.<br>Hiểu blocking và delay mechanism.<br>Hiểu synchronization và mutual exclusion. | Efficient blocking of threads.<br>Task state: Ready, Running, Blocked, Suspended.<br>Ready list và priority scheduling.<br>Delayed task list.<br>Synchronization and mutual exclusion mechanisms. |
 | 5 | Communication, Timer và Benchmark | Hiểu message passing giữa task.<br>Hiểu software timer.<br>Hiểu cách benchmark kernel performance. | Hệ thống truyền tin nhắn trong AK-mOS.<br>Cơ chế hoạt động của message system.<br>Software timer và SysTick.<br>Quản lý timer trong AK-mOS.<br>Benchmark AK-mOS trên Cortex-M3: context-switch latency và event/message latency. |
 
+## Lời cảm ơn
 Cảm ơn FPT Software Institute cùng các mentor đã cung cấp chương trình đào tạo chất lượng cao, giúp tôi nâng cao kỹ năng lập trình nhúng và phát triển phần mềm.
