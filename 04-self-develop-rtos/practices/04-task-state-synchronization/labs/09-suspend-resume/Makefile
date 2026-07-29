@@ -11,6 +11,7 @@ DEMO := $(BUILD_DIR)/$(TARGET)
 TEST := $(BUILD_DIR)/tests
 
 .PHONY: all test run clean help
+
 all: test $(DEMO)
 
 $(DEMO): $(SOURCES)
