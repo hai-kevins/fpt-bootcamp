@@ -2,21 +2,15 @@
 
 ## Mục tiêu
 
-- Ép địa chỉ số thành con trỏ.
-- Đọc và ghi dữ liệu qua dereference.
-- Hiểu vai trò của `volatile`.
-- Hiểu rủi ro của địa chỉ không hợp lệ.
-
-## API
-
-```c
-uint32_t memory_read32(uintptr_t address);
-void memory_write32(uintptr_t address, uint32_t value);
-```
-
-Lab chạy trên host 64-bit nên dùng `uintptr_t`. Trên Cortex-M3, không gian địa chỉ là 32-bit.
+- Ép một địa chỉ kiểu `uintptr_t` thành con trỏ 32-bit.
+- Đọc và ghi dữ liệu thông qua phép dereference.
+- Hiểu vai trò của `volatile` trong memory access.
+- Phân biệt địa chỉ hợp lệ và địa chỉ tùy ý.
+- Liên hệ thao tác con trỏ với Memory-Mapped I/O trên MCU.
 
 ## Build và chạy
+
+Makefile của lab này chỉ quản lý source và executable host của chính lab. Từ thư mục root:
 
 ```bash
 cd labs/02-memory-access
@@ -24,21 +18,35 @@ make
 make run
 ```
 
-Artifact được tạo tại:
+Có thể dùng:
+
+```bash
+make         # Build executable
+make run     # Build rồi chạy
+make rebuild # Clean rồi build lại
+make clean   # Chỉ xóa build/ của Lab 02
+```
+
+## Kết quả
+
+Artifact chính nằm cục bộ trong lab:
 
 ```text
 build/lab02_memory_access
 ```
 
-## An toàn
+Kết quả chính:
 
-Chương trình chỉ truy cập địa chỉ của một biến hợp lệ. Không thay địa chỉ bằng số ngẫu nhiên. Truy cập sai có thể gây segmentation fault trên host hoặc HardFault/BusFault trên MCU.
-
-## Liên hệ Memory-Mapped I/O
-
-```c
-#define GPIOC_ODR \
-    (*(volatile uint32_t *)0x4001100CU)
+```text
+initial value = 0x12345678
+after write = 0xABCDEF01
 ```
 
-Nguyên lý con trỏ giống nhau, nhưng địa chỉ được ánh xạ tới peripheral thay vì SRAM.
+Lab chỉ truy cập địa chỉ của biến `test_value` hợp lệ. Không thay địa chỉ bằng một số ngẫu nhiên vì executable host có thể gặp segmentation fault; trên Cortex-M, truy cập sai có thể gây HardFault hoặc BusFault.
+
+## Câu hỏi
+
+1. Vì sao lab dùng `uintptr_t` thay vì `uint32_t` để chứa địa chỉ trên host?
+2. `volatile` ngăn compiler thực hiện những tối ưu nào đối với memory access?
+3. Điều gì có thể xảy ra nếu truy cập một địa chỉ không căn chỉnh theo 4 byte?
+4. Memory-Mapped I/O khác SRAM thông thường ở đâu dù cú pháp dereference giống nhau?

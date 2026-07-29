@@ -1,35 +1,75 @@
-# Labs
+# Labs — Independent Makefiles
 
-Mỗi thư mục trong `labs/` là một project thực hành độc lập và có `Makefile` riêng.
-Makefile ở root chỉ quản lý firmware tổng kết, không build hoặc clean các lab.
+Mỗi thư mục lab là một build unit độc lập.
 
-## Cách sử dụng
+- Không build lab từ Makefile gốc.
+- Đi vào đúng thư mục lab rồi chạy Makefile của lab đó.
+- Output được tạo trong `build/` bên trong chính lab.
+- `make clean` chỉ xóa output của lab hiện tại.
+- Host lab tạo executable chạy trên Linux.
+- Target lab tạo firmware ARM để flash lên STM32F103.
+- `make flash-stlink` phải được chạy trong đúng target lab cần nạp.
+
+## Host labs
 
 ```bash
 cd labs/01-endianness
 make
 make run
-make clean
+
+cd ../02-memory-access
+make
+make run
+
+cd ../03-memory-sections
+make
+make run
+make report
 ```
 
-Với các lab chạy trên STM32:
+Host labs:
+
+| Lab | Artifact chính | Quan sát |
+|---:|---|---|
+| 01 | `build/lab01_endianness` | Byte order |
+| 02 | `build/lab02_memory_access` | Đọc/ghi qua địa chỉ |
+| 03 | `build/lab03_memory_sections` | Section và symbol của executable host |
+
+Các executable host không thể flash lên STM32.
+
+## Target labs
 
 ```bash
-cd labs/06-gpio-register
+cd labs/04-startup-code
 make
 make flash-stlink
-make clean
+
+cd ../05-linker-script
+make
+make report
+
+cd ../06-gpio-register
+make
+make flash-stlink
+
+cd ../07-uart-polling
+make
+make flash-stlink
+
+cd ../08-map-analysis
+make
+make report
+./analyze.sh
 ```
 
-## Danh sách
+Target labs:
 
-| Lab | Môi trường | Lệnh chính |
+| Lab | Artifact chính | Quan sát |
 |---:|---|---|
-| 01 Endianness | Host | `make`, `make run` |
-| 02 Memory access | Host | `make`, `make run` |
-| 03 Memory sections | Host | `make`, `make run`, `make report` |
-| 04 Startup code | STM32F103 | `make`, `make report`, `make flash-stlink` |
-| 05 Linker script | STM32F103 | `make`, `make report`, `make flash-stlink` |
-| 06 GPIO register | STM32F103 | `make`, `make report`, `make flash-stlink` |
-| 07 UART polling | STM32F103 | `make`, `make report`, `make flash-stlink` |
-| 08 Map analysis | STM32F103 | `make`, `make report`, `./analyze.sh` |
+| 04 | `build/lab04_startup_code.elf` | LED báo kết quả khởi tạo `.data`/`.bss` |
+| 05 | `build/lab05_linker_script.elf` | Map file, VMA/LMA và `.noinit` |
+| 06 | `build/lab06_gpio_register.elf` | LED PC13 nháy |
+| 07 | `build/lab07_uart_polling.elf` | UART echo và LED toggle |
+| 08 | `build/lab08_map_analysis.elf` | Size, section, symbol và map file |
+
+Mỗi target lab có Startup Code, Linker Script và Makefile riêng. Vì vậy, lệnh flash phải được thực hiện trong thư mục của lab tương ứng.
