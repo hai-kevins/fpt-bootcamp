@@ -8,8 +8,11 @@ LDFLAGS := -fsanitize=address,undefined
 SOURCES := src/ring_queue.c
 TEST := $(BUILD_DIR)/tests
 DEMO := $(BUILD_DIR)/01-static-ring-buffer-queue
+
 .PHONY: all test run clean help
+
 all: test $(DEMO)
+
 test: $(TEST)
 	ASAN_OPTIONS=detect_leaks=1 $(TEST)
 $(TEST): $(SOURCES) tests/test.c
@@ -18,9 +21,12 @@ $(TEST): $(SOURCES) tests/test.c
 $(DEMO): $(SOURCES) src/main.c
 	@mkdir -p $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $^ $(LDFLAGS) -o $@
+
 run: $(DEMO)
 	./$(DEMO)
+
 clean:
 	rm -rf $(BUILD_DIR)
+	
 help:
 	@echo "make | make test | make run | make clean"
