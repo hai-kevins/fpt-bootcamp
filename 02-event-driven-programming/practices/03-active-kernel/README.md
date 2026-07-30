@@ -19,7 +19,6 @@ Project được tổ chức theo cùng khuôn mẫu:
 - `build/` chỉ chứa artifact sinh tự động.
 - Makefile root chỉ quản lý firmware tổng kết và host unit test.
 - Mỗi lab có Makefile riêng và không được build từ root.
-- **Lab 14 Mini Game không được đưa vào repository theo yêu cầu.**
 
 > Lưu ý: đây là **training implementation tự xây dựng theo các khái niệm trong tài liệu Active Kernel**, không phải bản sao mã nguồn chính thức của AK Embedded Base Kit. API được giữ nhỏ để phục vụ học tập, unit test và port sang STM32F103.
 
