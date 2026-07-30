@@ -1,0 +1,14 @@
+#ifndef APP_SIGNALS_H
+#define APP_SIGNALS_H
+
+enum
+{
+    APP_START_SIG = 1,
+    APP_STOP_SIG,
+    DISPLAY_UPDATE_SIG,
+    SENSOR_DATA_SIG,
+    LINK_ERROR_SIG,
+    DIAGNOSTIC_DUMP_SIG
+};
+
+#endif
