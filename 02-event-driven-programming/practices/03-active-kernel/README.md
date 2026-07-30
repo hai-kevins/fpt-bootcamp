@@ -20,8 +20,6 @@ Project được tổ chức theo cùng khuôn mẫu:
 - Makefile root chỉ quản lý firmware tổng kết và host unit test.
 - Mỗi lab có Makefile riêng và không được build từ root.
 
-> Lưu ý: đây là **training implementation tự xây dựng theo các khái niệm trong tài liệu Active Kernel**, không phải bản sao mã nguồn chính thức của AK Embedded Base Kit. API được giữ nhỏ để phục vụ học tập, unit test và port sang STM32F103.
-
 Cấu hình mặc định:
 
 - Board: STM32F103C8T6 Blue Pill.
