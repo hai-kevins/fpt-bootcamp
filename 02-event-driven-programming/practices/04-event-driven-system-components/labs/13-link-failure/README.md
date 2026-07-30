@@ -6,14 +6,15 @@
 - Mô phỏng ACK không đến trước timeout.
 - Retry đúng số lần giới hạn.
 - Chuyển trạng thái link sang `ED_LINK_DOWN` khi hết retry.
+- Theo dõi send count, retry count và state cuối.
 
-## Build và test
+## Build và chạy
 
 Makefile của lab này chỉ quản lý source và executable của chính lab. Từ thư mục root:
 
 ```bash
 cd labs/13-link-failure
-make test
+make
 make run
 ```
 
@@ -21,10 +22,10 @@ Có thể dùng:
 
 ```bash
 make          # Build executable
-make test     # Build rồi chạy bài kiểm tra
-make run      # Build rồi chạy demo/test
+make run      # Build rồi chạy lab
+make test     # Alias của make run
 make sanitize # Chạy với ASan/UBSan
-make clean    # Chỉ xóa build/ của lab này
+make clean    # Chỉ xóa build/ của lab hiện tại
 ```
 
 ## Kết quả
@@ -35,7 +36,15 @@ Artifact chính nằm cục bộ trong lab:
 build/lab
 ```
 
-Output cho thấy tổng số lần send bằng 3: một lần gửi đầu và hai lần retry. Link kết thúc ở trạng thái DOWN và chương trình trả exit code `0`.
+Output dự kiến:
+
+```text
+state=2 sends=3 retries=2
+```
+
+Có một lần gửi đầu và hai lần retry; sau đó link chuyển sang trạng thái DOWN.
+
+Chương trình trả exit code `0` khi toàn bộ điều kiện kiểm tra của lab đều đúng.
 
 ## Câu hỏi
 

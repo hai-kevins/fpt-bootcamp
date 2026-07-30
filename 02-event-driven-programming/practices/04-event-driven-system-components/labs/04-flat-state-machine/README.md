@@ -6,14 +6,15 @@
 - Dispatch hai event để đi từ state 0 sang 1 rồi trở về 0.
 - Xác nhận action được gọi đúng số lần.
 - Quan sát handled count và state cuối.
+- Xử lý trường hợp signal không có transition.
 
-## Build và test
+## Build và chạy
 
 Makefile của lab này chỉ quản lý source và executable của chính lab. Từ thư mục root:
 
 ```bash
 cd labs/04-flat-state-machine
-make test
+make
 make run
 ```
 
@@ -21,10 +22,10 @@ Có thể dùng:
 
 ```bash
 make          # Build executable
-make test     # Build rồi chạy bài kiểm tra
-make run      # Build rồi chạy demo/test
+make run      # Build rồi chạy lab
+make test     # Alias của make run
 make sanitize # Chạy với ASan/UBSan
-make clean    # Chỉ xóa build/ của lab này
+make clean    # Chỉ xóa build/ của lab hiện tại
 ```
 
 ## Kết quả
@@ -35,7 +36,15 @@ Artifact chính nằm cục bộ trong lab:
 build/lab
 ```
 
-Output dự kiến: `state=0 actions=2`. Hai transition hợp lệ được thực hiện và cả hai action được gọi.
+Output dự kiến:
+
+```text
+state=0 actions=2
+```
+
+Hai transition hợp lệ được thực hiện và cả hai action được gọi.
+
+Chương trình trả exit code `0` khi toàn bộ điều kiện kiểm tra của lab đều đúng.
 
 ## Câu hỏi
 

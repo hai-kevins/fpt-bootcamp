@@ -1,48 +1,72 @@
-# Labs - Event-Driven System Components
+# Labs — Independent Makefiles
 
 Mỗi thư mục lab là một build unit độc lập.
 
-- Không build lab từ Makefile gốc.
+- Không build lab từ Makefile root.
 - Đi vào đúng thư mục lab rồi chạy Makefile của lab đó.
 - Output được tạo trong `build/` bên trong chính lab.
 - `make clean` chỉ xóa output của lab hiện tại.
 - `make sanitize` chạy AddressSanitizer và UndefinedBehaviorSanitizer.
-- Tất cả lab hiện được đánh số liên tục từ `01` đến `15`.
+- Tất cả lab chạy trên host Linux.
+- Thứ tự lab liên tục từ `01` đến `15`.
 
-## Danh sách lab
+## Host labs
 
-| Số | Thư mục | Nội dung | Kết quả trọng tâm |
-|---:|---|---|---|
-| 01 | `01-active-object` | Active Object | Handler xử lý đúng một event |
-| 02 | `02-mailbox` | Mailbox FIFO | FIFO, overflow và high-water mark |
-| 03 | `03-run-to-completion-scheduler` | Scheduler | Priority cao được dispatch trước |
-| 04 | `04-flat-state-machine` | Flat FSM | Transition và action |
-| 05 | `05-hierarchical-state-machine` | HSM | Event bubbling lên parent |
-| 06 | `06-table-driven-state-machine` | Table FSM | Chuỗi transition theo bảng |
-| 07 | `07-event-pool` | Static Event Pool | Exhaustion và release toàn bộ |
-| 08 | `08-reference-count-ownership` | Ownership | Retain/release đúng reference count |
-| 09 | `09-router-direct-post` | Router | Local route tới đúng Active Object |
-| 10 | `10-publish-subscribe` | PubSub | Hai subscriber nhận cùng signal |
-| 11 | `11-uart-datalink` | Frame serialization | Encode/decode và CRC |
-| 12 | `12-parser-state-machine` | Byte parser | Tạo frame sau khi nhận đủ byte |
-| 13 | `13-link-failure` | Timeout/retry | Chuyển link sang DOWN |
-| 14 | `14-event-trace` | Trace ring buffer | Overwrite record cũ nhất |
-| 15 | `15-stress-test` | Stress test | Không leak event sau tải lớn |
-
-## Quy trình chạy
+Ví dụ:
 
 ```bash
 cd labs/01-active-object
 make
 make run
 make sanitize
-make clean
 ```
 
-Kiểm tra toàn bộ repository:
+Danh sách:
+
+| Lab | Artifact chính | Quan sát |
+|---:|---|---|
+| 01 | `build/lab` | `handled=1` |
+| 02 | `build/lab` | FIFO, `hwm=2`, `overflow=1` |
+| 03 | `build/lab` | `order=2,1` |
+| 04 | `build/lab` | `state=0`, `actions=2` |
+| 05 | `build/lab` | HSM bubbling |
+| 06 | `build/lab` | `final=0`, `handled=3` |
+| 07 | `build/lab` | Pool exhaustion và release |
+| 08 | `build/lab` | Reference count về 0 |
+| 09 | `build/lab` | Local route đúng object |
+| 10 | `build/lab` | Hai subscriber nhận event |
+| 11 | `build/lab` | Frame encode/decode và CRC |
+| 12 | `build/lab` | Parser tạo frame hợp lệ |
+| 13 | `build/lab` | Retry rồi link DOWN |
+| 14 | `build/lab` | Trace ring buffer wraparound |
+| 15 | `build/lab` | 1000 event không leak |
+
+Các lệnh chung:
+
+```bash
+make          # Build executable
+make run      # Build rồi chạy
+make test     # Alias của make run
+make sanitize # Build và chạy với ASan/UBSan
+make clean    # Chỉ xóa build/ của lab hiện tại
+```
+
+## Kiểm tra toàn bộ
+
+Từ thư mục root:
 
 ```bash
 ./tools/validate.sh
 ```
 
-Không có target `make labXX` ở root. Cách tổ chức này tránh nhầm artifact root với artifact của từng lab.
+Script chạy:
+
+```text
+Root unit tests
+Integrated root demo
+Root sanitizer test
+15 lab make run
+15 lab make sanitize
+```
+
+Không có target `make labXX` ở root. Quy ước này tránh nhầm artifact root với executable của từng lab.

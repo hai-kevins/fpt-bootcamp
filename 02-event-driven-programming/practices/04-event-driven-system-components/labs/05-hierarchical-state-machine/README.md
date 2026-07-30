@@ -6,14 +6,15 @@
 - Bắt đầu dispatch từ leaf state.
 - Bubble event lên parent khi leaf không xử lý.
 - Thực hiện transition do parent state quyết định.
+- Hiểu cách HSM giảm lặp behavior dùng chung.
 
-## Build và test
+## Build và chạy
 
 Makefile của lab này chỉ quản lý source và executable của chính lab. Từ thư mục root:
 
 ```bash
 cd labs/05-hierarchical-state-machine
-make test
+make
 make run
 ```
 
@@ -21,10 +22,10 @@ Có thể dùng:
 
 ```bash
 make          # Build executable
-make test     # Build rồi chạy bài kiểm tra
-make run      # Build rồi chạy demo/test
+make run      # Build rồi chạy lab
+make test     # Alias của make run
 make sanitize # Chạy với ASan/UBSan
-make clean    # Chỉ xóa build/ của lab này
+make clean    # Chỉ xóa build/ của lab hiện tại
 ```
 
 ## Kết quả
@@ -35,7 +36,15 @@ Artifact chính nằm cục bộ trong lab:
 build/lab
 ```
 
-Output chứa state cuối bằng `1` và bubbled count khác 0. Chương trình trả exit code `0` khi parent xử lý signal 9 và chuyển state thành công.
+Output dự kiến:
+
+```text
+state=1 bubbled=1
+```
+
+Leaf không xử lý signal 9; event được bubble lên parent và parent thực hiện transition thành công.
+
+Chương trình trả exit code `0` khi toàn bộ điều kiện kiểm tra của lab đều đúng.
 
 ## Câu hỏi
 

@@ -6,14 +6,15 @@
 - Serialize frame thành byte buffer.
 - Tính và kiểm tra CRC-16.
 - Decode byte buffer về frame ban đầu.
+- Hiểu ranh giới giữa serializer và UART driver vật lý.
 
-## Build và test
+## Build và chạy
 
 Makefile của lab này chỉ quản lý source và executable của chính lab. Từ thư mục root:
 
 ```bash
 cd labs/11-uart-datalink
-make test
+make
 make run
 ```
 
@@ -21,10 +22,10 @@ Có thể dùng:
 
 ```bash
 make          # Build executable
-make test     # Build rồi chạy bài kiểm tra
-make run      # Build rồi chạy demo/test
+make run      # Build rồi chạy lab
+make test     # Alias của make run
 make sanitize # Chạy với ASan/UBSan
-make clean    # Chỉ xóa build/ của lab này
+make clean    # Chỉ xóa build/ của lab hiện tại
 ```
 
 ## Kết quả
@@ -35,7 +36,15 @@ Artifact chính nằm cục bộ trong lab:
 build/lab
 ```
 
-Output in số byte của frame và signal `0x55AA`. Chương trình trả exit code `0` khi sequence và payload sau decode giống dữ liệu đầu vào.
+Output dự kiến:
+
+```text
+bytes=15 signal=0x55AA
+```
+
+Frame 15 byte được decode đúng signal, sequence và payload ban đầu.
+
+Chương trình trả exit code `0` khi toàn bộ điều kiện kiểm tra của lab đều đúng.
 
 ## Câu hỏi
 

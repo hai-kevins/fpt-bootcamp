@@ -6,14 +6,15 @@
 - Xác nhận lần allocate tiếp theo thất bại deterministic.
 - Release toàn bộ event về pool.
 - Quan sát high-water mark và allocation failure count.
+- Kiểm tra invariant `used_count == 0` sau cleanup.
 
-## Build và test
+## Build và chạy
 
 Makefile của lab này chỉ quản lý source và executable của chính lab. Từ thư mục root:
 
 ```bash
 cd labs/07-event-pool
-make test
+make
 make run
 ```
 
@@ -21,10 +22,10 @@ Có thể dùng:
 
 ```bash
 make          # Build executable
-make test     # Build rồi chạy bài kiểm tra
-make run      # Build rồi chạy demo/test
+make run      # Build rồi chạy lab
+make test     # Alias của make run
 make sanitize # Chạy với ASan/UBSan
-make clean    # Chỉ xóa build/ của lab này
+make clean    # Chỉ xóa build/ của lab hiện tại
 ```
 
 ## Kết quả
@@ -35,7 +36,15 @@ Artifact chính nằm cục bộ trong lab:
 build/lab
 ```
 
-Output dự kiến cho thấy high-water mark bằng capacity của pool và có đúng một allocation failure. Cuối chương trình `used_count == 0`.
+Output dự kiến:
+
+```text
+hwm=32 failures=1
+```
+
+High-water mark đạt đúng capacity, có một allocation failure và toàn bộ block được trả về pool.
+
+Chương trình trả exit code `0` khi toàn bộ điều kiện kiểm tra của lab đều đúng.
 
 ## Câu hỏi
 
