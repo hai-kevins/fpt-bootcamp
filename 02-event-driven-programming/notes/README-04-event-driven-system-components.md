@@ -3380,17 +3380,7 @@ CRC
 
 Parser UART không blocking.
 
-## Bài 13 — CAN Event Transport
-
-Map event sang CAN frame.
-
-Xử lý payload dài bằng fragmentation.
-
-## Bài 14 — Multi-MCU Demo
-
-MCU A đọc button, MCU B điều khiển LED hoặc OLED.
-
-## Bài 15 — Link Failure
+## Bài 13 — Link Failure
 
 Ngắt dây truyền thông.
 
@@ -3401,7 +3391,7 @@ Kiểm tra:
 - Link state.
 - Error event.
 
-## Bài 16 — Event Trace
+## Bài 14 — Event Trace
 
 Log toàn bộ:
 
@@ -3413,34 +3403,15 @@ transition
 release
 ```
 
-## Bài 17 — Stress Test
+## Bài 15 — Stress Test
 
 Tạo event burst từ:
 
 - Timer.
 - UART.
 - Button.
-- CAN.
 
 Theo dõi pool và mailbox.
-
-## Bài 18 — Mini Distributed Game
-
-Node 1:
-
-```text
-Input AO
-Game AO
-```
-
-Node 2:
-
-```text
-Display AO
-Audio AO
-```
-
-Game event truyền qua Data-Link.
 
 ---
 
