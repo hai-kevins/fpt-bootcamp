@@ -6,7 +6,7 @@
 - Đo drift do execution time.
 - Phát hiện deadline miss.
 
-## Build và test
+## Build và chạy
 
 Makefile chỉ quản lý lab này:
 

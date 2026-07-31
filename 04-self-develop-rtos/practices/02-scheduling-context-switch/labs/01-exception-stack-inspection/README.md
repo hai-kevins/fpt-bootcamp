@@ -6,7 +6,7 @@
 - Phân biệt stack pointer được CPU sử dụng trong Thread mode và Handler mode.
 - Ghi lại một trường hợp đọc sai stack frame có chủ đích và giải thích nguyên nhân.
 
-## Build
+## Build và chạy
 
 Makefile của lab này chỉ build firmware của chính lab. Từ thư mục root:
 

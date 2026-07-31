@@ -6,7 +6,7 @@
 - Quan sát kết quả qua UART/GDB.
 - Ghi lại một fault injection và nguyên nhân.
 
-## Build
+## Build và chạy
 
 ```bash
 cd labs/10-target-synchronization-playground

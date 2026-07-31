@@ -6,7 +6,7 @@
 - Kiểm tra alignment, Thumb bit, task entry, task-return LR và R0 argument.
 - Ghi lại một frame lỗi có chủ đích và giải thích vì sao exception return sẽ thất bại.
 
-## Build và test
+## Build và chạy
 
 Makefile của lab này chỉ quản lý source, test và executable của chính lab. Từ thư mục root:
 

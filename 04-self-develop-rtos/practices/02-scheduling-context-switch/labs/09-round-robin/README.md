@@ -6,7 +6,7 @@
 - Quan sát tất cả counter đều tăng để chứng minh không task nào bị starvation.
 - Bỏ queue rotation có chủ đích rồi quan sát một worker chiếm CPU.
 
-## Build
+## Build và chạy
 
 Makefile của lab này chỉ build firmware của chính lab. Từ thư mục root:
 

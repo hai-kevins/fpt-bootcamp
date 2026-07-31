@@ -6,7 +6,7 @@
 - Đảm bảo BLOCKED task không còn READY.
 - Ngăn duplicate wake.
 
-## Build và test
+## Build và chạy
 
 Makefile chỉ quản lý lab này:
 

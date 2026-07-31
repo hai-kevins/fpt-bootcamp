@@ -6,7 +6,7 @@
 - Cho hai worker cùng priority luân phiên mà không gọi `yield()`.
 - Tắt time-slice rotation có chủ đích rồi quan sát một task bị giữ CPU.
 
-## Build
+## Build và chạy
 
 Makefile của lab này chỉ build firmware của chính lab. Từ thư mục root:
 

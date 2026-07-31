@@ -6,7 +6,7 @@
 - Chứng minh ISR chỉ pend PendSV và task high chạy sau khi ISR return.
 - Context-switch trực tiếp trong ISR có chủ đích trên bản thử nghiệm rồi phân tích rủi ro.
 
-## Build
+## Build và chạy
 
 Makefile của lab này chỉ build firmware của chính lab. Từ thư mục root:
 

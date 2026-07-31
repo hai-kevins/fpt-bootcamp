@@ -6,7 +6,7 @@
 - Xác nhận task chạy ở Thread mode bằng PSP còn handler dùng MSP.
 - Ghi lại một lỗi initial frame hoặc EXC_RETURN có chủ đích và giải thích HardFault.
 
-## Build
+## Build và chạy
 
 Makefile của lab này chỉ build firmware của chính lab. Từ thư mục root:
 

@@ -6,7 +6,7 @@
 - Kiểm tra local counter, stack guard và scheduler invariants mà không in mỗi switch.
 - Phá guard word có chủ đích rồi xác nhận panic path phát hiện lỗi.
 
-## Build
+## Build và chạy
 
 Makefile của lab này chỉ build firmware của chính lab. Từ thư mục root:
 

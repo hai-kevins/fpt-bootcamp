@@ -6,7 +6,7 @@
 - Kiểm tra transition hợp lệ và không hợp lệ.
 - Không đổi state khi transition bị reject.
 
-## Build và test
+## Build và chạy
 
 Makefile chỉ quản lý lab này:
 

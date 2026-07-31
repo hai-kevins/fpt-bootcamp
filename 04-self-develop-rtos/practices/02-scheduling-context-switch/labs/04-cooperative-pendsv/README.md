@@ -6,7 +6,7 @@
 - Kiểm tra PendSV lưu `R4-R11`, đổi `saved_sp` và phục hồi local context.
 - Bỏ lưu một register có chủ đích rồi quan sát biến local hoặc task state bị hỏng.
 
-## Build
+## Build và chạy
 
 Makefile của lab này chỉ build firmware của chính lab. Từ thư mục root:
 

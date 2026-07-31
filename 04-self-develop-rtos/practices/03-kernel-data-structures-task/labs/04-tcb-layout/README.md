@@ -6,7 +6,7 @@
 - Quan sát kết quả bằng output hoặc test thay vì chỉ đọc source code.
 - Ghi lại một trường hợp lỗi có chủ đích và giải thích nguyên nhân.
 
-## Build và test
+## Build và chạy
 
 Makefile của lab này chỉ quản lý source, test và executable của chính lab. Từ thư mục root:
 

@@ -6,7 +6,7 @@
 - Quan sát task priority cao preempt task thấp khi hết thời gian delay.
 - Đổi priority hoặc bỏ wake có chủ đích rồi phân tích thứ tự chạy sai.
 
-## Build
+## Build và chạy
 
 Makefile của lab này chỉ build firmware của chính lab. Từ thư mục root:
 

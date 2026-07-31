@@ -6,7 +6,7 @@
 - Waiter priority order và FIFO cùng priority.
 - Give wake waiter mà không double-count.
 
-## Build và test
+## Build và chạy
 
 Makefile chỉ quản lý lab này:
 

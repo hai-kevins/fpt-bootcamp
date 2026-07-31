@@ -6,7 +6,7 @@
 - Tách scheduler policy khỏi Cortex-M3 assembly và PendSV.
 - Tạo lỗi duplicate insertion hoặc bitmap sai có chủ đích rồi kiểm tra invariant.
 
-## Build và test
+## Build và chạy
 
 Makefile của lab này chỉ quản lý source, test và executable của chính lab. Từ thư mục root:
 

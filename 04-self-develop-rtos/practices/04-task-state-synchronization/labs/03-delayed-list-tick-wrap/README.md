@@ -6,7 +6,7 @@
 - Wake nhiều task tới hạn.
 - Kiểm thử wrap-around 32-bit.
 
-## Build và test
+## Build và chạy
 
 Makefile chỉ quản lý lab này:
 

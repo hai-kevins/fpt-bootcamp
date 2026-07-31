@@ -6,7 +6,7 @@
 - Quan sát output hoặc target trace thay vì chỉ đọc source.
 - Tạo một lỗi có chủ đích và giải thích invariant bị phá.
 
-## Build và test
+## Build và chạy
 
 ```bash
 make test

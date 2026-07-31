@@ -6,7 +6,7 @@
 - Boost effective priority của owner.
 - Restore priority sau unlock hoặc waiter removal.
 
-## Build và test
+## Build và chạy
 
 Makefile chỉ quản lý lab này:
 

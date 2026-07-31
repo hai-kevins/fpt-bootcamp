@@ -6,7 +6,7 @@
 - Non-recursive lock policy.
 - Priority-ordered waiters và ownership transfer.
 
-## Build và test
+## Build và chạy
 
 Makefile chỉ quản lý lab này:
 

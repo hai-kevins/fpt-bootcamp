@@ -6,7 +6,7 @@
 - Quan sát kết quả bằng UART và GDB thay vì chỉ đọc source code.
 - Ghi lại một trường hợp lỗi có chủ đích và giải thích nguyên nhân.
 
-## Build
+## Build và chạy
 
 Makefile của lab này chỉ build firmware của chính lab. Từ thư mục root:
 
