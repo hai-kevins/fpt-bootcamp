@@ -9,7 +9,7 @@
 - Echo byte nhận được và toggle LED PC13.
 - Hiểu giới hạn của polling trong firmware có nhiều tác vụ.
 
-## Build
+## Build và chạy
 
 Makefile của lab này chỉ build firmware của chính lab. Từ thư mục root:
 

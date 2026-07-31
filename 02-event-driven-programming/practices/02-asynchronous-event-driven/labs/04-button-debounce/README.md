@@ -8,7 +8,7 @@
 - Chỉ phát hiện stable pressed/released sau timeout.
 - Dùng LED PC13 để quan sát stable button state.
 
-## Build
+## Build và chạy
 
 ```bash
 cd labs/04-button-debounce

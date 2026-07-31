@@ -8,7 +8,7 @@
 - Hiểu LED PC13 active-low trên Blue Pill.
 - Tách driver GPIO khỏi `main.c`.
 
-## Build
+## Build và chạy
 
 Makefile của lab này chỉ build firmware của chính lab. Từ thư mục root:
 

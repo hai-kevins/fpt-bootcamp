@@ -6,7 +6,7 @@
 - Thay đổi chu kỳ 100/500/1000 ms.
 - Bù nhiều expiration khi scheduler xử lý trễ.
 
-## Build và test
+## Build và chạy
 
 Makefile của lab chỉ quản lý source và executable của chính lab.
 

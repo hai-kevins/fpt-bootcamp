@@ -6,7 +6,7 @@
 - Điều khiển trạng thái LED bằng ON/OFF/TOGGLE.
 - Nhận biết khi nào pure message là đủ.
 
-## Build và test
+## Build và chạy
 
 Makefile của lab chỉ quản lý source và executable của chính lab.
 

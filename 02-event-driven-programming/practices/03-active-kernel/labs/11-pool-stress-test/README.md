@@ -6,7 +6,7 @@
 - Đo posted, post failure, allocation failure.
 - Theo dõi pool và queue high-water mark.
 
-## Build và test
+## Build và chạy
 
 Makefile của lab chỉ quản lý source và executable của chính lab.
 

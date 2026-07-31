@@ -7,7 +7,7 @@
 - Validate blink period từ 50 đến 5000 ms.
 - Trả command object để tầng khác chuyển thành event.
 
-## Build và test
+## Build và chạy
 
 ```bash
 cd labs/06-uart-command-parser

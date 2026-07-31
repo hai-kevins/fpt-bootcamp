@@ -7,7 +7,7 @@
 - Test wraparound khi head/tail quay về đầu mảng.
 - Ghi overflow counter và high-water mark.
 
-## Build và test
+## Build và chạy
 
 ```bash
 cd labs/02-event-queue

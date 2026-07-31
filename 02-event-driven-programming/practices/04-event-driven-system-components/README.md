@@ -244,7 +244,7 @@ make clean     # Chỉ xóa build/ ở root
 
 ---
 
-## 6. Chạy demo và kiểm thử
+## 6. Chạy và kiểm thử
 
 Chạy demo tích hợp:
 
@@ -414,7 +414,7 @@ Retry, Trace và Stress Test
 
 ---
 
-## 10. Kiến trúc và invariant quan trọng
+## 10. Kiến trúc và nguyên tắc quan trọng
 
 ### Active Object
 

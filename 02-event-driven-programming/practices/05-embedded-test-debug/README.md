@@ -248,7 +248,7 @@ make clean     # Chỉ xóa build/ ở root
 
 ---
 
-## 6. Chạy demo và test
+## 6. Chạy và kiểm thử
 
 Chạy demo:
 
@@ -382,7 +382,7 @@ Mỗi bug thực tế nên được chuyển thành một regression test trư�
 
 ---
 
-## 10. Nguyên tắc Test/Debug quan trọng
+## 10. Kiến trúc và nguyên tắc quan trọng
 
 ### Design for Testability
 

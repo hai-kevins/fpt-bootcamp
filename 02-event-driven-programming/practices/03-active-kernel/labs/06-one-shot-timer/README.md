@@ -6,7 +6,7 @@
 - Tách edge event khỏi kiểm tra trạng thái ổn định.
 - Dùng phép so sánh deadline an toàn với wraparound.
 
-## Build và test
+## Build và chạy
 
 Makefile của lab chỉ quản lý source và executable của chính lab.
 

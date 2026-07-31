@@ -135,7 +135,7 @@ Sau khi hoàn thành repository này, người học có thể:
 
 ---
 
-## 3. Firmware root làm gì?
+## 3. Project root làm gì?
 
 ```text
 SysTick / EXTI0 / USART1 IRQ
@@ -212,7 +212,7 @@ make TOOLCHAIN=clang
 
 ---
 
-## 5. Build firmware tổng kết
+## 5. Build project tổng kết
 
 ```bash
 make
@@ -254,7 +254,9 @@ make rebuild
 
 ---
 
-## 6. Flash firmware
+## 6. Chạy và kiểm thử
+
+### Flash firmware
 
 ```bash
 make flash-stlink
@@ -287,7 +289,7 @@ Pressed  -> logic 0
 
 ---
 
-## 7. UART
+### UART
 
 Kết nối:
 
@@ -326,7 +328,7 @@ timestamp,source,destination,signal,parameter,phase
 
 ---
 
-## 8. Build các lab
+## 7. Build các lab
 
 Makefile root không build lab. Mỗi lab là một build unit độc lập.
 
@@ -357,7 +359,7 @@ Quy ước:
 
 ---
 
-## 9. Danh sách bài thực hành
+## 8. Danh sách bài thực hành
 
 | Bài | Chủ đề | Môi trường | Kết quả chính |
 |---:|---|---|---|
@@ -374,7 +376,7 @@ Quy ước:
 
 ---
 
-## 10. Quy trình học đề xuất
+## 9. Quy trình học đề xuất
 
 ```text
 Đọc README của lab
@@ -402,6 +404,24 @@ Tích hợp khái niệm vào firmware root
 ```
 
 ---
+
+## 10. Kiến trúc và nguyên tắc quan trọng
+
+### Run-to-completion
+
+Mỗi event handler phải hoàn thành nhanh, không busy-wait và không chờ I/O vô hạn. Handler dài làm tăng response latency của toàn hệ thống cooperative.
+
+### Event Queue
+
+ISR hoặc producer chỉ post event. Dispatcher lấy event theo FIFO rồi chuyển cho module phù hợp. Queue cần có overflow counter và high-water mark.
+
+### Event ownership
+
+Static event không cần giải phóng. Dynamic event phải có quy tắc owner, transfer và release rõ ràng để tránh leak hoặc double release.
+
+### ISR boundary
+
+ISR chỉ thu thập dữ liệu tối thiểu, clear interrupt flag và post event. Debounce, parse command và application transition được xử lý ngoài ISR.
 
 ## 11. Ghi chú kỹ thuật
 

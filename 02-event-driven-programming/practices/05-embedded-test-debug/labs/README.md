@@ -1,50 +1,73 @@
 # Labs — Independent Makefiles
 
-Mỗi thư mục lab là một build unit độc lập.
+Các bài thực hành trong `05-embedded-test-debug` được tổ chức độc lập. Mỗi lab có source code, Makefile, README và thư mục `build/` riêng.
 
-- Không build lab từ Makefile root.
-- Đi vào đúng thư mục lab rồi chạy Makefile của lab đó.
-- Output được tạo trong `build/` bên trong chính lab.
-- `make clean` chỉ xóa output của lab hiện tại.
-- `make sanitize` chạy AddressSanitizer và UndefinedBehaviorSanitizer.
-- Tất cả 18 lab chạy trên host Linux.
+## 1. Mục tiêu
 
-Ví dụ:
+- Tách từng khái niệm thành một bài thực hành nhỏ.
+- Build và kiểm thử từng lab mà không ảnh hưởng project root.
+- Phân biệt executable host với firmware target.
+- Giữ output sinh tự động trong `build/` của đúng lab.
+- Dùng cùng một bố cục README cho toàn bộ chương trình.
+
+## 2. Build và chạy
+
+Ví dụ host lab:
 
 ```bash
-cd labs/08-queue-latency
+cd labs/01-unit-test-event-queue
 make
 make run
-make sanitize
 ```
 
-Các lệnh chung:
+Các lệnh thường dùng:
 
 ```bash
-make          # Build executable
-make run      # Build rồi chạy
-make test     # Alias của make run
-make sanitize # Build và chạy với ASan/UBSan
-make clean    # Chỉ xóa build/ của lab hiện tại
+make          # Build lab hiện tại
+make run      # Chạy host lab nếu Makefile hỗ trợ
+make test     # Chạy test nếu Makefile hỗ trợ
+make sanitize # Chạy ASan/UBSan nếu Makefile hỗ trợ
+make clean    # Chỉ xóa output của lab hiện tại
 ```
 
-| Bài | Chủ đề | Output chính |
-|---:|---|---|
-| 01 | Unit Test Event Queue | `empty=PASS fifo=PASS full=PASS wrap=PASS overflow=1` |
-| 02 | Unit Test Event Pool | `allocate=PASS exhaustion=PASS reuse=PASS double_free=PASS hwm=4` |
-| 03 | Unit Test State Machine | `final=IDLE transitions=7 unhandled=1 PASS` |
-| 04 | Event Spy | `calls=2 last_signal=20 last_argument=7 PASS` |
-| 05 | Fake Timer | `one_shot=1 periodic=3 now=3000 PASS` |
-| 06 | UART Shell | `commands=6 known=6 unknown=1 PASS` |
-| 07 | Binary Event Trace | `count=128 overwritten=5 oldest=5 clear=PASS` |
-| 08 | Queue Latency | `min=5 max=20 avg=11 PASS` |
-| 09 | Handler Execution Time | `DISPLAY handler max: 1420 us threshold=1000 exceeded=1` |
-| 10 | Crash Record | `valid=1 fatal=0xE001 task=3 signal=42 state=2 uptime=12345 reset=1` |
-| 11 | HardFault Record | `pc=0x08001234 lr=0xFFFFFFF9 xpsr=0x21000000 cfsr=0x00008200 PASS` |
-| 12 | Automated Use Case | `steps=6 final=IDLE PASS` |
-| 13 | Fault Injection | `pool=1 crc=1 sensor=1 flash=1 triggers=4 PASS` |
-| 14 | Regression Test | `bug_reproduced=1 fixed=1 stale_timeout=0 PASS` |
-| 15 | Stress Test | `events=10000 drop=0 queue_max=16 pool_max=16 handler_max=900 PASS` |
-| 16 | Soak Test | `hours=12 samples=12 leak=0 resets=0 PASS` |
-| 17 | Continuous Integration | `stages=6 passed=6 failed=0 PASS` |
-| 18 | Hardware-in-the-Loop | `reset=PASS commands=4 passed=4 failed=0 HIL=PASS` |
+## 3. Danh sách bài thực hành
+
+| Bài | Chủ đề | Môi trường | Output |
+|---:|---|---|---|
+| 01 | Unit Test Event Queue | Host Linux | `labs/01-unit-test-event-queue/build/` |
+| 02 | Unit Test Event Pool | Host Linux | `labs/02-unit-test-event-pool/build/` |
+| 03 | Unit Test State Machine | Host Linux | `labs/03-unit-test-state-machine/build/` |
+| 04 | Event Spy | Host Linux | `labs/04-event-spy/build/` |
+| 05 | Fake Timer | Host Linux | `labs/05-fake-timer/build/` |
+| 06 | UART Shell | Host Linux | `labs/06-uart-shell/build/` |
+| 07 | Binary Event Trace | Host Linux | `labs/07-binary-event-trace/build/` |
+| 08 | Queue Latency | Host Linux | `labs/08-queue-latency/build/` |
+| 09 | Handler Execution Time | Host Linux | `labs/09-handler-execution-time/build/` |
+| 10 | Crash Record | Host Linux | `labs/10-crash-record/build/` |
+| 11 | HardFault Record | Host Linux | `labs/11-hardfault-record/build/` |
+| 12 | Automated Use Case | Host Linux | `labs/12-automated-use-case/build/` |
+| 13 | Fault Injection | Host Linux | `labs/13-fault-injection/build/` |
+| 14 | Regression Test | Host Linux | `labs/14-regression-test/build/` |
+| 15 | Stress Test | Host Linux | `labs/15-stress-test/build/` |
+| 16 | Soak Test | Host Linux | `labs/16-soak-test/build/` |
+| 17 | Continuous Integration | Host Linux | `labs/17-ci/build/` |
+| 18 | Hardware-in-the-Loop | Host Linux | `labs/18-hardware-in-the-loop/build/` |
+
+## 4. Quy ước
+
+- Không build lab bằng Makefile root trừ khi root Makefile ghi rõ target tương ứng.
+- Luôn chạy lệnh trong đúng thư mục lab.
+- Host executable không thể flash lên STM32.
+- `make flash-stlink` trong một target lab chỉ nạp firmware của lab đó.
+- `make clean` trong lab không được xóa artifact của project root hoặc lab khác.
+- README từng lab luôn theo thứ tự: Mục tiêu, Build và chạy, Kết quả, Câu hỏi.
+
+## 5. Kiểm tra toàn bộ
+
+Từ thư mục root:
+
+```bash
+./tools/validate.sh
+```
+
+Script build và chạy các bài kiểm tra được repository hỗ trợ.

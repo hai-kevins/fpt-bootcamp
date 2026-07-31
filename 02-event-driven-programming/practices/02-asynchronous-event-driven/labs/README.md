@@ -1,40 +1,25 @@
 # Labs — Independent Makefiles
 
-Mỗi lab là một build unit độc lập.
+Các bài thực hành trong `02-asynchronous-event-driven` được tổ chức độc lập. Mỗi lab có source code, Makefile, README và thư mục `build/` riêng.
 
-- Không build lab từ Makefile root.
-- Đi vào đúng thư mục lab rồi chạy Makefile của lab đó.
-- Output nằm trong `build/` của chính lab.
-- `make clean` chỉ xóa output của lab hiện tại.
-- Host lab tạo executable Linux.
-- Target lab tạo firmware ARM cho STM32F103.
-- `make flash-stlink` phải chạy trong đúng target lab cần nạp.
+## 1. Mục tiêu
 
-## Host labs
+- Tách từng khái niệm thành một bài thực hành nhỏ.
+- Build và kiểm thử từng lab mà không ảnh hưởng project root.
+- Phân biệt executable host với firmware target.
+- Giữ output sinh tự động trong `build/` của đúng lab.
+- Dùng cùng một bố cục README cho toàn bộ chương trình.
 
-| Lab | Lệnh chính | Nội dung |
-|---:|---|---|
-| 01 | `make run` | Blocking và non-blocking |
-| 02 | `make test && make run` | Circular Event Queue |
-| 03 | `make run` | Dispatcher |
-| 05 | `make test && make run` | LED State Machine |
-| 06 | `make test && make run` | UART command parser |
-| 07 | `make run` | Event Trace |
-| 08 | `make run` | Queue stress test |
-| 09 | `make test && make run` | Product State Machine |
-| 10 | `make run` | So sánh kiến trúc |
+## 2. Build và chạy
 
-Ví dụ:
+Ví dụ host lab:
 
 ```bash
-cd labs/05-led-state-machine
-make test
+cd labs/01-blocking-to-nonblocking
+make
 make run
 ```
-
-## Target labs
-
-Lab 04 chạy trên STM32F103:
+Ví dụ target lab:
 
 ```bash
 cd labs/04-button-debounce
@@ -42,16 +27,48 @@ make
 make flash-stlink
 ```
 
-Hoặc:
+Các lệnh thường dùng:
 
 ```bash
-make TOOLCHAIN=clang
+make          # Build lab hiện tại
+make run      # Chạy host lab nếu Makefile hỗ trợ
+make test     # Chạy test nếu Makefile hỗ trợ
+make sanitize # Chạy ASan/UBSan nếu Makefile hỗ trợ
+make clean    # Chỉ xóa output của lab hiện tại
 ```
 
-Kết nối button ngoài:
+## 3. Danh sách bài thực hành
 
-```text
-PA0 ---- Button ---- GND
+| Bài | Chủ đề | Môi trường | Output |
+|---:|---|---|---|
+| 01 | Blocking to Non-blocking | Host Linux | `labs/01-blocking-to-nonblocking/build/` |
+| 02 | Circular Event Queue | Host Linux | `labs/02-event-queue/build/` |
+| 03 | Dispatcher | Host Linux | `labs/03-dispatcher/build/` |
+| 04 | Button Debounce | STM32F103 | `labs/04-button-debounce/build/` |
+| 05 | LED State Machine | Host Linux | `labs/05-led-state-machine/build/` |
+| 06 | UART Command Parser | Host Linux | `labs/06-uart-command-parser/build/` |
+| 07 | Event Trace | Host Linux | `labs/07-event-trace/build/` |
+| 08 | Queue Stress Test | Host Linux | `labs/08-queue-stress-test/build/` |
+| 09 | Product State Machine | Host Linux | `labs/09-product-state-machine/build/` |
+| 10 | Super-loop vs Event-Driven | Host Linux | `labs/10-superloop-vs-event-driven/build/` |
+
+## 4. Quy ước
+
+- Không build lab bằng Makefile root trừ khi root Makefile ghi rõ target tương ứng.
+- Luôn chạy lệnh trong đúng thư mục lab.
+- Host executable không thể flash lên STM32.
+- `make flash-stlink` trong một target lab chỉ nạp firmware của lab đó.
+- `make clean` trong lab không được xóa artifact của project root hoặc lab khác.
+- README từng lab luôn theo thứ tự: Mục tiêu, Build và chạy, Kết quả, Câu hỏi.
+
+## 5. Kiểm tra toàn bộ
+
+Kiểm tra từng lab trong thư mục riêng:
+
+```bash
+cd labs/<lab-name>
+make clean
+make run
 ```
 
-Không chạy `make flash-stlink` ở root khi mục tiêu là nạp Lab 04.
+Với target lab, thay `make run` bằng target flash hoặc report được mô tả trong README của lab.

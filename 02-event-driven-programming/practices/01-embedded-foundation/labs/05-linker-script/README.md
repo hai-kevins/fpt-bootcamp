@@ -8,7 +8,7 @@
 - Tạo các linker symbol phục vụ Startup Code.
 - Quan sát tác động của `KEEP()`, `NOLOAD` và `AT > FLASH`.
 
-## Build
+## Build và chạy
 
 Makefile của lab này chỉ build firmware và báo cáo của chính lab. Từ thư mục root:
 

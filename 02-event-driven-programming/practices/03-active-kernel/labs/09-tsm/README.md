@@ -6,7 +6,7 @@
 - Tách dữ liệu transition khỏi engine.
 - So sánh readability với switch-case.
 
-## Build và test
+## Build và chạy
 
 Makefile của lab chỉ quản lý source và executable của chính lab.
 

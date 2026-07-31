@@ -6,7 +6,7 @@
 - Ghi đè record cũ khi đầy.
 - Hỗ trợ dump và clear.
 
-## Build và test
+## Build và chạy
 
 Makefile của lab chỉ quản lý source và executable của chính lab.
 

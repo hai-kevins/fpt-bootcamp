@@ -6,7 +6,7 @@
 - Kiểm tra `len` trước khi đọc.
 - Quan sát lỗi khi length không đúng.
 
-## Build và test
+## Build và chạy
 
 Makefile của lab chỉ quản lý source và executable của chính lab.
 

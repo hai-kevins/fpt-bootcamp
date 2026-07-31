@@ -6,7 +6,7 @@
 - Kiểm tra transition hợp lệ.
 - Giữ state trong module owner.
 
-## Build và test
+## Build và chạy
 
 Makefile của lab chỉ quản lý source và executable của chính lab.
 

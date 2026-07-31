@@ -92,7 +92,7 @@ Sau khi hoàn thành repository này, người học có thể:
 
 ---
 
-## 3. Firmware root làm gì?
+## 3. Project root làm gì?
 
 Firmware root là chương trình bare-metal tổng kết chạy trên STM32F103C8T6:
 
@@ -160,7 +160,7 @@ Firmware root và các target lab dùng GNU Arm Embedded Toolchain. Ba host lab 
 
 ---
 
-## 5. Build firmware tổng kết
+## 5. Build project tổng kết
 
 Từ thư mục root:
 
@@ -194,7 +194,9 @@ make rebuild
 
 ---
 
-## 6. Flash firmware
+## 6. Chạy và kiểm thử
+
+### Flash firmware
 
 ST-Link tools:
 
@@ -239,7 +241,7 @@ monitor reset run
 
 ---
 
-## 7. UART
+### UART
 
 Kết nối:
 
@@ -275,7 +277,7 @@ Mỗi byte nhận được trên PA10 sẽ được gửi lại qua PA9.
 
 ---
 
-## 8. Build các lab
+## 7. Build các lab
 
 Makefile ở thư mục gốc **chỉ quản lý firmware tổng kết**. Nó không gọi hoặc điều khiển Makefile của các lab.
 
@@ -315,7 +317,7 @@ Quy ước:
 
 ---
 
-## 9. Danh sách bài thực hành
+## 8. Danh sách bài thực hành
 
 | Bài | Chủ đề | Môi trường | Kết quả chính |
 |---:|---|---|---|
@@ -330,7 +332,7 @@ Quy ước:
 
 ---
 
-## 10. Quy trình học đề xuất
+## 9. Quy trình học đề xuất
 
 ```text
 Đọc README của lab
@@ -363,6 +365,27 @@ Chuyển sang lab tiếp theo
 Không nên chỉ chạy code có sẵn. Cần tự thay đổi dữ liệu, địa chỉ, section, kích thước buffer, cấu hình GPIO hoặc baud rate và quan sát tác động.
 
 ---
+
+## 10. Kiến trúc và nguyên tắc quan trọng
+
+### Startup contract
+
+Trước khi gọi `main()`, firmware phải bảo đảm:
+
+```text
+MSP hợp lệ
+.data đã được copy từ Flash sang SRAM
+.bss đã được clear về 0
+Vector Table nằm đúng địa chỉ
+```
+
+### Memory-Mapped I/O
+
+GPIO và UART được truy cập qua địa chỉ thanh ghi `volatile`. Việc thay đổi MCU yêu cầu kiểm tra lại memory map, clock gate, pin configuration và peripheral register.
+
+### Host và target
+
+Các lab kiến thức thuần chạy trên host để quan sát nhanh. Các lab Startup Code, Linker Script, GPIO, UART và map analysis tạo firmware ARM riêng cho STM32F103.
 
 ## 11. Ghi chú kỹ thuật
 

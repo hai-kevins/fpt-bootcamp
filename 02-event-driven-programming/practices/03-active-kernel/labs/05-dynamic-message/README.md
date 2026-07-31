@@ -6,7 +6,7 @@
 - Dùng fixed block pool thay vì heap tổng quát.
 - Theo dõi pool used max và exhaustion.
 
-## Build và test
+## Build và chạy
 
 Makefile của lab chỉ quản lý source và executable của chính lab.
 

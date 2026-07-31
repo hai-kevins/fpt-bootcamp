@@ -6,7 +6,7 @@
 - Shell chỉ post message thay vì gọi driver application trực tiếp.
 - Tách parser khỏi owner task.
 
-## Build và test
+## Build và chạy
 
 Makefile của lab chỉ quản lý source và executable của chính lab.
 

@@ -6,7 +6,7 @@
 - Quan sát kích thước các cấu trúc tối thiểu.
 - Giải thích priority và run-to-completion.
 
-## Build và test
+## Build và chạy
 
 Makefile của lab chỉ quản lý source và executable của chính lab.
 

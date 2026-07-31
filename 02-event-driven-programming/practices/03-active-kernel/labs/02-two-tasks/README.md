@@ -6,7 +6,7 @@
 - Task A nhận START_SIG rồi gửi HELLO_SIG.
 - Quan sát message routing qua queue.
 
-## Build và test
+## Build và chạy
 
 Makefile của lab chỉ quản lý source và executable của chính lab.
 

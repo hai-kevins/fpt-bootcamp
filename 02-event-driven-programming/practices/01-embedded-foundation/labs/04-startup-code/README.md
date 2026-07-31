@@ -9,7 +9,7 @@
 - Clear `.bss` trước khi gọi `main()`.
 - Kiểm tra kết quả khởi tạo bằng biến probe và LED PC13.
 
-## Build
+## Build và chạy
 
 Makefile của lab này chỉ build firmware của chính lab. Từ thư mục root:
 

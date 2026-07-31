@@ -7,7 +7,7 @@
 - Chứng minh timeout chỉ toggle khi state là BLINKING.
 - Test State Machine không cần GPIO thật.
 
-## Build và test
+## Build và chạy
 
 ```bash
 cd labs/05-led-state-machine

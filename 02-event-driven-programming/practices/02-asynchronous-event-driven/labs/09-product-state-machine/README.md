@@ -7,7 +7,7 @@
 - Đếm transition thực sự.
 - Test invalid/unhandled event không làm state đổi sai.
 
-## Build và test
+## Build và chạy
 
 ```bash
 cd labs/09-product-state-machine

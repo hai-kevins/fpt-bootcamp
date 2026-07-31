@@ -108,7 +108,7 @@ Sau khi hoàn thành repository này, người học có thể:
 
 ---
 
-## 3. Firmware root làm gì?
+## 3. Project root làm gì?
 
 ```text
 Reset -> Startup Code -> platform_init -> ak_init -> app_init
@@ -159,7 +159,7 @@ sudo apt install openocd stlink-tools gdb-multiarch picocom
 
 ---
 
-## 5. Build firmware tổng kết
+## 5. Build project tổng kết
 
 GNU Arm:
 
@@ -201,7 +201,9 @@ make disasm
 
 ---
 
-## 6. Flash firmware
+## 6. Chạy và kiểm thử
+
+### Flash firmware
 
 ```bash
 make flash-stlink
@@ -215,7 +217,7 @@ make flash-openocd
 
 ---
 
-## 7. UART Shell
+### UART Shell
 
 Kết nối:
 
@@ -253,7 +255,7 @@ Shell chỉ parse và post message. Task owner mới được thay đổi applic
 
 ---
 
-## 8. Build các lab
+## 7. Build các lab
 
 Root Makefile không build lab. Đi vào đúng thư mục:
 
@@ -267,7 +269,7 @@ Mỗi lab tạo executable trong `build/` của chính lab. Toàn bộ Lab 01-13
 
 ---
 
-## 9. Danh sách bài thực hành
+## 8. Danh sách bài thực hành
 
 | Bài | Nội dung | Kết quả chính |
 |---:|---|---|
@@ -289,7 +291,7 @@ Lab 14 Mini Game đã được bỏ.
 
 ---
 
-## 10. Quy trình học đề xuất
+## 9. Quy trình học đề xuất
 
 ```text
 Đọc README lab
@@ -314,6 +316,24 @@ Lab 14 Mini Game đã được bỏ.
 - Shell không gọi application driver trực tiếp.
 
 ---
+
+## 10. Kiến trúc và nguyên tắc quan trọng
+
+### Cooperative scheduler
+
+Active Kernel chọn task ready theo priority nhưng không preempt handler đang chạy. Mỗi handler phải tuân thủ run-to-completion.
+
+### Mailbox
+
+Mỗi task sở hữu mailbox riêng. Module khác giao tiếp bằng message thay vì sửa trực tiếp state nội bộ của task.
+
+### Message ownership
+
+Pure và Common Message có lifetime tĩnh. Dynamic Message lấy từ fixed pool và phải được release đúng số reference.
+
+### Timer và State Machine
+
+One-shot/periodic timer chỉ tạo message khi hết hạn. FSM/TSM xử lý message trong context của task sở hữu state.
 
 ## 11. Ghi chú kỹ thuật
 

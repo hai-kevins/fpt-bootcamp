@@ -6,7 +6,7 @@
 - Kiểm tra integrity bằng checksum.
 - Mô phỏng record còn lại qua reset.
 
-## Build và test
+## Build và chạy
 
 Makefile của lab chỉ quản lý source và executable của chính lab.
 

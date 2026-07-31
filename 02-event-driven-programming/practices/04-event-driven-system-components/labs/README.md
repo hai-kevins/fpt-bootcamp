@@ -1,57 +1,65 @@
 # Labs — Independent Makefiles
 
-Mỗi thư mục lab là một build unit độc lập.
+Các bài thực hành trong `04-event-driven-system-components` được tổ chức độc lập. Mỗi lab có source code, Makefile, README và thư mục `build/` riêng.
 
-- Không build lab từ Makefile root.
-- Đi vào đúng thư mục lab rồi chạy Makefile của lab đó.
-- Output được tạo trong `build/` bên trong chính lab.
-- `make clean` chỉ xóa output của lab hiện tại.
-- `make sanitize` chạy AddressSanitizer và UndefinedBehaviorSanitizer.
-- Tất cả lab chạy trên host Linux.
-- Thứ tự lab liên tục từ `01` đến `15`.
+## 1. Mục tiêu
 
-## Host labs
+- Tách từng khái niệm thành một bài thực hành nhỏ.
+- Build và kiểm thử từng lab mà không ảnh hưởng project root.
+- Phân biệt executable host với firmware target.
+- Giữ output sinh tự động trong `build/` của đúng lab.
+- Dùng cùng một bố cục README cho toàn bộ chương trình.
 
-Ví dụ:
+## 2. Build và chạy
+
+Ví dụ host lab:
 
 ```bash
 cd labs/01-active-object
 make
 make run
-make sanitize
 ```
 
-Danh sách:
-
-| Lab | Artifact chính | Quan sát |
-|---:|---|---|
-| 01 | `build/lab` | `handled=1` |
-| 02 | `build/lab` | FIFO, `hwm=2`, `overflow=1` |
-| 03 | `build/lab` | `order=2,1` |
-| 04 | `build/lab` | `state=0`, `actions=2` |
-| 05 | `build/lab` | HSM bubbling |
-| 06 | `build/lab` | `final=0`, `handled=3` |
-| 07 | `build/lab` | Pool exhaustion và release |
-| 08 | `build/lab` | Reference count về 0 |
-| 09 | `build/lab` | Local route đúng object |
-| 10 | `build/lab` | Hai subscriber nhận event |
-| 11 | `build/lab` | Frame encode/decode và CRC |
-| 12 | `build/lab` | Parser tạo frame hợp lệ |
-| 13 | `build/lab` | Retry rồi link DOWN |
-| 14 | `build/lab` | Trace ring buffer wraparound |
-| 15 | `build/lab` | 1000 event không leak |
-
-Các lệnh chung:
+Các lệnh thường dùng:
 
 ```bash
-make          # Build executable
-make run      # Build rồi chạy
-make test     # Alias của make run
-make sanitize # Build và chạy với ASan/UBSan
-make clean    # Chỉ xóa build/ của lab hiện tại
+make          # Build lab hiện tại
+make run      # Chạy host lab nếu Makefile hỗ trợ
+make test     # Chạy test nếu Makefile hỗ trợ
+make sanitize # Chạy ASan/UBSan nếu Makefile hỗ trợ
+make clean    # Chỉ xóa output của lab hiện tại
 ```
 
-## Kiểm tra toàn bộ
+## 3. Danh sách bài thực hành
+
+| Bài | Chủ đề | Môi trường | Output |
+|---:|---|---|---|
+| 01 | Active Object | Host Linux | `labs/01-active-object/build/` |
+| 02 | Mailbox FIFO và Overflow | Host Linux | `labs/02-mailbox/build/` |
+| 03 | Run-to-Completion Scheduler | Host Linux | `labs/03-run-to-completion-scheduler/build/` |
+| 04 | Flat State Machine | Host Linux | `labs/04-flat-state-machine/build/` |
+| 05 | Hierarchical State Machine | Host Linux | `labs/05-hierarchical-state-machine/build/` |
+| 06 | Table-Driven State Machine | Host Linux | `labs/06-table-driven-state-machine/build/` |
+| 07 | Static Event Pool | Host Linux | `labs/07-event-pool/build/` |
+| 08 | Reference Count và Ownership | Host Linux | `labs/08-reference-count-ownership/build/` |
+| 09 | Router và Direct Post | Host Linux | `labs/09-router-direct-post/build/` |
+| 10 | Publish-Subscribe | Host Linux | `labs/10-publish-subscribe/build/` |
+| 11 | UART-style Data-Link Frame | Host Linux | `labs/11-uart-datalink/build/` |
+| 12 | Parser State Machine | Host Linux | `labs/12-parser-state-machine/build/` |
+| 13 | Link Failure, Timeout và Retry | Host Linux | `labs/13-link-failure/build/` |
+| 14 | Event Trace Ring Buffer | Host Linux | `labs/14-event-trace/build/` |
+| 15 | Mailbox và Event Pool Stress Test | Host Linux | `labs/15-stress-test/build/` |
+
+## 4. Quy ước
+
+- Không build lab bằng Makefile root trừ khi root Makefile ghi rõ target tương ứng.
+- Luôn chạy lệnh trong đúng thư mục lab.
+- Host executable không thể flash lên STM32.
+- `make flash-stlink` trong một target lab chỉ nạp firmware của lab đó.
+- `make clean` trong lab không được xóa artifact của project root hoặc lab khác.
+- README từng lab luôn theo thứ tự: Mục tiêu, Build và chạy, Kết quả, Câu hỏi.
+
+## 5. Kiểm tra toàn bộ
 
 Từ thư mục root:
 
@@ -59,14 +67,4 @@ Từ thư mục root:
 ./tools/validate.sh
 ```
 
-Script chạy:
-
-```text
-Root unit tests
-Integrated root demo
-Root sanitizer test
-15 lab make run
-15 lab make sanitize
-```
-
-Không có target `make labXX` ở root. Quy ước này tránh nhầm artifact root với executable của từng lab.
+Script build và chạy các bài kiểm tra được repository hỗ trợ.
