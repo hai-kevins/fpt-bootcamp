@@ -1,6 +1,7 @@
 #include "led_sm.h"
 #include <stdbool.h>
 #include <stdio.h>
+
 int main(void)
 {
     led_sm_t sm;

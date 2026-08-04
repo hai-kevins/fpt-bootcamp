@@ -1,7 +1,10 @@
 #include "platform.h"
 #include "stm32f1.h"
+
 #define LED_PIN (13U)
+
 void platform_systick_init(void);
+
 void platform_init(void)
 {
     RCC_APB2ENR |=
@@ -26,22 +29,27 @@ void platform_init(void)
 
     platform_systick_init();
 }
+
 void platform_idle(void)
 {
     __asm volatile ("wfi" ::: "memory");
 }
+
 bool platform_button_is_pressed(void)
 {
     return (GPIOA_IDR & 1UL) == 0UL;
 }
+
 void platform_led_on(void)
 {
     GPIOC_BSRR = (1UL << (LED_PIN + 16U));
 }
+
 void platform_led_off(void)
 {
     GPIOC_BSRR = (1UL << LED_PIN);
 }
+
 void platform_led_toggle(void)
 {
     if ((GPIOC_ODR & (1UL << LED_PIN)) == 0UL)
@@ -49,6 +57,7 @@ void platform_led_toggle(void)
     else
         platform_led_on();
 }
+
 void EXTI0_IRQHandler(void)
 {
     if ((EXTI_PR & 1UL) != 0UL)
