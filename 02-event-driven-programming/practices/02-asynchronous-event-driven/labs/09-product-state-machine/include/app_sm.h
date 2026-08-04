@@ -26,4 +26,5 @@ typedef struct
 
 void app_sm_init(app_sm_t *sm);
 void app_sm_dispatch(app_sm_t *sm, app_event_t event);
+
 #endif

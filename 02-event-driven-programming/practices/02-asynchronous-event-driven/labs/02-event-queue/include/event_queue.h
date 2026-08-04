@@ -20,4 +20,5 @@ typedef struct
 void event_queue_init(event_queue_t *queue);
 bool event_queue_post(event_queue_t *queue, const event_t *event);
 bool event_queue_get(event_queue_t *queue, event_t *event);
+
 #endif
