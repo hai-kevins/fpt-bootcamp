@@ -1,33 +1,54 @@
 #include "command_parser.h"
 #include <stddef.h>
+
 static bool equal(const char *a, const char *b)
 {
-    if ((a == NULL) || (b == NULL)) return false;
+    if ((a == NULL) || (b == NULL)) 
+    {
+        return false;
+    }
     while ((*a != '\0') && (*b != '\0'))
     {
-        if (*a != *b) return false;
+        if (*a != *b) 
+        {
+            return false;
+        }
         a++; b++;
     }
     return (*a == '\0') && (*b == '\0');
 }
+
 static bool starts(const char *a, const char *b)
 {
-    if ((a == NULL) || (b == NULL)) return false;
+    if ((a == NULL) || (b == NULL)) 
+    {
+        return false;
+    }
     while (*b != '\0')
     {
-        if (*a != *b) return false;
+        if (*a != *b) 
+        {
+            return false;
+        }
         a++; b++;
     }
     return true;
 }
+
 static bool number(const char *text, uint32_t *value)
 {
     uint32_t result = 0UL;
     bool any = false;
-    if ((text == NULL) || (value == NULL)) return false;
+    if ((text == NULL) || (value == NULL)) 
+    {
+        return false;
+    }
     while (*text != '\0')
     {
-        if ((*text < '0') || (*text > '9')) return false;
+        if ((*text < '0') || (*text > '9')) 
+        {
+            return false;
+        }
         result = result * 10U + (uint32_t)(*text - '0');
         any = true;
         text++;
@@ -35,6 +56,7 @@ static bool number(const char *text, uint32_t *value)
     *value = result;
     return any;
 }
+
 bool command_parse(const char *line, command_t *command)
 {
     uint32_t period;
