@@ -7,8 +7,8 @@
 
 typedef struct rtos_list_node
 {
-    struct rtos_list_node *previous;
-    struct rtos_list_node *next;
+    struct rtos_list_node * previous;
+    struct rtos_list_node * next;
     const void *owner;
 } rtos_list_node_t;
 

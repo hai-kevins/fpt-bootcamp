@@ -17,10 +17,7 @@ void rtos_trace_reset(void)
     rtos_critical_exit(state);
 }
 
-void rtos_trace_record(rtos_trace_type_t type,
-                     uint8_t from_task,
-                     uint8_t to_task,
-                     uint32_t tick)
+void rtos_trace_record(rtos_trace_type_t type, uint8_t from_task, uint8_t to_task, uint32_t tick)
 {
     rtos_trace_record_t *record = &g_trace[g_trace_write_index];
 
@@ -51,8 +48,7 @@ size_t rtos_trace_snapshot(rtos_trace_record_t *output, size_t capacity)
     }
 
     count = (g_trace_count < capacity) ? g_trace_count : capacity;
-    first = (g_trace_write_index + RTOS_TRACE_CAPACITY - g_trace_count) %
-            RTOS_TRACE_CAPACITY;
+    first = (g_trace_write_index + RTOS_TRACE_CAPACITY - g_trace_count) % RTOS_TRACE_CAPACITY;
 
     for (size_t index = 0U; index < count; ++index)
     {

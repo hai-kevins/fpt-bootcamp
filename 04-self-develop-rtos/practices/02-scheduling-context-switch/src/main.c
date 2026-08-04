@@ -45,13 +45,13 @@ static void print_task(const rtos_task_t *task)
     uart1_write_string(" prio=");
     uart1_write_u32(task->priority);
     uart1_write_string(" state=");
-    uart1_write_u32((uint32_t)task->state);
+    uart1_write_u32((uint32_t) task->state);
     uart1_write_string(" switches=");
     uart1_write_u32(task->switch_count);
     uart1_write_string(" runtime_ticks=");
     uart1_write_u32(task->runtime_ticks);
     uart1_write_string(" unused_stack_words=");
-    uart1_write_u32((uint32_t)rtos_task_stack_unused_words(task));
+    uart1_write_u32((uint32_t) rtos_task_stack_unused_words(task));
     print_newline();
 }
 
@@ -97,7 +97,7 @@ static void print_trace(void)
         uart1_write_string(" tick=");
         uart1_write_u32(records[index].tick);
         uart1_write_string(" type=");
-        uart1_write_u32((uint32_t)records[index].type);
+        uart1_write_u32((uint32_t) records[index].type);
         uart1_write_string(" from=");
         uart1_write_u32(records[index].from_task);
         uart1_write_string(" to=");
@@ -108,7 +108,7 @@ static void print_trace(void)
 
 static void high_event_task(void *argument)
 {
-    (void)argument;
+    (void) argument;
 
     for (;;)
     {
@@ -121,7 +121,7 @@ static void high_event_task(void *argument)
 static void worker_a_task(void *argument)
 {
     uint32_t local = 0xA0000000UL;
-    (void)argument;
+    (void) argument;
 
     for (;;)
     {
@@ -138,7 +138,7 @@ static void worker_a_task(void *argument)
 static void worker_b_task(void *argument)
 {
     uint32_t local = 0xB0000000UL;
-    (void)argument;
+    (void) argument;
 
     for (;;)
     {
@@ -154,11 +154,9 @@ static void worker_b_task(void *argument)
 
 static void monitor_task(void *argument)
 {
-    (void)argument;
+    (void) argument;
 
-    uart1_write_string(
-        "\r\nRTOS Scheduler Playground\r\n"
-        "h=help s=stats t=trace\r\n");
+    uart1_write_string("\r\nRTOS Scheduler Playground\r\n""h=help s=stats t=trace\r\n");
 
     for (;;)
     {
@@ -190,7 +188,7 @@ static void monitor_task(void *argument)
 
 static void idle_task(void *argument)
 {
-    (void)argument;
+    (void) argument;
 
     for (;;)
     {
@@ -201,46 +199,15 @@ static void idle_task(void *argument)
 
 static void create_tasks(void)
 {
-    RTOS_ASSERT(rtos_task_create_static(&g_high_task,
-                                    "high",
-                                    0U,
-                                    0U,
-                                    high_event_task,
-                                    (void *)0,
-                                    g_high_stack,
-                                    STACK_WORDS_SMALL));
-    RTOS_ASSERT(rtos_task_create_static(&g_worker_a_task,
-                                    "worker-a",
-                                    1U,
-                                    1U,
-                                    worker_a_task,
-                                    (void *)0,
-                                    g_worker_a_stack,
-                                    STACK_WORDS_SMALL));
-    RTOS_ASSERT(rtos_task_create_static(&g_worker_b_task,
-                                    "worker-b",
-                                    2U,
-                                    1U,
-                                    worker_b_task,
-                                    (void *)0,
-                                    g_worker_b_stack,
-                                    STACK_WORDS_SMALL));
-    RTOS_ASSERT(rtos_task_create_static(&g_monitor_task,
-                                    "monitor",
-                                    3U,
-                                    2U,
-                                    monitor_task,
-                                    (void *)0,
-                                    g_monitor_stack,
-                                    STACK_WORDS_MONITOR));
-    RTOS_ASSERT(rtos_task_create_static(&g_idle_task,
-                                    "idle",
-                                    4U,
-                                    3U,
-                                    idle_task,
-                                    (void *)0,
-                                    g_idle_stack,
-                                    STACK_WORDS_SMALL));
+    RTOS_ASSERT(rtos_task_create_static(&g_high_task, "high", 0U, 0U, high_event_task, (void *)0, g_high_stack,
+        STACK_WORDS_SMALL));
+    RTOS_ASSERT(rtos_task_create_static(&g_worker_a_task, "worker-a", 1U, 1U, worker_a_task, (void *)0, g_worker_a_stack,
+        STACK_WORDS_SMALL));
+    RTOS_ASSERT(rtos_task_create_static(&g_worker_b_task, "worker-b", 2U, 1U, worker_b_task, (void *)0, g_worker_b_stack,
+        STACK_WORDS_SMALL));
+    RTOS_ASSERT(rtos_task_create_static(&g_monitor_task, "monitor", 3U, 2U, monitor_task, (void *)0, g_monitor_stack,
+        STACK_WORDS_MONITOR));
+    RTOS_ASSERT(rtos_task_create_static(&g_idle_task, "idle", 4U, 3U, idle_task, (void *)0, g_idle_stack, STACK_WORDS_SMALL));
 
     RTOS_ASSERT(rtos_scheduler_add_task(&g_high_task));
     RTOS_ASSERT(rtos_scheduler_add_task(&g_worker_a_task));

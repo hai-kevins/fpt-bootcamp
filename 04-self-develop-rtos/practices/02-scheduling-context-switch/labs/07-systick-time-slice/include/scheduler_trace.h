@@ -25,10 +25,7 @@ typedef struct
 } rtos_trace_record_t;
 
 void rtos_trace_reset(void);
-void rtos_trace_record(rtos_trace_type_t type,
-                     uint8_t from_task,
-                     uint8_t to_task,
-                     uint32_t tick);
+void rtos_trace_record(rtos_trace_type_t type, uint8_t from_task, uint8_t to_task, uint32_t tick);
 size_t rtos_trace_snapshot(rtos_trace_record_t *output, size_t capacity);
 
 #endif

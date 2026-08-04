@@ -70,8 +70,7 @@ WEAK_DEFAULT_HANDLER(USBWakeUp_IRQHandler);
 
 typedef void (*isr_handler_t)(void);
 
-__attribute__((used, section(".isr_vector"), aligned(256)))
-const isr_handler_t g_vector_table[] =
+__attribute__((used, section(".isr_vector"), aligned(256))) const isr_handler_t g_vector_table[] =
 {
     (isr_handler_t)(uintptr_t)&_estack,
     Reset_Handler,
@@ -153,7 +152,7 @@ void Reset_Handler(void)
         ++destination;
     }
 
-    (void)main();
+    (void) main();
 
     for (;;)
     {
@@ -163,7 +162,7 @@ void Reset_Handler(void)
 
 void Default_Handler(void)
 {
-    __asm volatile("cpsid i" ::: "memory");
+    __asm volatile("cpsid i" : : : "memory");
     for (;;)
     {
         __asm volatile("nop");

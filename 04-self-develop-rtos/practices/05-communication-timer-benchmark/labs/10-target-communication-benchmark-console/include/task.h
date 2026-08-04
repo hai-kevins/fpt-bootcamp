@@ -76,14 +76,8 @@ typedef struct hr_task
     hr_wait_kind_t wait_kind;
 } hr_task_t;
 
-bool hr_task_create_static(hr_task_t *task,
-                           const char *name,
-                           uint8_t id,
-                           uint8_t priority,
-                           hr_task_entry_t entry,
-                           void *argument,
-                           uint32_t *stack,
-                           size_t stack_word_count);
+bool hr_task_create_static(hr_task_t *task, const char *name, uint8_t id, uint8_t priority, hr_task_entry_t entry,
+    void *argument, uint32_t *stack, size_t stack_word_count);
 bool hr_task_is_valid(const hr_task_t *task);
 bool hr_task_saved_sp_is_valid(const hr_task_t *task);
 size_t hr_task_stack_unused_words(const hr_task_t *task);

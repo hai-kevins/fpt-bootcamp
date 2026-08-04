@@ -11,12 +11,11 @@ int main(void)
 
     for (index = 0U; index < 96U; index++)
     {
-        stack[sizeof(stack) - 1U - index] = (uint8_t)index;
+        stack[sizeof(stack) - 1U - index] = (uint8_t) index;
     }
 
     printf("Lab 03 - Stack high-water mark\n");
     printf("Stack capacity : %zu bytes\n", sizeof(stack));
-    printf("Stack used     : %zu bytes\n",
-           stack_monitor_high_water(stack, sizeof(stack), 0xA5U, true));
+    printf("Stack used     : %zu bytes\n", stack_monitor_high_water(stack, sizeof(stack), 0xA5U, true));
     return 0;
 }

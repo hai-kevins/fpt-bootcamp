@@ -21,10 +21,7 @@ hr_wait_result_t hr_task_delay_until(uint32_t *previous_wake, uint32_t period_ti
 hr_task_t *hr_scheduler_current(void);
 uint32_t hr_scheduler_tick_now(void);
 
-bool hr_scheduler_block_current_locked(void *object,
-                                       hr_list_t *waiters,
-                                       hr_wait_kind_t kind,
-                                       uint32_t timeout_ticks);
+bool hr_scheduler_block_current_locked(void *object, hr_list_t *waiters, hr_wait_kind_t kind, uint32_t timeout_ticks);
 bool hr_scheduler_wake_task_locked(hr_task_t *task, hr_wait_result_t result);
 bool hr_scheduler_set_effective_priority_locked(hr_task_t *task, uint8_t priority);
 bool hr_task_suspend(hr_task_t *task);

@@ -14,11 +14,12 @@ static rtos_semaphore_t *g_event_sem;
 static rtos_semaphore_t *g_count_sem;
 static rtos_mutex_t *g_resource_mutex;
 
-static void newline(void) { uart1_write_string("\r\n"); }
+static void newline(void)
+{
+    uart1_write_string("\r\n");
+}
 
-void rtos_sync_inspector_bind(rtos_semaphore_t *event_sem,
-                            rtos_semaphore_t *count_sem,
-                            rtos_mutex_t *resource_mutex)
+void rtos_sync_inspector_bind(rtos_semaphore_t *event_sem, rtos_semaphore_t *count_sem, rtos_mutex_t *resource_mutex)
 {
     g_event_sem = event_sem;
     g_count_sem = count_sem;
@@ -36,19 +37,29 @@ void rtos_sync_inspector_print_tasks(void)
     const size_t count = rtos_task_registry_count();
     const size_t limit = (count < SNAPSHOT_MAX_TASKS) ? count : SNAPSHOT_MAX_TASKS;
     const rtos_task_t *tasks[SNAPSHOT_MAX_TASKS];
-    for (size_t i = 0U; i < limit; ++i) { tasks[i] = rtos_task_registry_at(i); }
+    for (size_t i = 0U; i < limit; ++i)
+    {
+        tasks[i] = rtos_task_registry_at(i);
+    }
     rtos_critical_exit(state);
 
-    uart1_write_string("task_count="); uart1_write_u32((uint32_t)limit); newline();
+    uart1_write_string("task_count=");
+    uart1_write_u32((uint32_t) limit);
+    newline();
     for (size_t i = 0U; i < limit; ++i)
     {
         const rtos_task_t *task = tasks[i];
         uart1_write_string(task->name);
-        uart1_write_string(" state="); uart1_write_string(rtos_task_state_name(task->state));
-        uart1_write_string(" base="); uart1_write_u32(task->base_priority);
-        uart1_write_string(" effective="); uart1_write_u32(task->effective_priority);
-        uart1_write_string(" wait="); uart1_write_string(rtos_wait_result_name(task->wait_result));
-        uart1_write_string(" wake="); uart1_write_u32(task->wake_tick);
+        uart1_write_string(" state=");
+        uart1_write_string(rtos_task_state_name(task->state));
+        uart1_write_string(" base=");
+        uart1_write_u32(task->base_priority);
+        uart1_write_string(" effective=");
+        uart1_write_u32(task->effective_priority);
+        uart1_write_string(" wait=");
+        uart1_write_string(rtos_wait_result_name(task->wait_result));
+        uart1_write_string(" wake=");
+        uart1_write_u32(task->wake_tick);
         newline();
     }
 }
@@ -70,21 +81,31 @@ void rtos_sync_inspector_print_delayed(void)
         node = node->next;
     }
     rtos_critical_exit(state);
-    uart1_write_string("delayed_count="); uart1_write_u32((uint32_t)count); newline();
+    uart1_write_string("delayed_count=");
+    uart1_write_u32((uint32_t) count);
+    newline();
     for (size_t i = 0U; i < count; ++i)
     {
-        uart1_write_string(names[i]); uart1_write_string(" wake=");
-        uart1_write_u32(wakes[i]); newline();
+        uart1_write_string(names[i]);
+        uart1_write_string(" wake=");
+        uart1_write_u32(wakes[i]);
+        newline();
     }
 }
 
 static void print_sem(const rtos_semaphore_t *sem)
 {
-    if (sem == (const rtos_semaphore_t *)0) { return; }
+    if (sem == (const rtos_semaphore_t *)0)
+    {
+        return;
+    }
     uart1_write_string(sem->name);
-    uart1_write_string(" count="); uart1_write_u32(sem->count);
-    uart1_write_string(" max="); uart1_write_u32(sem->max_count);
-    uart1_write_string(" waiters="); uart1_write_u32((uint32_t)rtos_list_count(&sem->waiters));
+    uart1_write_string(" count=");
+    uart1_write_u32(sem->count);
+    uart1_write_string(" max=");
+    uart1_write_u32(sem->max_count);
+    uart1_write_string(" waiters=");
+    uart1_write_u32((uint32_t) rtos_list_count(&sem->waiters));
     newline();
 }
 
@@ -103,10 +124,9 @@ void rtos_sync_inspector_print_mutex(void)
     {
         uart1_write_string(g_resource_mutex->name);
         uart1_write_string(" owner=");
-        uart1_write_string((g_resource_mutex->owner != (rtos_task_t *)0) ?
-                           g_resource_mutex->owner->name : "none");
+        uart1_write_string((g_resource_mutex->owner != (rtos_task_t *)0) ? g_resource_mutex->owner->name : "none");
         uart1_write_string(" waiters=");
-        uart1_write_u32((uint32_t)rtos_list_count(&g_resource_mutex->waiters));
+        uart1_write_u32((uint32_t) rtos_list_count(&g_resource_mutex->waiters));
         newline();
     }
     rtos_critical_exit(state);
@@ -120,7 +140,13 @@ void rtos_sync_inspector_print_validation(void)
     sem_ok = rtos_semaphore_validate(g_event_sem) && rtos_semaphore_validate(g_count_sem);
     mutex_ok = rtos_mutex_validate(g_resource_mutex);
     rtos_critical_exit(state);
-    uart1_write_string("scheduler="); uart1_write_string(rtos_scheduler_validate() ? "PASS" : "FAIL"); newline();
-    uart1_write_string("semaphores="); uart1_write_string(sem_ok ? "PASS" : "FAIL"); newline();
-    uart1_write_string("mutex="); uart1_write_string(mutex_ok ? "PASS" : "FAIL"); newline();
+    uart1_write_string("scheduler=");
+    uart1_write_string(rtos_scheduler_validate() ? "PASS" : "FAIL");
+    newline();
+    uart1_write_string("semaphores=");
+    uart1_write_string(sem_ok ? "PASS" : "FAIL");
+    newline();
+    uart1_write_string("mutex=");
+    uart1_write_string(mutex_ok ? "PASS" : "FAIL");
+    newline();
 }

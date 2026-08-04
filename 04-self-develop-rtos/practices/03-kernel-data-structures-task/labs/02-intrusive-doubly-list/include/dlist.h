@@ -7,8 +7,8 @@
 
 typedef struct dlist_node
 {
-    struct dlist_node *previous;
-    struct dlist_node *next;
+    struct dlist_node * previous;
+    struct dlist_node * next;
     const void *owner;
 } dlist_node_t;
 

@@ -5,10 +5,30 @@
 int main(void)
 {
     policy_scheduler_t scheduler;
-    policy_task_t a = {.id = 1U, .priority = 2U, .queued = false};
-    policy_task_t b = {.id = 2U, .priority = 2U, .queued = false};
-    policy_task_t high = {.id = 3U, .priority = 0U, .queued = false};
-    policy_task_t invalid = {.id = 4U, .priority = 9U, .queued = false};
+    policy_task_t a =
+    {
+        .id = 1U,
+        .priority = 2U,
+        .queued = false
+    };
+    policy_task_t b =
+    {
+        .id = 2U,
+        .priority = 2U,
+        .queued = false
+    };
+    policy_task_t high =
+    {
+        .id = 3U,
+        .priority = 0U,
+        .queued = false
+    };
+    policy_task_t invalid =
+    {
+        .id = 4U,
+        .priority = 9U,
+        .queued = false
+    };
 
     policy_init(&scheduler);
     assert(policy_select(&scheduler) == NULL);

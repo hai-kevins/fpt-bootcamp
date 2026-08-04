@@ -136,28 +136,28 @@ typedef struct
 
 static inline void cpu_disable_irq(void)
 {
-    __asm volatile ("cpsid i" ::: "memory");
+    __asm volatile("cpsid i" : : : "memory");
 }
 
 static inline void cpu_enable_irq(void)
 {
-    __asm volatile ("cpsie i" ::: "memory");
+    __asm volatile("cpsie i" : : : "memory");
 }
 
 static inline void cpu_wait_for_interrupt(void)
 {
-    __asm volatile ("wfi" ::: "memory");
+    __asm volatile("wfi" : : : "memory");
 }
 
 static inline void cpu_breakpoint(void)
 {
-    __asm volatile ("bkpt #0");
+    __asm volatile("bkpt #0");
 }
 
 static inline uintptr_t cpu_get_msp(void)
 {
     uintptr_t value;
-    __asm volatile ("mrs %0, msp" : "=r" (value));
+    __asm volatile("mrs %0, msp" : "=r"(value));
     return value;
 }
 

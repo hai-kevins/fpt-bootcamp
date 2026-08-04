@@ -7,20 +7,15 @@ static stm32_gpio_t *gpio_from_port(gpio_port_t port)
 {
     switch (port)
     {
-        case GPIO_PORT_A:
-            return GPIOA;
-        case GPIO_PORT_B:
-            return GPIOB;
-        case GPIO_PORT_C:
-            return GPIOC;
+        case GPIO_PORT_A : return GPIOA;
+        case GPIO_PORT_B : return GPIOB;
+        case GPIO_PORT_C : return GPIOC;
         default:
-            return (stm32_gpio_t *)0;
+        return (stm32_gpio_t *)0;
     }
 }
 
-static void configure_nibble(stm32_gpio_t *gpio,
-                             uint32_t pin,
-                             uint32_t value)
+static void configure_nibble(stm32_gpio_t *gpio, uint32_t pin, uint32_t value)
 {
     volatile uint32_t *reg;
     uint32_t shift;
@@ -43,7 +38,7 @@ static void configure_nibble(stm32_gpio_t *gpio,
     }
 
     current = *reg;
-    current &= ~(0x0FUL << shift);
+    current &= ~ (0x0FUL << shift);
     current |= (value & 0x0FUL) << shift;
     *reg = current;
 }
@@ -52,17 +47,14 @@ void gpio_enable_clock(gpio_port_t port)
 {
     switch (port)
     {
-        case GPIO_PORT_A:
-            RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;
-            break;
-        case GPIO_PORT_B:
-            RCC->APB2ENR |= RCC_APB2ENR_IOPBEN;
-            break;
-        case GPIO_PORT_C:
-            RCC->APB2ENR |= RCC_APB2ENR_IOPCEN;
-            break;
+        case GPIO_PORT_A : RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;
+        break;
+        case GPIO_PORT_B : RCC->APB2ENR |= RCC_APB2ENR_IOPBEN;
+        break;
+        case GPIO_PORT_C : RCC->APB2ENR |= RCC_APB2ENR_IOPCEN;
+        break;
         default:
-            break;
+        break;
     }
 }
 

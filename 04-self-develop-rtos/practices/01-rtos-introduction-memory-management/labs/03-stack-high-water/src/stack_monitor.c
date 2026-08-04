@@ -15,10 +15,7 @@ void stack_monitor_fill(uint8_t *memory, size_t size, uint8_t pattern)
     }
 }
 
-size_t stack_monitor_high_water(const uint8_t *memory,
-                                size_t size,
-                                uint8_t pattern,
-                                bool grows_down)
+size_t stack_monitor_high_water(const uint8_t *memory, size_t size, uint8_t pattern, bool grows_down)
 {
     size_t unused = 0U;
 
@@ -36,8 +33,7 @@ size_t stack_monitor_high_water(const uint8_t *memory,
     }
     else
     {
-        while ((unused < size) &&
-               (memory[size - 1U - unused] == pattern))
+        while ((unused < size) && (memory[size - 1U - unused] == pattern))
         {
             unused++;
         }

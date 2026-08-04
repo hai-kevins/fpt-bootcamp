@@ -8,7 +8,7 @@ void clock_init_hsi_8mhz(void)
     {
     }
 
-    RCC_CFGR &= ~0x3UL;
+    RCC_CFGR &= ~ 0x3UL;
     while ((RCC_CFGR & (0x3UL << 2)) != 0U)
     {
     }

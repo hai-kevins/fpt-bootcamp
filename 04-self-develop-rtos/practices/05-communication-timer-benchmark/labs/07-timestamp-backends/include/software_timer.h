@@ -31,16 +31,10 @@ typedef struct hr_software_timer
 } hr_software_timer_t;
 
 void hr_software_timer_system_init(hr_semaphore_t *service_signal);
-bool hr_software_timer_init(hr_software_timer_t *timer,
-                            const char *name,
-                            hr_timer_callback_t callback,
-                            void *argument);
-bool hr_software_timer_start(hr_software_timer_t *timer,
-                             uint32_t delay_ticks,
-                             uint32_t period_ticks);
+bool hr_software_timer_init(hr_software_timer_t *timer, const char *name, hr_timer_callback_t callback, void *argument);
+bool hr_software_timer_start(hr_software_timer_t *timer, uint32_t delay_ticks, uint32_t period_ticks);
 bool hr_software_timer_stop(hr_software_timer_t *timer);
-bool hr_software_timer_restart(hr_software_timer_t *timer,
-                               uint32_t delay_ticks);
+bool hr_software_timer_restart(hr_software_timer_t *timer, uint32_t delay_ticks);
 void hr_software_timer_on_tick_from_isr(uint32_t now);
 hr_software_timer_t *hr_software_timer_take_due(uint32_t now);
 void hr_software_timer_complete(hr_software_timer_t *timer, uint32_t now);

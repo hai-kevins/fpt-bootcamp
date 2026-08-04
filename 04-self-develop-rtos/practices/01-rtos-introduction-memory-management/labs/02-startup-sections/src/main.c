@@ -14,7 +14,7 @@ int main(void)
     const bool bss_ok = g_zero_initialized == 0UL;
 
     uart_init(9600UL, 8000000UL);
-    (void)systick_init(8000000UL, 1000UL);
+    (void) systick_init(8000000UL, 1000UL);
     gpio_enable_clock(GPIO_PORT_C);
     gpio_config_output_push_pull(GPIO_PORT_C, 13UL);
 

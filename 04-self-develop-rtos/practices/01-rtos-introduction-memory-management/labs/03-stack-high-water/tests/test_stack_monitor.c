@@ -6,10 +6,7 @@ int test_stack_monitor_empty(void)
 {
     uint8_t memory[64];
     stack_monitor_fill(memory, sizeof(memory), 0xA5U);
-    TEST_ASSERT(stack_monitor_high_water(memory,
-                                         sizeof(memory),
-                                         0xA5U,
-                                         true) == 0U);
+    TEST_ASSERT(stack_monitor_high_water(memory, sizeof(memory), 0xA5U, true) == 0U);
     return 0;
 }
 
@@ -24,10 +21,7 @@ int test_stack_monitor_downward(void)
         memory[sizeof(memory) - 1U - index] = 0U;
     }
 
-    TEST_ASSERT(stack_monitor_high_water(memory,
-                                         sizeof(memory),
-                                         0xA5U,
-                                         true) == 17U);
+    TEST_ASSERT(stack_monitor_high_water(memory, sizeof(memory), 0xA5U, true) == 17U);
     return 0;
 }
 
@@ -42,9 +36,6 @@ int test_stack_monitor_upward(void)
         memory[index] = 0U;
     }
 
-    TEST_ASSERT(stack_monitor_high_water(memory,
-                                         sizeof(memory),
-                                         0xA5U,
-                                         false) == 12U);
+    TEST_ASSERT(stack_monitor_high_water(memory, sizeof(memory), 0xA5U, false) == 12U);
     return 0;
 }

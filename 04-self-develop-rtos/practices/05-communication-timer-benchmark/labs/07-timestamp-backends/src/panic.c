@@ -6,7 +6,7 @@ volatile uint32_t g_hr_panic_detail;
 
 void hr_panic(hr_panic_code_t code, uint32_t detail)
 {
-    __asm volatile("cpsid i" ::: "memory");
+    __asm volatile("cpsid i" : : : "memory");
     g_hr_panic_code = code;
     g_hr_panic_detail = detail;
 

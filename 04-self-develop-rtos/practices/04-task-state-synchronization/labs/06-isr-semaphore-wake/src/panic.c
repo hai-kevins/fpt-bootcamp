@@ -6,7 +6,7 @@ volatile uint32_t g_rtos_panic_detail;
 
 void rtos_panic(rtos_panic_code_t code, uint32_t detail)
 {
-    __asm volatile("cpsid i" ::: "memory");
+    __asm volatile("cpsid i" : : : "memory");
     g_rtos_panic_code = code;
     g_rtos_panic_detail = detail;
 

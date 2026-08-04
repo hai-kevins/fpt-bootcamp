@@ -9,7 +9,7 @@
 
 typedef struct policy_task
 {
-    struct policy_task *next;
+    struct policy_task * next;
     uint8_t id;
     uint8_t priority;
     bool queued;

@@ -47,14 +47,8 @@ typedef struct rtos_task
     rtos_task_state_t state;
 } rtos_task_t;
 
-bool rtos_task_create_static(rtos_task_t *task,
-                           const char *name,
-                           uint8_t id,
-                           uint8_t priority,
-                           rtos_task_entry_t entry,
-                           void *argument,
-                           uint32_t *stack,
-                           size_t stack_word_count);
+bool rtos_task_create_static(rtos_task_t *task, const char *name, uint8_t id, uint8_t priority, rtos_task_entry_t entry,
+    void *argument, uint32_t *stack, size_t stack_word_count);
 bool rtos_task_is_valid(const rtos_task_t *task);
 bool rtos_task_saved_sp_is_valid(const rtos_task_t *task);
 size_t rtos_task_stack_unused_words(const rtos_task_t *task);

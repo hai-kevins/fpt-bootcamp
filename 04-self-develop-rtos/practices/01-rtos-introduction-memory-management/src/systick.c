@@ -23,9 +23,7 @@ bool systick_init(uint32_t core_clock_hz, uint32_t tick_hz)
     SYSTICK->CTRL = 0UL;
     SYSTICK->LOAD = reload - 1UL;
     SYSTICK->VAL = 0UL;
-    SYSTICK->CTRL = SYSTICK_CTRL_CLKSOURCE |
-                    SYSTICK_CTRL_TICKINT |
-                    SYSTICK_CTRL_ENABLE;
+    SYSTICK->CTRL = SYSTICK_CTRL_CLKSOURCE | SYSTICK_CTRL_TICKINT | SYSTICK_CTRL_ENABLE;
     return true;
 }
 

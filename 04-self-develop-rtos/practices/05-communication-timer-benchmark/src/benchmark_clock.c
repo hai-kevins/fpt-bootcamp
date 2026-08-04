@@ -17,9 +17,20 @@ void hr_benchmark_clock_init(void)
     g_available = (DWT_CTRL & DWT_CYCCNTENA) != 0U;
 }
 
-uint32_t hr_benchmark_now(void) { return DWT_CYCCNT; }
-uint32_t hr_benchmark_elapsed(uint32_t start, uint32_t end) { return end - start; }
-bool hr_benchmark_clock_available(void) { return g_available; }
+uint32_t hr_benchmark_now(void)
+{
+    return DWT_CYCCNT;
+}
+
+uint32_t hr_benchmark_elapsed(uint32_t start, uint32_t end)
+{
+    return end - start;
+}
+
+bool hr_benchmark_clock_available(void)
+{
+    return g_available;
+}
 
 uint32_t hr_benchmark_timestamp_overhead(void)
 {
@@ -29,7 +40,10 @@ uint32_t hr_benchmark_timestamp_overhead(void)
         const uint32_t start = hr_benchmark_now();
         const uint32_t end = hr_benchmark_now();
         const uint32_t elapsed = end - start;
-        if (elapsed < best) { best = elapsed; }
+        if (elapsed < best)
+        {
+            best = elapsed;
+        }
     }
     return best;
 }

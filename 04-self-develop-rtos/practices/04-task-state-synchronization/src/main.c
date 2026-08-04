@@ -50,7 +50,7 @@ volatile uint32_t g_idle_count;
 
 static void event_task(void *argument)
 {
-    (void)argument;
+    (void) argument;
     for (;;)
     {
         if (rtos_semaphore_take(&g_button_event, RTOS_WAIT_FOREVER) == RTOS_WAIT_SUCCESS)
@@ -63,35 +63,38 @@ static void event_task(void *argument)
 
 static void high_task(void *argument)
 {
-    (void)argument;
-    (void)rtos_task_delay(20U);
+    (void) argument;
+    (void) rtos_task_delay(20U);
     for (;;)
     {
         if (rtos_mutex_lock(&g_resource_mutex, 100U) == RTOS_WAIT_SUCCESS)
         {
             ++g_high_count;
-            (void)rtos_mutex_unlock(&g_resource_mutex);
+            (void) rtos_mutex_unlock(&g_resource_mutex);
         }
-        (void)rtos_task_delay(100U);
+        (void) rtos_task_delay(100U);
     }
 }
 
 static void medium_task(void *argument)
 {
     uint32_t local = 0U;
-    (void)argument;
+    (void) argument;
     for (;;)
     {
         ++local;
         g_medium_count = local;
-        if ((local & 0x3FFFUL) == 0U) { rtos_task_yield(); }
+        if ((local & 0x3FFFUL) == 0U)
+        {
+            rtos_task_yield();
+        }
     }
 }
 
 static void low_task(void *argument)
 {
     uint32_t cycle = 0U;
-    (void)argument;
+    (void) argument;
     for (;;)
     {
         if (rtos_mutex_lock(&g_resource_mutex, RTOS_WAIT_FOREVER) == RTOS_WAIT_SUCCESS)
@@ -99,28 +102,34 @@ static void low_task(void *argument)
             for (uint32_t i = 0U; i < 50000U; ++i)
             {
                 ++g_low_count;
-                if ((i & 0x0FFFUL) == 0U) { rtos_task_yield(); }
+                if ((i & 0x0FFFUL) == 0U)
+                {
+                    rtos_task_yield();
+                }
             }
-            (void)rtos_mutex_unlock(&g_resource_mutex);
+            (void) rtos_mutex_unlock(&g_resource_mutex);
         }
         ++cycle;
-        (void)rtos_task_delay(250U + (cycle & 0x1FUL));
+        (void) rtos_task_delay(250U + (cycle & 0x1FUL));
     }
 }
 
 static void producer_task(void *argument)
 {
-    (void)argument;
+    (void) argument;
     for (;;)
     {
-        if (rtos_semaphore_give(&g_items)) { ++g_produced_count; }
-        (void)rtos_task_delay(40U);
+        if (rtos_semaphore_give(&g_items))
+        {
+            ++g_produced_count;
+        }
+        (void) rtos_task_delay(40U);
     }
 }
 
 static void consumer_task(void *argument)
 {
-    (void)argument;
+    (void) argument;
     for (;;)
     {
         if (rtos_semaphore_take(&g_items, 200U) == RTOS_WAIT_SUCCESS)
@@ -132,7 +141,7 @@ static void consumer_task(void *argument)
 
 static void monitor_task(void *argument)
 {
-    (void)argument;
+    (void) argument;
     uart1_write_string("\r\nRTOS Synchronization Playground\r\n");
     rtos_sync_inspector_print_help();
     for (;;)
@@ -140,28 +149,55 @@ static void monitor_task(void *argument)
         if (uart1_byte_available())
         {
             const uint8_t command = uart1_read_byte();
-            if (command == (uint8_t)'h') { rtos_sync_inspector_print_help(); }
-            else if (command == (uint8_t)'t') { rtos_sync_inspector_print_tasks(); }
-            else if (command == (uint8_t)'d') { rtos_sync_inspector_print_delayed(); }
-            else if (command == (uint8_t)'s') { rtos_sync_inspector_print_semaphores(); }
-            else if (command == (uint8_t)'m') { rtos_sync_inspector_print_mutex(); }
-            else if (command == (uint8_t)'v') { rtos_sync_inspector_print_validation(); }
+            if (command == (uint8_t)'h')
+            {
+                rtos_sync_inspector_print_help();
+            }
+            else if (command == (uint8_t)'t')
+            {
+                rtos_sync_inspector_print_tasks();
+            }
+            else if (command == (uint8_t)'d')
+            {
+                rtos_sync_inspector_print_delayed();
+            }
+            else if (command == (uint8_t)'s')
+            {
+                rtos_sync_inspector_print_semaphores();
+            }
+            else if (command == (uint8_t)'m')
+            {
+                rtos_sync_inspector_print_mutex();
+            }
+            else if (command == (uint8_t)'v')
+            {
+                rtos_sync_inspector_print_validation();
+            }
             else if (command == (uint8_t)'u')
             {
                 if (g_medium_task.state == RTOS_TASK_SUSPENDED)
-                { (void)rtos_task_resume(&g_medium_task); uart1_write_string("medium resumed\r\n"); }
+                {
+                    (void) rtos_task_resume(&g_medium_task);
+                    uart1_write_string("medium resumed\r\n");
+                }
                 else
-                { (void)rtos_task_suspend(&g_medium_task); uart1_write_string("medium suspended\r\n"); }
+                {
+                    (void) rtos_task_suspend(&g_medium_task);
+                    uart1_write_string("medium suspended\r\n");
+                }
             }
-            else { uart1_write_string("unknown command\r\n"); }
+            else
+            {
+                uart1_write_string("unknown command\r\n");
+            }
         }
-        (void)rtos_task_delay(25U);
+        (void) rtos_task_delay(25U);
     }
 }
 
 static void idle_task(void *argument)
 {
-    (void)argument;
+    (void) argument;
     for (;;)
     {
         ++g_idle_count;
@@ -171,22 +207,18 @@ static void idle_task(void *argument)
 
 static void create_tasks(void)
 {
-    RTOS_ASSERT(rtos_task_create_static(&g_event_task, "event", 0U, 0U, event_task,
-                                    (void *)0, g_event_stack, STACK_SMALL));
-    RTOS_ASSERT(rtos_task_create_static(&g_high_task, "high", 1U, 0U, high_task,
-                                    (void *)0, g_high_stack, STACK_MEDIUM));
-    RTOS_ASSERT(rtos_task_create_static(&g_medium_task, "medium", 2U, 1U, medium_task,
-                                    (void *)0, g_medium_stack, STACK_SMALL));
-    RTOS_ASSERT(rtos_task_create_static(&g_low_task, "low", 3U, 2U, low_task,
-                                    (void *)0, g_low_stack, STACK_MEDIUM));
-    RTOS_ASSERT(rtos_task_create_static(&g_producer_task, "producer", 4U, 2U, producer_task,
-                                    (void *)0, g_producer_stack, STACK_SMALL));
-    RTOS_ASSERT(rtos_task_create_static(&g_consumer_task, "consumer", 5U, 1U, consumer_task,
-                                    (void *)0, g_consumer_stack, STACK_SMALL));
-    RTOS_ASSERT(rtos_task_create_static(&g_monitor_task, "monitor", 6U, 2U, monitor_task,
-                                    (void *)0, g_monitor_stack, STACK_MONITOR));
-    RTOS_ASSERT(rtos_task_create_static(&g_idle_task, "idle", 7U, 3U, idle_task,
-                                    (void *)0, g_idle_stack, STACK_IDLE));
+    RTOS_ASSERT(rtos_task_create_static(&g_event_task, "event", 0U, 0U, event_task, (void *)0, g_event_stack, STACK_SMALL));
+    RTOS_ASSERT(rtos_task_create_static(&g_high_task, "high", 1U, 0U, high_task, (void *)0, g_high_stack, STACK_MEDIUM));
+    RTOS_ASSERT(rtos_task_create_static(&g_medium_task, "medium", 2U, 1U, medium_task, (void *)0, g_medium_stack,
+        STACK_SMALL));
+    RTOS_ASSERT(rtos_task_create_static(&g_low_task, "low", 3U, 2U, low_task, (void *)0, g_low_stack, STACK_MEDIUM));
+    RTOS_ASSERT(rtos_task_create_static(&g_producer_task, "producer", 4U, 2U, producer_task, (void *)0, g_producer_stack,
+        STACK_SMALL));
+    RTOS_ASSERT(rtos_task_create_static(&g_consumer_task, "consumer", 5U, 1U, consumer_task, (void *)0, g_consumer_stack,
+        STACK_SMALL));
+    RTOS_ASSERT(rtos_task_create_static(&g_monitor_task, "monitor", 6U, 2U, monitor_task, (void *)0, g_monitor_stack,
+        STACK_MONITOR));
+    RTOS_ASSERT(rtos_task_create_static(&g_idle_task, "idle", 7U, 3U, idle_task, (void *)0, g_idle_stack, STACK_IDLE));
 
     RTOS_ASSERT(rtos_scheduler_add_task(&g_event_task));
     RTOS_ASSERT(rtos_scheduler_add_task(&g_high_task));
@@ -202,8 +234,9 @@ void EXTI0_IRQHandler(void)
 {
     bool higher = false;
     EXTI_PR = 1UL;
-    (void)rtos_semaphore_give_from_isr(&g_button_event, &higher);
-    (void)higher; /* give_from_isr already pends PendSV through wake path. */
+    (void) rtos_semaphore_give_from_isr(&g_button_event, &higher);
+    (void) higher;
+    /* give_from_isr already pends PendSV through wake path. */
 }
 
 int main(void)

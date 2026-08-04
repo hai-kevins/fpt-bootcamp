@@ -20,8 +20,7 @@ bool policy_add(policy_scheduler_t *scheduler, policy_task_t *task)
 {
     const uint8_t priority = (task != NULL) ? task->priority : 0U;
 
-    if ((scheduler == NULL) || (task == NULL) || task->queued ||
-        (priority >= POLICY_PRIORITIES))
+    if ((scheduler == NULL) || (task == NULL) || task->queued || (priority >= POLICY_PRIORITIES))
     {
         return false;
     }
@@ -63,8 +62,7 @@ bool policy_rotate(policy_scheduler_t *scheduler, uint8_t priority)
 {
     policy_task_t *first;
 
-    if ((scheduler == NULL) || (priority >= POLICY_PRIORITIES) ||
-        (scheduler->count[priority] <= 1U))
+    if ((scheduler == NULL) || (priority >= POLICY_PRIORITIES) || (scheduler->count[priority] <= 1U))
     {
         return false;
     }
@@ -83,8 +81,7 @@ bool policy_remove(policy_scheduler_t *scheduler, policy_task_t *task)
     policy_task_t *cursor;
     const uint8_t priority = (task != NULL) ? task->priority : 0U;
 
-    if ((scheduler == NULL) || (task == NULL) || !task->queued ||
-        (priority >= POLICY_PRIORITIES))
+    if ((scheduler == NULL) || (task == NULL) || !task->queued || (priority >= POLICY_PRIORITIES))
     {
         return false;
     }
@@ -120,7 +117,7 @@ bool policy_remove(policy_scheduler_t *scheduler, policy_task_t *task)
     --scheduler->count[priority];
     if (scheduler->count[priority] == 0U)
     {
-        scheduler->bitmap &= ~(1UL << priority);
+        scheduler->bitmap &= ~ (1UL << priority);
     }
     return true;
 }

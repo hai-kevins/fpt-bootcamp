@@ -29,9 +29,7 @@ static bool tick_due(uint32_t now, uint32_t wake_tick)
 
 static uint8_t highest_ready_priority(void)
 {
-    for (uint8_t priority = 0U;
-         priority < (uint8_t)RTOS_PRIORITY_COUNT;
-         ++priority)
+    for (uint8_t priority = 0U; priority < (uint8_t) RTOS_PRIORITY_COUNT; ++priority)
     {
         if ((g_ready_bitmap & (1UL << priority)) != 0U)
         {
@@ -51,7 +49,7 @@ static void ready_clear_bitmap_if_empty(uint8_t priority)
 {
     if (g_ready_queues[priority].count == 0U)
     {
-        g_ready_bitmap &= ~(1UL << priority);
+        g_ready_bitmap &= ~ (1UL << priority);
     }
 }
 
@@ -180,10 +178,8 @@ bool rtos_scheduler_add_task(rtos_task_t *task)
 {
     rtos_irq_state_t irq_state;
 
-    if ((task == (rtos_task_t *)0) ||
-        (task->priority >= RTOS_PRIORITY_COUNT) ||
-        (task->state != RTOS_TASK_CREATED) ||
-        (g_task_count >= RTOS_MAX_TASKS))
+    if ((task == (rtos_task_t *)0) || (task->priority >= RTOS_PRIORITY_COUNT) || (task->state != RTOS_TASK_CREATED)
+        || (g_task_count >= RTOS_MAX_TASKS))
     {
         return false;
     }
@@ -203,10 +199,7 @@ void rtos_scheduler_start(void)
     g_current_task = select_next();
     g_current_task->state = RTOS_TASK_RUNNING;
     ++g_current_task->switch_count;
-    rtos_trace_record(RTOS_TRACE_KERNEL_START,
-                    0xFFU,
-                    g_current_task->id,
-                    g_kernel_tick);
+    rtos_trace_record(RTOS_TRACE_KERNEL_START, 0xFFU, g_current_task->id, g_kernel_tick);
     rtos_port_start_first_task();
 }
 
@@ -215,9 +208,7 @@ void rtos_scheduler_commit_switch(void)
     rtos_task_t *old_task = g_current_task;
     rtos_task_t *next_task = select_next();
 
-    if ((old_task != (rtos_task_t *)0) &&
-        (old_task != next_task) &&
-        (old_task->state == RTOS_TASK_RUNNING))
+    if ((old_task != (rtos_task_t *)0) && (old_task != next_task) && (old_task->state == RTOS_TASK_RUNNING))
     {
         old_task->state = RTOS_TASK_READY;
     }
@@ -229,10 +220,8 @@ void rtos_scheduler_commit_switch(void)
     {
         ++g_context_switch_count;
         ++next_task->switch_count;
-        rtos_trace_record(RTOS_TRACE_SWITCH,
-                        (old_task != (rtos_task_t *)0) ? old_task->id : 0xFFU,
-                        next_task->id,
-                        g_kernel_tick);
+        rtos_trace_record(RTOS_TRACE_SWITCH, (old_task != (rtos_task_t *)0) ? old_task->id : 0xFFU, next_task->id,
+        g_kernel_tick);
     }
 }
 
@@ -247,30 +236,23 @@ void rtos_scheduler_on_tick(void)
     {
         rtos_task_t *task = g_all_tasks[index];
 
-        if ((task != (rtos_task_t *)0) &&
-            (task->state == RTOS_TASK_BLOCKED) &&
-            (task->wake_tick != RTOS_WAIT_FOREVER) &&
-            tick_due(g_kernel_tick, task->wake_tick))
+        if ((task != (rtos_task_t *)0) && (task->state == RTOS_TASK_BLOCKED) && (task->wake_tick != RTOS_WAIT_FOREVER)
+            && tick_due(g_kernel_tick, task->wake_tick))
         {
             task->wake_tick = RTOS_WAIT_FOREVER;
             task->state = RTOS_TASK_READY;
             ready_enqueue_tail(task);
-            rtos_trace_record(RTOS_TRACE_WAKE,
-                            (g_current_task != (rtos_task_t *)0) ?
-                                g_current_task->id : 0xFFU,
-                            task->id,
-                            g_kernel_tick);
+            rtos_trace_record(RTOS_TRACE_WAKE, (g_current_task != (rtos_task_t *)0) ? g_current_task->id : 0xFFU,
+                task->id, g_kernel_tick);
 
-            if ((g_current_task == (rtos_task_t *)0) ||
-                (task->priority < g_current_task->priority))
+            if ((g_current_task == (rtos_task_t *)0) || (task->priority < g_current_task->priority))
             {
                 switch_required = true;
             }
         }
     }
 
-    if ((g_current_task != (rtos_task_t *)0) &&
-        (g_current_task->state == RTOS_TASK_RUNNING))
+    if ((g_current_task != (rtos_task_t *)0) && (g_current_task->state == RTOS_TASK_RUNNING))
     {
         ++g_current_task->runtime_ticks;
 
@@ -281,18 +263,15 @@ void rtos_scheduler_on_tick(void)
 
         if (g_current_task->time_slice_remaining == 0U)
         {
-            g_current_task->time_slice_remaining =
-                RTOS_DEFAULT_TIME_SLICE_TICKS;
+            g_current_task->time_slice_remaining = RTOS_DEFAULT_TIME_SLICE_TICKS;
 
             if (g_ready_queues[g_current_task->priority].count > 1U)
             {
                 const uint8_t old_id = g_current_task->id;
                 ready_rotate(g_current_task->priority);
                 g_current_task->state = RTOS_TASK_READY;
-                rtos_trace_record(RTOS_TRACE_TICK_ROTATE,
-                                old_id,
-                                g_ready_queues[g_current_task->priority].head->id,
-                                g_kernel_tick);
+                rtos_trace_record(RTOS_TRACE_TICK_ROTATE, old_id, g_ready_queues[g_current_task->priority].head->id,
+                    g_kernel_tick);
                 switch_required = true;
             }
         }
@@ -318,12 +297,8 @@ void rtos_task_yield(void)
         const uint8_t old_id = g_current_task->id;
         ready_rotate(g_current_task->priority);
         g_current_task->state = RTOS_TASK_READY;
-        g_current_task->time_slice_remaining =
-            RTOS_DEFAULT_TIME_SLICE_TICKS;
-        rtos_trace_record(RTOS_TRACE_YIELD,
-                        old_id,
-                        g_ready_queues[g_current_task->priority].head->id,
-                        g_kernel_tick);
+        g_current_task->time_slice_remaining = RTOS_DEFAULT_TIME_SLICE_TICKS;
+        rtos_trace_record(RTOS_TRACE_YIELD, old_id, g_ready_queues[g_current_task->priority].head->id, g_kernel_tick);
         rtos_port_request_context_switch();
     }
 
@@ -347,10 +322,7 @@ void rtos_task_delay(uint32_t ticks)
     ready_remove(g_current_task);
     g_current_task->wake_tick = g_kernel_tick + ticks;
     g_current_task->state = RTOS_TASK_BLOCKED;
-    rtos_trace_record(RTOS_TRACE_DELAY,
-                    g_current_task->id,
-                    0xFFU,
-                    g_kernel_tick);
+    rtos_trace_record(RTOS_TRACE_DELAY, g_current_task->id, 0xFFU, g_kernel_tick);
     rtos_port_request_context_switch();
     rtos_critical_exit(irq_state);
 }
@@ -374,14 +346,12 @@ bool rtos_task_wake(rtos_task_t *task)
     bool switch_required = false;
     const rtos_irq_state_t irq_state = rtos_critical_enter();
 
-    if ((task != (rtos_task_t *)0) &&
-        (task->state == RTOS_TASK_BLOCKED))
+    if ((task != (rtos_task_t *)0) && (task->state == RTOS_TASK_BLOCKED))
     {
         task->wake_tick = RTOS_WAIT_FOREVER;
         task->state = RTOS_TASK_READY;
         ready_enqueue_tail(task);
-        switch_required = (g_current_task == (rtos_task_t *)0) ||
-                          (task->priority < g_current_task->priority);
+        switch_required = (g_current_task == (rtos_task_t *)0) || (task->priority < g_current_task->priority);
         if (switch_required)
         {
             rtos_port_request_context_switch();
@@ -397,19 +367,14 @@ bool rtos_task_wake_from_isr(rtos_task_t *task)
     bool switch_required = false;
     const rtos_irq_state_t irq_state = rtos_critical_enter();
 
-    if ((task != (rtos_task_t *)0) &&
-        (task->state == RTOS_TASK_BLOCKED))
+    if ((task != (rtos_task_t *)0) && (task->state == RTOS_TASK_BLOCKED))
     {
         task->wake_tick = RTOS_WAIT_FOREVER;
         task->state = RTOS_TASK_READY;
         ready_enqueue_tail(task);
-        switch_required = (g_current_task == (rtos_task_t *)0) ||
-                          (task->priority < g_current_task->priority);
-        rtos_trace_record(RTOS_TRACE_ISR_WAKE,
-                        (g_current_task != (rtos_task_t *)0) ?
-                            g_current_task->id : 0xFFU,
-                        task->id,
-                        g_kernel_tick);
+        switch_required = (g_current_task == (rtos_task_t *)0) || (task->priority < g_current_task->priority);
+        rtos_trace_record(RTOS_TRACE_ISR_WAKE, (g_current_task != (rtos_task_t *)0) ? g_current_task->id : 0xFFU,
+        task->id, g_kernel_tick);
         if (switch_required)
         {
             rtos_port_request_context_switch();

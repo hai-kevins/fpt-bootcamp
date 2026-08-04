@@ -2,7 +2,10 @@
 
 static hr_list_t g_delayed_tasks;
 
-void hr_timeout_init(void) { hr_list_init(&g_delayed_tasks); }
+void hr_timeout_init(void)
+{
+    hr_list_init(&g_delayed_tasks);
+}
 
 bool hr_tick_reached(uint32_t now, uint32_t deadline)
 {
@@ -17,8 +20,10 @@ bool hr_tick_before(uint32_t left, uint32_t right)
 bool hr_timeout_insert(hr_task_t *task)
 {
     hr_list_node_t *node;
-    if (!hr_task_is_valid(task) || (task->wake_tick == HR_WAIT_FOREVER) ||
-        (task->timeout_node.owner != (const void *)0)) { return false; }
+    if (!hr_task_is_valid(task) || (task->wake_tick == HR_WAIT_FOREVER) || (task->timeout_node.owner != (const void *)0))
+    {
+        return false;
+    }
 
     node = hr_list_front(&g_delayed_tasks);
     while (node != (hr_list_node_t *)0)
@@ -35,16 +40,14 @@ bool hr_timeout_insert(hr_task_t *task)
 
 bool hr_timeout_remove(hr_task_t *task)
 {
-    return hr_task_is_valid(task) &&
-           (task->timeout_node.owner == &g_delayed_tasks) &&
-           hr_list_remove(&g_delayed_tasks, &task->timeout_node);
+    return hr_task_is_valid(task) && (task->timeout_node.owner == &g_delayed_tasks) && hr_list_remove(&g_delayed_tasks,
+        &task->timeout_node);
 }
 
 hr_task_t *hr_timeout_front(void)
 {
     hr_list_node_t *node = hr_list_front(&g_delayed_tasks);
-    return (node != (hr_list_node_t *)0) ?
-           HR_CONTAINER_OF(node, hr_task_t, timeout_node) : (hr_task_t *)0;
+    return (node != (hr_list_node_t *)0) ? HR_CONTAINER_OF(node, hr_task_t, timeout_node) : (hr_task_t *)0;
 }
 
 hr_task_t *hr_timeout_take_due(uint32_t now)
@@ -54,26 +57,40 @@ hr_task_t *hr_timeout_take_due(uint32_t now)
     {
         return (hr_task_t *)0;
     }
-    (void)hr_timeout_remove(task);
+    (void) hr_timeout_remove(task);
     return task;
 }
 
-size_t hr_timeout_count(void) { return hr_list_count(&g_delayed_tasks); }
-const hr_list_t *hr_timeout_list(void) { return &g_delayed_tasks; }
+size_t hr_timeout_count(void)
+{
+    return hr_list_count(&g_delayed_tasks);
+}
+
+const hr_list_t *hr_timeout_list(void)
+{
+    return &g_delayed_tasks;
+}
 
 bool hr_timeout_validate(void)
 {
     const hr_list_node_t *node;
     const hr_task_t *previous = (const hr_task_t *)0;
-    if (!hr_list_validate(&g_delayed_tasks)) { return false; }
+    if (!hr_list_validate(&g_delayed_tasks))
+    {
+        return false;
+    }
     node = g_delayed_tasks.head;
     while (node != (const hr_list_node_t *)0)
     {
         const hr_task_t *task = HR_CONTAINER_OF(node, hr_task_t, timeout_node);
-        if (!hr_task_is_valid(task) || (task->state != HR_TASK_BLOCKED) ||
-            (task->wake_tick == HR_WAIT_FOREVER)) { return false; }
-        if ((previous != (const hr_task_t *)0) &&
-            hr_tick_before(task->wake_tick, previous->wake_tick)) { return false; }
+        if (!hr_task_is_valid(task) || (task->state != HR_TASK_BLOCKED) || (task->wake_tick == HR_WAIT_FOREVER))
+        {
+            return false;
+        }
+        if ((previous != (const hr_task_t *)0) && hr_tick_before(task->wake_tick, previous->wake_tick))
+        {
+            return false;
+        }
         previous = task;
         node = node->next;
     }

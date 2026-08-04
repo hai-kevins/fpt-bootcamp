@@ -18,9 +18,7 @@ typedef struct
     uint32_t bin_count[HR_BENCHMARK_BIN_COUNT + 1U];
 } hr_benchmark_stats_t;
 
-void hr_benchmark_stats_init(hr_benchmark_stats_t *stats,
-                             const uint32_t *bin_upper,
-                             size_t bin_count);
+void hr_benchmark_stats_init(hr_benchmark_stats_t *stats, const uint32_t *bin_upper, size_t bin_count);
 void hr_benchmark_stats_add(hr_benchmark_stats_t *stats, uint32_t sample);
 uint32_t hr_benchmark_stats_average(const hr_benchmark_stats_t *stats);
 bool hr_benchmark_stats_validate(const hr_benchmark_stats_t *stats);

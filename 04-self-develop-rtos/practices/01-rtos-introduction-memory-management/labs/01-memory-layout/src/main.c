@@ -28,7 +28,7 @@ static void print_symbol(const char *name, const void *address)
 int main(void)
 {
     uart_init(9600UL, 8000000UL);
-    (void)systick_init(8000000UL, 1000UL);
+    (void) systick_init(8000000UL, 1000UL);
     gpio_enable_clock(GPIO_PORT_C);
     gpio_config_output_push_pull(GPIO_PORT_C, 13UL);
     gpio_write(GPIO_PORT_C, 13UL, true);

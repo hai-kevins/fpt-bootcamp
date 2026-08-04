@@ -19,13 +19,13 @@ void rtos_port_start_first_task(void)
 void rtos_port_request_context_switch(void)
 {
     SCB_ICSR = SCB_ICSR_PENDSVSET;
-    __asm volatile("dsb" ::: "memory");
-    __asm volatile("isb" ::: "memory");
+    __asm volatile("dsb" : : : "memory");
+    __asm volatile("isb" : : : "memory");
 }
 
 void rtos_port_wait_for_interrupt(void)
 {
-    __asm volatile("wfi" ::: "memory");
+    __asm volatile("wfi" : : : "memory");
 }
 
 uint32_t rtos_port_get_psp(void)

@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+
 typedef enum
 {
     HEAP_STATUS_OK = 0,
@@ -13,6 +14,7 @@ typedef enum
     HEAP_STATUS_DOUBLE_FREE,
     HEAP_STATUS_CORRUPTED
 } heap_status_t;
+
 typedef struct
 {
     size_t heap_size;
@@ -26,6 +28,7 @@ typedef struct
     size_t free_count;
     size_t failed_allocation_count;
 } heap_stats_t;
+
 heap_status_t heap_init(void *memory, size_t size);
 void *heap_alloc(size_t size);
 heap_status_t heap_free(void *pointer);

@@ -5,13 +5,14 @@ void uart1_init_9600_hsi8(void)
 {
     RCC_APB2ENR |= RCC_APB2ENR_IOPAEN | RCC_APB2ENR_USART1EN;
 
-    GPIOA_CRH &= ~((0xFUL << 4) | (0xFUL << 8));
-    GPIOA_CRH |= (0xBUL << 4); /* PA9: AF push-pull, 50 MHz. */
-    GPIOA_CRH |= (0x4UL << 8); /* PA10: floating input. */
+    GPIOA_CRH &= ~ ((0xFUL << 4) | (0xFUL << 8));
+    GPIOA_CRH |= (0xBUL << 4);
+    /* PA9: AF push-pull, 50 MHz. */ GPIOA_CRH |= (0x4UL << 8);
+    /* PA10: floating input. */
 
     USART1_CR1 = 0U;
-    USART1_BRR = 0x0341UL; /* 8 MHz / 9600 baud, oversampling by 16. */
-    USART1_CR1 = USART_CR1_TE | USART_CR1_RE | USART_CR1_UE;
+    USART1_BRR = 0x0341UL;
+    /* 8 MHz / 9600 baud, oversampling by 16. */ USART1_CR1 = USART_CR1_TE | USART_CR1_RE | USART_CR1_UE;
 }
 
 void uart1_write_byte(uint8_t byte)
@@ -46,7 +47,7 @@ void uart1_write_hex32(uint32_t value)
     for (uint32_t shift = 28U;; shift -= 4U)
     {
         const uint32_t nibble = (value >> shift) & 0xFUL;
-        uart1_write_byte((uint8_t)digits[nibble]);
+        uart1_write_byte((uint8_t) digits[nibble]);
 
         if (shift == 0U)
         {

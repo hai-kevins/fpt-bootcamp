@@ -10,11 +10,9 @@ volatile uint32_t g_svc_frame[8];
 
 static uint32_t g_process_stack[64] __attribute__((aligned(8)));
 
-void lab_svc_capture(uint32_t *stacked,
-                     uint32_t psp,
-                     uint32_t exc_return)
+void lab_svc_capture(uint32_t *stacked, uint32_t psp, uint32_t exc_return)
 {
-    g_svc_msp = (uint32_t)(uintptr_t)stacked;
+    g_svc_msp = (uint32_t)(uintptr_t) stacked;
     g_svc_psp = psp;
     g_svc_exc_return = exc_return;
 
@@ -33,8 +31,7 @@ static void print_value(const char *name, uint32_t value)
 
 int main(void)
 {
-    const uint32_t psp_top =
-        (uint32_t)(uintptr_t)(g_process_stack + 64U);
+    const uint32_t psp_top = (uint32_t)(uintptr_t)(g_process_stack + 64U);
 
     clock_init_hsi_8mhz();
     uart1_init_9600_hsi8();

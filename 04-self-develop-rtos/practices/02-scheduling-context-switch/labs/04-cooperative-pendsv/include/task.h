@@ -28,8 +28,8 @@ typedef struct rtos_task
     const char *name;
     rtos_task_entry_t entry;
     void *argument;
-    struct rtos_task *ready_previous;
-    struct rtos_task *ready_next;
+    struct rtos_task * ready_previous;
+    struct rtos_task * ready_next;
     uint32_t wake_tick;
     uint32_t runtime_ticks;
     uint32_t switch_count;
@@ -41,14 +41,8 @@ typedef struct rtos_task
     bool in_ready_queue;
 } rtos_task_t;
 
-bool rtos_task_create_static(rtos_task_t *task,
-                           const char *name,
-                           uint8_t id,
-                           uint8_t priority,
-                           rtos_task_entry_t entry,
-                           void *argument,
-                           uint32_t *stack,
-                           size_t stack_word_count);
+bool rtos_task_create_static(rtos_task_t *task, const char *name, uint8_t id, uint8_t priority, rtos_task_entry_t entry,
+    void *argument, uint32_t *stack, size_t stack_word_count);
 
 size_t rtos_task_stack_unused_words(const rtos_task_t *task);
 bool rtos_task_stack_guard_ok(const rtos_task_t *task);

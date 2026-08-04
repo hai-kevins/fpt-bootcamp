@@ -1,9 +1,11 @@
 #include "test.h"
 #include "heap.h"
 #include <stdint.h>
+
 int test_double_free(void)
 {
-    uint8_t memory[512]; void *pointer;
+    uint8_t memory[512];
+    void *pointer;
     TEST_ASSERT(heap_init(memory, sizeof(memory)) == HEAP_STATUS_OK);
     pointer = heap_alloc(32U);
     TEST_ASSERT(pointer != (void *)0);

@@ -7,8 +7,8 @@
 
 typedef struct hr_list_node
 {
-    struct hr_list_node *previous;
-    struct hr_list_node *next;
+    struct hr_list_node * previous;
+    struct hr_list_node * next;
     const void *owner;
 } hr_list_node_t;
 

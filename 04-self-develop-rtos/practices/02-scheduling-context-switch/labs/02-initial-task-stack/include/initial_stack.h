@@ -6,10 +6,6 @@
 
 typedef void (*lab_task_entry_t)(void *argument);
 
-uint32_t *lab_build_initial_stack(uint32_t *stack,
-                                  size_t word_count,
-                                  lab_task_entry_t entry,
-                                  void *argument,
-                                  uintptr_t return_handler);
+uint32_t *lab_build_initial_stack(uint32_t *stack, size_t word_count, lab_task_entry_t entry, void *argument, uintptr_t return_handler);
 
 #endif

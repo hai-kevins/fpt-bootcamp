@@ -1,3 +1,38 @@
 #include "dlist.h"
 #include "test.h"
-typedef struct{int v;dlist_node_t node;}item_t;int main(void){dlist_t l;item_t a={.v=1},b={.v=2},c={.v=3};dlist_init(&l);dlist_node_init(&a.node);dlist_node_init(&b.node);dlist_node_init(&c.node);TEST_ASSERT(dlist_push_back(&l,&a.node));TEST_ASSERT(dlist_push_back(&l,&b.node));TEST_ASSERT(dlist_insert_before(&l,&b.node,&c.node));TEST_ASSERT(l.count==3&&l.head==&a.node&&l.tail==&b.node);TEST_ASSERT(DLIST_CONTAINER_OF(c.node.previous,item_t,node)==&a);TEST_ASSERT(dlist_remove(&l,&c.node));TEST_ASSERT(dlist_validate(&l));TEST_PASS("intrusive doubly list");return 0;}
+
+typedef struct
+{
+    int v;
+    dlist_node_t node;
+} item_t;
+
+int main(void)
+{
+    dlist_t l;
+    item_t a =
+    {
+        .v = 1
+    },
+    b =
+    {
+        .v = 2
+    },
+    c =
+    {
+        .v = 3
+    };
+    dlist_init(&l);
+    dlist_node_init(&a.node);
+    dlist_node_init(&b.node);
+    dlist_node_init(&c.node);
+    TEST_ASSERT(dlist_push_back(&l, &a.node));
+    TEST_ASSERT(dlist_push_back(&l, &b.node));
+    TEST_ASSERT(dlist_insert_before(&l, &b.node, &c.node));
+    TEST_ASSERT(l.count == 3 && l.head == &a.node && l.tail == &b.node);
+    TEST_ASSERT(DLIST_CONTAINER_OF(c.node.previous, item_t, node) == &a);
+    TEST_ASSERT(dlist_remove(&l, &c.node));
+    TEST_ASSERT(dlist_validate(&l));
+    TEST_PASS("intrusive doubly list");
+    return 0;
+}

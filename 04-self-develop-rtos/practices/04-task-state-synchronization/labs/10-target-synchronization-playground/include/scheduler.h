@@ -21,10 +21,7 @@ rtos_wait_result_t rtos_task_delay_until(uint32_t *previous_wake, uint32_t perio
 rtos_task_t *rtos_scheduler_current(void);
 uint32_t rtos_scheduler_tick_now(void);
 
-bool rtos_scheduler_block_current_locked(void *object,
-                                       rtos_list_t *waiters,
-                                       rtos_wait_kind_t kind,
-                                       uint32_t timeout_ticks);
+bool rtos_scheduler_block_current_locked(void *object, rtos_list_t *waiters, rtos_wait_kind_t kind, uint32_t timeout_ticks);
 bool rtos_scheduler_wake_task_locked(rtos_task_t *task, rtos_wait_result_t result);
 bool rtos_scheduler_set_effective_priority_locked(rtos_task_t *task, uint8_t priority);
 bool rtos_task_suspend(rtos_task_t *task);

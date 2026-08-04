@@ -7,7 +7,7 @@
 
 typedef struct hr_pool_block
 {
-    struct hr_pool_block *next;
+    struct hr_pool_block * next;
 } hr_pool_block_t;
 
 typedef struct
@@ -24,12 +24,8 @@ typedef struct
     uint32_t failure_count;
 } hr_message_pool_t;
 
-bool hr_message_pool_init_static(hr_message_pool_t *pool,
-                                 const char *name,
-                                 void *memory,
-                                 size_t block_size,
-                                 size_t block_count,
-                                 uint8_t *allocation_map);
+bool hr_message_pool_init_static(hr_message_pool_t *pool, const char *name, void *memory, size_t block_size, size_t block_count,
+    uint8_t *allocation_map);
 void *hr_message_pool_alloc(hr_message_pool_t *pool);
 bool hr_message_pool_free(hr_message_pool_t *pool, void *block);
 bool hr_message_pool_owns(const hr_message_pool_t *pool, const void *block);
