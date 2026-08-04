@@ -25,10 +25,10 @@ void trace_write(const trace_record_t *record)
     {
         g_count++;
     }
-        else
-        {
-            g_overwritten++;
-        }
+    else
+    {
+        g_overwritten++;
+    }
 }
 
 size_t trace_count(void)

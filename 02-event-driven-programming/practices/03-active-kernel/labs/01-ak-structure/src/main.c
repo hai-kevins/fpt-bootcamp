@@ -7,6 +7,7 @@ typedef struct
     priority,
     queue_depth;
 } task_t;
+
 typedef struct
 {
     uint16_t signal;
@@ -14,6 +15,7 @@ typedef struct
     length,
     ref_count;
 } message_t;
+
 typedef struct
 {
     uint8_t active,

@@ -1,7 +1,9 @@
 #include "active_object.h"
 #include "scheduler.h"
 #include <stdio.h>
+
 static unsigned handled;
+
 static void h(ed_active_object_t *o, const ed_event_t *e)
 {
     (void) o;
@@ -28,10 +30,10 @@ int main(void)
             {
                 posted++;
             }
-                else
-                {
-                    ed_event_pool_release(&p, e);
-                }
+            else
+            {
+                ed_event_pool_release(&p, e);
+            }
         }
         if ((i % 16U) == 15U)
         {

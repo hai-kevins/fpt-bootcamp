@@ -1,7 +1,9 @@
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
+
 static uint32_t period = 1000U, deadline, count;
+
 static void start(uint32_t now, uint32_t p)
 {
     period = p;

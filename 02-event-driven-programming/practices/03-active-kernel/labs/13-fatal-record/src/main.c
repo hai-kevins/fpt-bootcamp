@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
+
 typedef struct
 {
     uint32_t magic,
@@ -11,7 +12,9 @@ typedef struct
     uint16_t sig;
     uint8_t task;
 } fatal_t;
+
 static fatal_t r;
+
 static uint32_t sum(void)
 {
     return r.magic ^ r.code ^ r.ts ^ r.restart ^ r.sig ^ r.task ^ 0x5A5AA5A5U;

@@ -1,5 +1,6 @@
 #include "fsm.h"
 #include <stdio.h>
+
 int main(void)
 {
     const ed_fsm_transition_t t[] =

@@ -72,18 +72,18 @@ bool command_parse(const char *line, command_t *command)
     {
         command->type = COMMAND_LED_ON;
     }
-        else if (equal(line, "led off"))
-        {
-            command->type = COMMAND_LED_OFF;
-        }
-            else if (equal(line, "status"))
-            {
-                command->type = COMMAND_STATUS;
-            }
-                else if (starts(line, "blink ") && number(&line[6], &period) && (period >= 50UL) && (period <= 5000UL))
-                {
-                    command->type = COMMAND_BLINK;
-                    command->parameter = period;
-                }
+    else if (equal(line, "led off"))
+    {
+        command->type = COMMAND_LED_OFF;
+    }
+    else if (equal(line, "status"))
+    {
+        command->type = COMMAND_STATUS;
+    }
+    else if (starts(line, "blink ") && number(&line[6], &period) && (period >= 50UL) && (period <= 5000UL))
+    {
+        command->type = COMMAND_BLINK;
+        command->parameter = period;
+    }
     return command->type != COMMAND_INVALID;
 }

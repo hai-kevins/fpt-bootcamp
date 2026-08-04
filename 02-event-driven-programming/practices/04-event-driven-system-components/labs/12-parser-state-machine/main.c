@@ -1,6 +1,7 @@
 #include "parser.h"
 #include "serializer.h"
 #include <stdio.h>
+
 int main(void)
 {
     ed_frame_t f =

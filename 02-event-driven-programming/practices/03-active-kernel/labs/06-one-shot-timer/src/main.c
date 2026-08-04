@@ -2,8 +2,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+
 static bool active, pressed;
 static uint32_t deadline;
+
 static void edge(uint32_t now)
 {
     active = true;

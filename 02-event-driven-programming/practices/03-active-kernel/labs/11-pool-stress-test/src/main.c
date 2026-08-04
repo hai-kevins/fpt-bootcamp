@@ -1,8 +1,10 @@
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
+
 #define POOL 16U
 #define QUEUE 8U
+
 int main(void)
 {
     uint32_t posted = 0, post_fail = 0, alloc_fail = 0;

@@ -1,12 +1,14 @@
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
+
 typedef struct
 {
     uint8_t state;
     uint16_t sig;
     uint8_t next;
 } row_t;
+
 enum
 {
     IDLE,
@@ -14,6 +16,7 @@ enum
     PAUSED,
     ERROR
 };
+
 enum
 {
     START = 1,
@@ -23,6 +26,7 @@ enum
     FAIL,
     RESET
 };
+
 static const row_t rows[] =
 {
     {
@@ -70,6 +74,7 @@ static const row_t rows[] =
     }
 };
 static uint8_t state = IDLE;
+
 static int dispatch(uint16_t sig)
 {
     for (unsigned i = 0; i < sizeof(rows) / sizeof(rows[0]); i++)

@@ -7,8 +7,10 @@ typedef struct
     uint8_t destination;
     uint16_t signal;
 } message_t;
+
 static message_t queue[4];
 static uint8_t head, tail, count;
+
 static void post(uint8_t dst, uint16_t sig)
 {
     assert(count < 4U);
@@ -49,10 +51,10 @@ int main(void)
         {
             task_a(m.signal);
         }
-            else
-            {
-                task_b(m.signal);
-            }
+        else
+        {
+            task_b(m.signal);
+        }
     }
     assert(count == 0U);
     return 0;

@@ -44,10 +44,10 @@ void platform_led_toggle(void)
     {
         platform_led_off();
     }
-        else
-        {
-            platform_led_on();
-        }
+    else
+    {
+        platform_led_on();
+    }
 }
 
 bool platform_led_is_on(void)

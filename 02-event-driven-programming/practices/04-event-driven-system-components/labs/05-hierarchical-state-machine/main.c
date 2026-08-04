@@ -1,6 +1,8 @@
 #include "hsm.h"
 #include <stdio.h>
+
 static unsigned hits;
+
 static bool h(void *c, uint8_t s, const ed_event_t *e, uint8_t *n)
 {
     (void) c;

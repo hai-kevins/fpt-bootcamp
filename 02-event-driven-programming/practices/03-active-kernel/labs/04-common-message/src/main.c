@@ -3,17 +3,20 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+
 typedef struct
 {
     uint16_t x,
     y;
     uint8_t health;
 } player_status_t;
+
 typedef struct
 {
     uint8_t len;
     uint8_t data[24];
 } message_t;
+
 static bool receive(const message_t *m, player_status_t *out)
 {
     if (m->len != sizeof (*out))

@@ -37,10 +37,10 @@ void app_sm_dispatch(app_sm_t *sm, app_event_t event)
             {
                 next = APP_ERROR;
             }
-                else if (event == APP_SENSOR_READY)
-                {
-                    next = APP_ACTIVE;
-                }
+            else if (event == APP_SENSOR_READY)
+            {
+                next = APP_ACTIVE;
+            }
         break;
         case APP_ERROR : if (event == APP_RESET_REQUEST)
             next = APP_IDLE;

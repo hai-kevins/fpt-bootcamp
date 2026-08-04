@@ -1,6 +1,5 @@
 #ifndef LAB07_TRACE_H
 #define LAB07_TRACE_H
-
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -21,5 +20,4 @@ void trace_write(const trace_record_t *record);
 size_t trace_count(void);
 bool trace_get(size_t index, trace_record_t *record);
 uint32_t trace_overwritten(void);
-
 #endif

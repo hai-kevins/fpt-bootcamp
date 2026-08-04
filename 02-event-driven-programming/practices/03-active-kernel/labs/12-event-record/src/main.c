@@ -1,14 +1,18 @@
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
+
 #define CAP 64U
+
 typedef struct
 {
     uint32_t ts;
     uint16_t sig;
 } rec_t;
+
 static rec_t r[CAP];
 static uint32_t head, count, over;
+
 static void write_rec(uint32_t ts, uint16_t sig)
 {
     r[head] = (rec_t)
@@ -21,10 +25,10 @@ static void write_rec(uint32_t ts, uint16_t sig)
     {
         count++;
     }
-        else
-        {
-            over++;
-        }
+    else
+    {
+        over++;
+    }
 }
 
 int main(void)

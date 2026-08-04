@@ -1,6 +1,8 @@
 #include "datalink.h"
 #include <stdio.h>
+
 static unsigned sends;
+
 static bool tx(void *c, const uint8_t *d, size_t n)
 {
     (void) c;

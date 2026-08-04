@@ -3,11 +3,14 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+
 #define BLOCKS 4U
 #define SIZE 96U
+
 static uint8_t pool[BLOCKS][SIZE];
 static bool used[BLOCKS];
 static uint8_t current, max_used;
+
 static void *alloc(void)
 {
     for (uint8_t i = 0; i < BLOCKS; i++)

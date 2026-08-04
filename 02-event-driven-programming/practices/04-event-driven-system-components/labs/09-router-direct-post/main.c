@@ -1,7 +1,9 @@
 #include "router.h"
 #include "scheduler.h"
 #include <stdio.h>
+
 static unsigned hit;
+
 static void h(ed_active_object_t *o, const ed_event_t *e)
 {
     (void) o;

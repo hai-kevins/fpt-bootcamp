@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
+
 enum
 {
     IDLE,
@@ -8,6 +9,7 @@ enum
     PAUSED,
     ERROR
 };
+
 enum
 {
     START = 1,
@@ -17,7 +19,9 @@ enum
     FAIL,
     RESET
 };
+
 static uint8_t state = IDLE;
+
 static void dispatch(uint16_t sig)
 {
     switch (state)
@@ -35,10 +39,10 @@ static void dispatch(uint16_t sig)
             {
                 state = IDLE;
             }
-                else if (sig == FAIL)
-                {
-                    state = ERROR;
-                }
+            else if (sig == FAIL)
+            {
+                state = ERROR;
+            }
         break;
         case PAUSED : if (sig == RESUME)
             state = RUNNING;
@@ -46,10 +50,10 @@ static void dispatch(uint16_t sig)
             {
                 state = IDLE;
             }
-                else if (sig == FAIL)
-                {
-                    state = ERROR;
-                }
+            else if (sig == FAIL)
+            {
+                state = ERROR;
+            }
         break;
         case ERROR : if (sig == RESET)
             state = IDLE;

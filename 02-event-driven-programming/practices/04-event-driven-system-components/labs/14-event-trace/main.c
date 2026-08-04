@@ -1,5 +1,6 @@
 #include "event_trace.h"
 #include <stdio.h>
+
 int main(void)
 {
     ed_trace_t t;

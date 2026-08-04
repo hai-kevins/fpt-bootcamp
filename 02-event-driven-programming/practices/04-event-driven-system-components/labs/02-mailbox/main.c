@@ -1,5 +1,6 @@
 #include "mailbox.h"
 #include <stdio.h>
+
 int main(void)
 {
     ed_mailbox_t q;

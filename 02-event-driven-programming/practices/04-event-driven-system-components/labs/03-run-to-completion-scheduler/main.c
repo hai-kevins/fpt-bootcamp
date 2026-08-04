@@ -2,7 +2,9 @@
 #include "event_pool.h"
 #include "scheduler.h"
 #include <stdio.h>
+
 static unsigned order[2], n;
+
 static void h(ed_active_object_t *o, const ed_event_t *e)
 {
     (void) e;

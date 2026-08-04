@@ -6,6 +6,7 @@
 
 extern uint32_t g_fake_time;
 static uint32_t g_count;
+
 static void handler(const ak_message_t *message)
 {
     (void) message;

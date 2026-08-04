@@ -51,10 +51,10 @@ void platform_led_toggle(void)
     {
         platform_led_off();
     }
-        else
-        {
-            platform_led_on();
-        }
+    else
+    {
+        platform_led_on();
+    }
 }
 
 void EXTI0_IRQHandler(void)

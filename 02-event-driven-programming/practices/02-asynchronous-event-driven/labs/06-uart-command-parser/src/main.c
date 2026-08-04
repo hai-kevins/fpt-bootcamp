@@ -1,5 +1,6 @@
 #include "command_parser.h"
 #include <stdio.h>
+
 int main(void)
 {
     const char *commands[] =

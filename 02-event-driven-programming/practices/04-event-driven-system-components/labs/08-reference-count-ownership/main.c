@@ -1,5 +1,6 @@
 #include "event_pool.h"
 #include <stdio.h>
+
 int main(void)
 {
     ed_event_pool_t p;

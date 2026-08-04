@@ -1,6 +1,8 @@
 #include "fsm.h"
 #include <stdio.h>
+
 static unsigned actions;
+
 static void a(void *c, const ed_event_t *e)
 {
     (void) e;
