@@ -1,5 +1,6 @@
 #ifndef TIMER_MODEL_H
 #define TIMER_MODEL_H
+
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -25,4 +26,5 @@ bool timer_stop(timer_list_t *, timer_model_t *);
 timer_model_t *timer_take_due(timer_list_t *, uint32_t);
 void timer_complete(timer_list_t *, timer_model_t *, uint32_t);
 bool timer_validate(const timer_list_t *);
+
 #endif

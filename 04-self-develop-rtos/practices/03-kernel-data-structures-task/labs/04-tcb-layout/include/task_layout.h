@@ -1,5 +1,6 @@
 #ifndef TASK_LAYOUT_H
 #define TASK_LAYOUT_H
+
 #include "list.h"
 #include <stddef.h>
 #include <stdint.h>
@@ -28,4 +29,5 @@ typedef struct task
 } task_t;
 
 _Static_assert(offsetof(task_t, saved_sp) == 0U, "saved_sp offset must remain zero");
+
 #endif

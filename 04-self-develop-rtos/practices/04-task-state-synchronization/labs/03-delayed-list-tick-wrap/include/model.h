@@ -1,5 +1,6 @@
 #ifndef MODEL_H
 #define MODEL_H
+
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -23,4 +24,5 @@ void delayed_init(delayed_t *d);
 bool delayed_insert(delayed_t *d, task_t *t);
 task_t *delayed_take_due(delayed_t *d, uint32_t now);
 bool delayed_validate(const delayed_t *d);
+
 #endif

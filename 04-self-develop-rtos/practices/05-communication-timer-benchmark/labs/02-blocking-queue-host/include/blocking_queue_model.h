@@ -1,5 +1,6 @@
 #ifndef BLOCKING_QUEUE_MODEL_H
 #define BLOCKING_QUEUE_MODEL_H
+
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -25,4 +26,5 @@ void model_init(model_queue_t *);
 model_result_t model_send(model_queue_t *, int, bool);
 model_result_t model_receive(model_queue_t *, int *, bool);
 bool model_validate(const model_queue_t *);
+
 #endif

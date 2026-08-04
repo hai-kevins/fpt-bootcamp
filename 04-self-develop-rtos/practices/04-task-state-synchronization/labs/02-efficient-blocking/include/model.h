@@ -1,5 +1,6 @@
 #ifndef MODEL_H
 #define MODEL_H
+
 #include <stdbool.h>
 
 typedef enum
@@ -22,4 +23,5 @@ bool wake_task(task_t *t);
 bool suspend_task(task_t *t);
 bool resume_task(task_t *t);
 bool validate_task(const task_t *t);
+
 #endif

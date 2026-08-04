@@ -1,5 +1,6 @@
 #ifndef MODEL_H
 #define MODEL_H
+
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -21,4 +22,5 @@ void mutex_init(mutex_t *m);
 bool mutex_lock(mutex_t *m, task_t *t, bool wait);
 bool mutex_unlock(mutex_t *m, task_t *t);
 bool mutex_validate(const mutex_t *m);
+
 #endif

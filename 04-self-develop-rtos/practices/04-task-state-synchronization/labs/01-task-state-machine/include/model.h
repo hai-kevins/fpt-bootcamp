@@ -1,5 +1,6 @@
 #ifndef MODEL_H
 #define MODEL_H
+
 #include <stdbool.h>
 
 typedef enum
@@ -15,4 +16,5 @@ typedef enum
 bool transition_allowed(state_t from, state_t to);
 bool transition_apply(state_t *state, state_t to);
 const char *state_name(state_t state);
+
 #endif

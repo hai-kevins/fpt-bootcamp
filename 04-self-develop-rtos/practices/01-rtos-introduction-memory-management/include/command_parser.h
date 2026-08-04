@@ -1,5 +1,6 @@
 #ifndef COMMAND_PARSER_H
 #define COMMAND_PARSER_H
+
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -14,4 +15,5 @@ typedef struct
 } command_t;
 
 bool command_parse(const char *line, command_t *command);
+
 #endif

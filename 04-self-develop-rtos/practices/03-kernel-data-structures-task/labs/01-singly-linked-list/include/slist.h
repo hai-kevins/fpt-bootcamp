@@ -1,5 +1,6 @@
 #ifndef SLIST_H
 #define SLIST_H
+
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -24,4 +25,5 @@ bool slist_push_back(slist_t *list, slist_node_t *node);
 slist_node_t *slist_pop_front(slist_t *list);
 slist_node_t *slist_find(const slist_t *list, int value);
 bool slist_validate(const slist_t *list);
+
 #endif

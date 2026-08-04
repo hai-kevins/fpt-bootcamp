@@ -1,5 +1,6 @@
 #ifndef MODEL_H
 #define MODEL_H
+
 #include <stdbool.h>
 
 typedef struct
@@ -21,4 +22,5 @@ void mutex_init(mutex_t *m);
 bool lock_with_pi(mutex_t *m, task_t *t);
 bool unlock_with_pi(mutex_t *m, task_t *t);
 void waiter_timeout(mutex_t *m, task_t *t);
+
 #endif

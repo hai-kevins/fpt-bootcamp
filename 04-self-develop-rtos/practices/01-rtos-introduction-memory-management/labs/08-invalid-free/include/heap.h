@@ -1,5 +1,6 @@
 #ifndef HEAP_H
 #define HEAP_H
+
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -35,4 +36,5 @@ heap_status_t heap_free(void *pointer);
 bool heap_validate(void);
 heap_status_t heap_get_stats(heap_stats_t *stats);
 size_t heap_dump_blocks(size_t *sizes, bool *free_flags, size_t capacity);
+
 #endif
