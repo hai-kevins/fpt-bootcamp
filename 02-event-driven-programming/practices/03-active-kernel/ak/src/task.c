@@ -41,17 +41,12 @@ static task_control_t *find_task(uint8_t id)
 
 void ak_task_system_init(void)
 {
-    (void)memset(g_tasks, 0, sizeof(g_tasks));
+    (void) memset(g_tasks, 0, sizeof(g_tasks));
     g_current_task = 0U;
     g_interrupt_nesting = 0U;
 }
 
-bool ak_task_register(
-    uint8_t task_id,
-    uint8_t priority,
-    const char *name,
-    ak_task_handler_t handler
-)
+bool ak_task_register(uint8_t task_id, uint8_t priority, const char *name, ak_task_handler_t handler)
 {
     if ((task_id == 0U) || (handler == 0) || (find_task(task_id) != 0))
     {
@@ -112,7 +107,8 @@ bool ak_task_post(ak_message_t *message)
 
     ak_port_critical_exit(key);
 
-    ak_event_record_t record = {
+    ak_event_record_t record =
+    {
         .timestamp = ak_port_time_now_ms(),
         .signal = message->signal,
         .value = task->count,
@@ -143,8 +139,7 @@ bool ak_task_run_once(void)
     {
         if (g_tasks[i].registered && (g_tasks[i].count > 0U))
         {
-            if ((selected == 0) ||
-                (g_tasks[i].priority > selected->priority))
+            if ((selected == 0) || (g_tasks[i].priority > selected->priority))
             {
                 selected = &g_tasks[i];
             }
@@ -165,7 +160,8 @@ bool ak_task_run_once(void)
     g_current_task = selected->id;
     start = ak_port_time_now_ms();
 
-    ak_event_record_t begin = {
+    ak_event_record_t begin =
+    {
         .timestamp = start,
         .signal = message->signal,
         .value = selected->count,
@@ -187,7 +183,7 @@ bool ak_task_run_once(void)
 
     ak_event_record_t end = begin;
     end.timestamp = ak_port_time_now_ms();
-    end.value = (uint16_t)elapsed;
+    end.value = (uint16_t) elapsed;
     end.type = AK_RECORD_DISPATCH_END;
     ak_event_record_write(&end);
 

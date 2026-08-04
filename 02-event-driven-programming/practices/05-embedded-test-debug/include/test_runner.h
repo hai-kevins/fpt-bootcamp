@@ -12,10 +12,6 @@ typedef struct
     test_function_t function;
 } test_case_t;
 
-int test_run_all(
-    const char *suite_name,
-    const test_case_t *tests,
-    size_t test_count
-);
+int test_run_all(const char *suite_name, const test_case_t *tests, size_t test_count);
 
 #endif

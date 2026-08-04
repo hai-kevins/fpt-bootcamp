@@ -38,27 +38,13 @@ typedef struct
 
 void ak_message_system_init(void);
 
-ak_message_t *ak_message_create_pure(
-    uint8_t source,
-    uint8_t destination,
-    uint16_t signal
-);
+ak_message_t *ak_message_create_pure(uint8_t source, uint8_t destination, uint16_t signal);
 
-ak_message_t *ak_message_create_common(
-    uint8_t source,
-    uint8_t destination,
-    uint16_t signal,
-    const void *data,
-    size_t length
-);
+ak_message_t *ak_message_create_common(uint8_t source, uint8_t destination, uint16_t signal, const void *data,
+    size_t length);
 
-ak_message_t *ak_message_create_dynamic(
-    uint8_t source,
-    uint8_t destination,
-    uint16_t signal,
-    const void *data,
-    size_t length
-);
+ak_message_t *ak_message_create_dynamic(uint8_t source, uint8_t destination, uint16_t signal, const void *data,
+    size_t length);
 
 bool ak_message_retain(ak_message_t *message);
 void ak_message_release(ak_message_t *message);

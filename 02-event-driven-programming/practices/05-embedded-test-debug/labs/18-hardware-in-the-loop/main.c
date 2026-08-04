@@ -16,42 +16,41 @@ int main(void)
 
     const test_case_t cases[] =
     {
-        {"state", "state=IDLE", "IDLE"},
-        {"event start", "OK", "OK"},
-        {"state", "state=RUNNING", "RUNNING"},
-        {"stats", "queue=0 pool=0", "queue="}
+        {
+            "state", "state=IDLE", "IDLE"
+        },
+        {
+            "event start",
+            "OK",
+            "OK"
+        },
+        {
+            "state",
+            "state=RUNNING",
+            "RUNNING"
+        },
+        {
+            "stats",
+            "queue=0 pool=0",
+            "queue="
+        }
     };
 
     size_t passed = 0U;
 
-    for (size_t i = 0U;
-         i < sizeof(cases) / sizeof(cases[0]);
-         i++)
+    for (size_t i = 0U; i < sizeof(cases) / sizeof(cases[0]); i++)
     {
-        const bool ok =
-            strstr(
-                cases[i].response,
-                cases[i].expected
-            ) != NULL;
+        const bool ok = strstr(cases[i].response, cases[i].expected) != NULL;
 
         passed += ok ? 1U : 0U;
     }
 
-    const size_t total =
-        sizeof(cases) / sizeof(cases[0]);
+    const size_t total = sizeof(cases) / sizeof(cases[0]);
 
-    const bool hil_pass =
-        reset_pass &&
-        (passed == total);
+    const bool hil_pass = reset_pass && (passed == total);
 
-    (void)printf(
-        "reset=%s commands=%zu passed=%zu failed=%zu HIL=%s\n",
-        reset_pass ? "PASS" : "FAIL",
-        total,
-        passed,
-        total - passed,
-        hil_pass ? "PASS" : "FAIL"
-    );
+    (void) printf("reset=%s commands=%zu passed=%zu failed=%zu HIL=%s\n", reset_pass ? "PASS" : "FAIL", total,
+        passed, total - passed, hil_pass ? "PASS" : "FAIL");
 
     return hil_pass ? 0 : 1;
 }

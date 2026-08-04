@@ -14,8 +14,7 @@ int main(void)
 
     for (uint32_t i = 0U; i < events; i++)
     {
-        if ((queue_current < 16U) &&
-            (pool_current < 16U))
+        if ((queue_current < 16U) && (pool_current < 16U))
         {
             queue_current++;
             pool_current++;
@@ -48,22 +47,11 @@ int main(void)
         }
     }
 
-    const bool pass =
-        (drop == 0U) &&
-        (queue_max == 16U) &&
-        (pool_max == 16U) &&
-        (handler_max == 900U);
+    const bool pass = (drop == 0U) && (queue_max == 16U) && (pool_max == 16U) && (handler_max == 900U);
 
-    (void)printf(
-        "events=%lu drop=%lu queue_max=%lu pool_max=%lu "
-        "handler_max=%lu %s\n",
-        (unsigned long)events,
-        (unsigned long)drop,
-        (unsigned long)queue_max,
-        (unsigned long)pool_max,
-        (unsigned long)handler_max,
-        pass ? "PASS" : "FAIL"
-    );
+    (void) printf("events=%lu drop=%lu queue_max=%lu pool_max=%lu ""handler_max=%lu %s\n", (unsigned long) events,
+        (unsigned long) drop, (unsigned long) queue_max, (unsigned long) pool_max, (unsigned long) handler_max,
+        pass ? "PASS" : "FAIL");
 
     return pass ? 0 : 1;
 }

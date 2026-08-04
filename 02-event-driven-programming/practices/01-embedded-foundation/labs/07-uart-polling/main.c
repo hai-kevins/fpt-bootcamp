@@ -10,7 +10,7 @@ static void delay_cycles(volatile uint32_t cycles)
 {
     while (cycles > 0UL)
     {
-        __asm volatile ("nop" ::: "memory");
+        __asm volatile("nop" : : : "memory");
         cycles--;
     }
 }
@@ -28,11 +28,7 @@ int main(void)
         }
     }
 
-    uart1_send_string(
-        "\r\nLab 07 - USART1 polling\r\n"
-        "PA9=TX, PA10=RX, 9600 8-N-1\r\n"
-        "Every received byte is echoed.\r\n"
-    );
+    uart1_send_string("\r\nLab 07 - USART1 polling\r\n""PA9=TX, PA10=RX, 9600 8-N-1\r\n""Every received byte is echoed.\r\n");
 
     for (;;)
     {

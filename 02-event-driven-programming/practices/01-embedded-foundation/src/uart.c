@@ -43,24 +43,15 @@ bool uart1_init(uint32_t peripheral_clock_hz, uint32_t baud_rate)
         return false;
     }
 
-    RCC_APB2ENR |=
-        RCC_APB2ENR_AFIOEN |
-        RCC_APB2ENR_IOPAEN |
-        RCC_APB2ENR_USART1EN;
+    RCC_APB2ENR |= RCC_APB2ENR_AFIOEN | RCC_APB2ENR_IOPAEN | RCC_APB2ENR_USART1EN;
 
-    /* PA9 = alternate-function push-pull; PA10 = floating input. */
-    GPIOA_CRH =
-        (GPIOA_CRH &
-         ~((GPIO_NIBBLE_MASK << 4U) | (GPIO_NIBBLE_MASK << 8U))) |
-        (GPIO_AF_PP_2MHZ << 4U) |
-        (GPIO_INPUT_FLOATING << 8U);
+    /* PA9 = alternate-function push-pull; PA10 = floating input. */ GPIOA_CRH = (GPIOA_CRH & ~((GPIO_NIBBLE_MASK << 4U) | (GPIO_NIBBLE_MASK << 8U))) | (GPIO_AF_PP_2MHZ << 4U) | (GPIO_INPUT_FLOATING << 8U);
 
     USART1_CR1 = 0UL;
     USART1_CR2 = 0UL;
     USART1_CR3 = 0UL;
 
-    baud_divisor =
-        (peripheral_clock_hz + (baud_rate / 2UL)) / baud_rate;
+    baud_divisor = (peripheral_clock_hz + (baud_rate / 2UL)) / baud_rate;
 
     if ((baud_divisor == 0UL) || (baud_divisor > 0xFFFFUL))
     {
@@ -79,7 +70,7 @@ void uart1_send_byte(uint8_t byte)
     {
     }
 
-    USART1_DR = (uint32_t)byte;
+    USART1_DR = (uint32_t) byte;
 }
 
 void uart1_send_string(const char *text)

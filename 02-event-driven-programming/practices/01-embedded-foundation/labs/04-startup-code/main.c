@@ -45,7 +45,7 @@ static void delay_cycles(volatile uint32_t cycles)
 {
     while (cycles > 0UL)
     {
-        __asm volatile ("nop" ::: "memory");
+        __asm volatile("nop" : : : "memory");
         cycles--;
     }
 }

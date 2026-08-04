@@ -5,8 +5,11 @@
 
 void ak_port_reset(void)
 {
-    __asm volatile ("dsb" ::: "memory");
+    __asm volatile("dsb" : : : "memory");
     SCB_AIRCR = (0x5FAUL << 16U) | (1UL << 2U);
-    __asm volatile ("dsb" ::: "memory");
-    for (;;) { __asm volatile ("nop"); }
+    __asm volatile("dsb" : : : "memory");
+    for (;;)
+    {
+        __asm volatile("nop");
+    }
 }

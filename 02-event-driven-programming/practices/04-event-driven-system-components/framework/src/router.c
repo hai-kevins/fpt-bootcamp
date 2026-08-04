@@ -2,15 +2,12 @@
 
 #include <string.h>
 
-void ed_router_init(ed_router_t *router,
-                    uint8_t local_node,
-                    ed_event_pool_t *pool,
-                    ed_remote_send_t remote_send,
-                    void *remote_context)
+void ed_router_init(ed_router_t *router, uint8_t local_node, ed_event_pool_t *pool, ed_remote_send_t remote_send,
+    void *remote_context)
 {
     if (router != NULL)
     {
-        (void)memset(router, 0, sizeof(*router));
+        (void) memset(router, 0, sizeof (*router));
         router->local_node = local_node;
         router->pool = pool;
         router->remote_send = remote_send;
@@ -18,11 +15,9 @@ void ed_router_init(ed_router_t *router,
     }
 }
 
-bool ed_router_register(ed_router_t *router,
-                        ed_active_object_t *object)
+bool ed_router_register(ed_router_t *router, ed_active_object_t *object)
 {
-    if ((router == NULL) || (object == NULL) ||
-        (router->object_count >= ED_ROUTER_MAX_OBJECTS))
+    if ((router == NULL) || (object == NULL) || (router->object_count >= ED_ROUTER_MAX_OBJECTS))
     {
         return false;
     }
@@ -32,9 +27,7 @@ bool ed_router_register(ed_router_t *router,
     return true;
 }
 
-bool ed_router_post(ed_router_t *router,
-                    uint8_t destination_node,
-                    ed_event_t *event)
+bool ed_router_post(ed_router_t *router, uint8_t destination_node, ed_event_t *event)
 {
     if ((router == NULL) || (event == NULL))
     {
@@ -56,13 +49,12 @@ bool ed_router_post(ed_router_t *router,
             }
         }
     }
-    else if ((router->remote_send != NULL) &&
-             router->remote_send(router->remote_context, event))
+    else if ((router->remote_send != NULL) && router->remote_send(router->remote_context, event))
     {
         router->remote_post_count++;
         if (router->pool != NULL)
         {
-            (void)ed_event_pool_release(router->pool, event);
+            (void) ed_event_pool_release(router->pool, event);
         }
         return true;
     }

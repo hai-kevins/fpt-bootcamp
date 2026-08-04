@@ -7,20 +7,15 @@ void platform_systick_init(void);
 
 void platform_init(void)
 {
-    RCC_APB2ENR |=
-        (1UL << 0U) |
-        (1UL << 2U) |
-        (1UL << 4U);
+    RCC_APB2ENR |= (1UL << 0U) | (1UL << 2U) | (1UL << 4U);
 
-    GPIOC_CRH =
-        (GPIOC_CRH & ~(0xFUL << 20U)) |
-        (0x2UL << 20U);
+    GPIOC_CRH = (GPIOC_CRH & ~(0xFUL << 20U)) | (0x2UL << 20U);
     platform_led_off();
 
     GPIOA_CRL = (GPIOA_CRL & ~0xFUL) | 0x8UL;
     GPIOA_ODR |= 1UL;
 
-    AFIO_EXTICR1 &= ~0xFUL;
+    AFIO_EXTICR1 &= ~ 0xFUL;
     EXTI_IMR |= 1UL;
     EXTI_RTSR |= 1UL;
     EXTI_FTSR |= 1UL;
@@ -32,7 +27,7 @@ void platform_init(void)
 
 void platform_idle(void)
 {
-    __asm volatile ("wfi" ::: "memory");
+    __asm volatile("wfi" : : : "memory");
 }
 
 bool platform_button_is_pressed(void)
@@ -53,9 +48,13 @@ void platform_led_off(void)
 void platform_led_toggle(void)
 {
     if ((GPIOC_ODR & (1UL << LED_PIN)) == 0UL)
+    {
         platform_led_off();
-    else
-        platform_led_on();
+    }
+        else
+        {
+            platform_led_on();
+        }
 }
 
 void EXTI0_IRQHandler(void)
@@ -65,9 +64,9 @@ void EXTI0_IRQHandler(void)
         const event_t event =
         {
             .timestamp_ms = platform_time_now_ms(),
-            .signal = (uint16_t)EVENT_BUTTON_EDGE
+            .signal = (uint16_t) EVENT_BUTTON_EDGE
         };
         EXTI_PR = 1UL;
-        (void)lab04_post_from_isr(&event);
+        (void) lab04_post_from_isr(&event);
     }
 }

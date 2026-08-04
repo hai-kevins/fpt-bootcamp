@@ -19,18 +19,10 @@ typedef struct
 } dispatcher_stats_t;
 
 void dispatcher_init(void);
-bool dispatcher_register(
-    event_destination_t destination,
-    event_handler_t handler
-);
+bool dispatcher_register(event_destination_t destination, event_handler_t handler);
 bool dispatcher_post_event(const event_t *event);
-bool dispatcher_post(
-    event_source_t source,
-    event_destination_t destination,
-    signal_t signal,
-    uint32_t parameter,
-    uint32_t timestamp_ms
-);
+bool dispatcher_post(event_source_t source, event_destination_t destination, signal_t signal, uint32_t parameter,
+    uint32_t timestamp_ms);
 bool dispatcher_try_get(event_t *event);
 bool dispatcher_dispatch_once(void);
 void dispatcher_run_until_empty(void);

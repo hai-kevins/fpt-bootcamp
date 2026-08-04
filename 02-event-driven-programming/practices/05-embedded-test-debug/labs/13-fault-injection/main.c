@@ -31,11 +31,7 @@ int main(void)
 {
     faults_t faults =
     {
-        .enabled =
-            POOL_FAIL |
-            CRC_ERROR |
-            SENSOR_TIMEOUT |
-            FLASH_FAIL
+        .enabled = POOL_FAIL | CRC_ERROR | SENSOR_TIMEOUT | FLASH_FAIL
     };
 
     const bool pool = trigger(&faults, POOL_FAIL);
@@ -43,20 +39,10 @@ int main(void)
     const bool sensor = trigger(&faults, SENSOR_TIMEOUT);
     const bool flash = trigger(&faults, FLASH_FAIL);
 
-    const bool pass =
-        pool && crc && sensor && flash &&
-        (faults.triggers == 4U);
+    const bool pass = pool && crc && sensor && flash && (faults.triggers == 4U);
 
-    (void)printf(
-        "pool=%u crc=%u sensor=%u flash=%u "
-        "triggers=%lu %s\n",
-        pool ? 1U : 0U,
-        crc ? 1U : 0U,
-        sensor ? 1U : 0U,
-        flash ? 1U : 0U,
-        (unsigned long)faults.triggers,
-        pass ? "PASS" : "FAIL"
-    );
+    (void) printf("pool=%u crc=%u sensor=%u flash=%u ""triggers=%lu %s\n", pool ? 1U : 0U, crc ? 1U : 0U, sensor ? 1U : 0U,
+        flash ? 1U : 0U, (unsigned long) faults.triggers, pass ? "PASS" : "FAIL");
 
     return pass ? 0 : 1;
 }

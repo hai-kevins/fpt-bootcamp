@@ -5,9 +5,18 @@
 bool test_queue_fifo(void)
 {
     event_queue_t queue;
-    event_t first = {.signal = 1U};
-    event_t second = {.signal = 2U};
-    event_t output = {0};
+    event_t first =
+    {
+        .signal = 1U
+    };
+    event_t second =
+    {
+        .signal = 2U
+    };
+    event_t output =
+    {
+        0
+    };
 
     TEST_ASSERT_TRUE(event_queue_init(&queue, 2U));
     TEST_ASSERT_TRUE(event_queue_post(&queue, &first));
@@ -27,7 +36,10 @@ bool test_queue_fifo(void)
 bool test_queue_overflow(void)
 {
     event_queue_t queue;
-    event_t event = {.signal = 1U};
+    event_t event =
+    {
+        .signal = 1U
+    };
 
     TEST_ASSERT_TRUE(event_queue_init(&queue, 1U));
     TEST_ASSERT_TRUE(event_queue_post(&queue, &event));

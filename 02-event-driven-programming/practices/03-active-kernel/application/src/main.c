@@ -16,11 +16,7 @@ int main(void)
     app_init();
     app_post_start();
 
-    uart_write_string(
-        "\r\n03 Active Kernel\r\n"
-        "STM32F103C8T6, HSI 8 MHz, USART1 9600\r\n"
-        "Type help and press Enter.\r\n"
-    );
+    uart_write_string("\r\n03 Active Kernel\r\n""STM32F103C8T6, HSI 8 MHz, USART1 9600\r\n""Type help and press Enter.\r\n");
 
     for (;;)
     {

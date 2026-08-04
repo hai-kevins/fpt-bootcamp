@@ -12,7 +12,7 @@ static uint32_t g_overwritten;
 void ak_event_record_init(void)
 {
     uint32_t key = ak_port_critical_enter();
-    (void)memset(g_records, 0, sizeof(g_records));
+    (void) memset(g_records, 0, sizeof(g_records));
     g_head = 0U;
     g_count = 0U;
     g_overwritten = 0U;
@@ -55,8 +55,7 @@ bool ak_event_record_read(size_t oldest_index, ak_event_record_t *record)
         return false;
     }
 
-    oldest = (g_head + AK_EVENT_RECORD_CAPACITY - g_count) %
-             AK_EVENT_RECORD_CAPACITY;
+    oldest = (g_head + AK_EVENT_RECORD_CAPACITY - g_count) % AK_EVENT_RECORD_CAPACITY;
     position = (oldest + oldest_index) % AK_EVENT_RECORD_CAPACITY;
     *record = g_records[position];
     return true;

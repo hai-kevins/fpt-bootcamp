@@ -19,10 +19,9 @@ static uint32_t g_handler_count;
 static uint8_t g_order[8];
 static size_t g_order_count;
 
-static void count_handler(ed_active_object_t *object,
-                          const ed_event_t *event)
+static void count_handler(ed_active_object_t *object, const ed_event_t *event)
 {
-    (void)event;
+    (void) event;
     g_handler_count++;
     if (g_order_count < sizeof(g_order))
     {
@@ -77,10 +76,8 @@ static bool test_scheduler_priority(void)
     ed_event_pool_init(&pool);
     ed_scheduler_init(&scheduler, &pool);
     g_order_count = 0U;
-    TEST_ASSERT(ed_active_object_init(&low, 1U, 1U, "low", 4U,
-                                      count_handler, NULL));
-    TEST_ASSERT(ed_active_object_init(&high, 2U, 3U, "high", 4U,
-                                      count_handler, NULL));
+    TEST_ASSERT(ed_active_object_init(&low, 1U, 1U, "low", 4U, count_handler, NULL));
+    TEST_ASSERT(ed_active_object_init(&high, 2U, 3U, "high", 4U, count_handler, NULL));
     TEST_ASSERT(ed_scheduler_register(&scheduler, &low));
     TEST_ASSERT(ed_scheduler_register(&scheduler, &high));
     ed_event_init_static(&low_event, 1U, 0U, 1U);
@@ -95,25 +92,34 @@ static bool test_scheduler_priority(void)
 
 static void increment_action(void *context, const ed_event_t *event)
 {
-    (void)event;
+    (void) event;
     uint32_t *counter = context;
     (*counter)++;
 }
 
 static bool test_fsm(void)
 {
-    enum { IDLE = 0, ACTIVE = 1 };
+    enum
+    {
+        IDLE = 0,
+        ACTIVE = 1
+    };
     const ed_fsm_transition_t transitions[] =
     {
-        { IDLE, 1U, ACTIVE, increment_action },
-        { ACTIVE, 2U, IDLE, increment_action }
+        {
+            IDLE, 1U, ACTIVE, increment_action
+        },
+        {
+            ACTIVE,
+            2U,
+            IDLE,
+            increment_action
+        }
     };
     uint32_t actions = 0U;
     ed_fsm_t fsm;
     ed_event_t event;
-    ed_fsm_init(&fsm, IDLE, transitions,
-                sizeof(transitions) / sizeof(transitions[0]),
-                &actions);
+    ed_fsm_init(&fsm, IDLE, transitions, sizeof(transitions) / sizeof(transitions[0]), &actions);
     ed_event_init_static(&event, 1U, 0U, 0U);
     TEST_ASSERT(ed_fsm_dispatch(&fsm, &event));
     TEST_ASSERT(fsm.state == ACTIVE);
@@ -124,12 +130,12 @@ static bool test_fsm(void)
     return true;
 }
 
-typedef struct { uint32_t parent_hits; } hsm_context_t;
+typedef struct
+{
+    uint32_t parent_hits;
+} hsm_context_t;
 
-static bool hsm_handler(void *context,
-                        uint8_t state,
-                        const ed_event_t *event,
-                        uint8_t *next_state)
+static bool hsm_handler(void *context, uint8_t state, const ed_event_t *event, uint8_t *next_state)
 {
     hsm_context_t *ctx = context;
     if ((state == 0U) && (event->signal == 9U))
@@ -143,12 +149,19 @@ static bool hsm_handler(void *context,
 
 static bool test_hsm(void)
 {
-    const uint8_t parents[] = { ED_HSM_NO_STATE, 0U, 0U };
-    hsm_context_t context = {0U};
+    const uint8_t parents[] =
+    {
+        ED_HSM_NO_STATE,
+        0U,
+        0U
+    };
+    hsm_context_t context =
+    {
+        0U
+    };
     ed_hsm_t hsm;
     ed_event_t event;
-    TEST_ASSERT(ed_hsm_init(&hsm, 2U, parents, 3U,
-                            hsm_handler, &context));
+    TEST_ASSERT(ed_hsm_init(&hsm, 2U, parents, 3U, hsm_handler, &context));
     ed_event_init_static(&event, 9U, 0U, 0U);
     TEST_ASSERT(ed_hsm_dispatch(&hsm, &event));
     TEST_ASSERT(context.parent_hits == 1U);
@@ -169,10 +182,8 @@ static bool test_pubsub(void)
     ed_pubsub_init(&pubsub, &pool);
     ed_scheduler_init(&scheduler, &pool);
     g_handler_count = 0U;
-    TEST_ASSERT(ed_active_object_init(&a, 1U, 1U, "a", 4U,
-                                      count_handler, NULL));
-    TEST_ASSERT(ed_active_object_init(&b, 2U, 1U, "b", 4U,
-                                      count_handler, NULL));
+    TEST_ASSERT(ed_active_object_init(&a, 1U, 1U, "a", 4U, count_handler, NULL));
+    TEST_ASSERT(ed_active_object_init(&b, 2U, 1U, "b", 4U, count_handler, NULL));
     TEST_ASSERT(ed_scheduler_register(&scheduler, &a));
     TEST_ASSERT(ed_scheduler_register(&scheduler, &b));
     TEST_ASSERT(ed_pubsub_subscribe(&pubsub, 5U, &a));
@@ -187,7 +198,10 @@ static bool test_pubsub(void)
 
 static bool test_serializer_parser(void)
 {
-    ed_frame_t frame = {0};
+    ed_frame_t frame =
+    {
+        0
+    };
     ed_frame_t decoded;
     ed_frame_t parsed;
     ed_parser_t parser;
@@ -220,11 +234,12 @@ static bool test_serializer_parser(void)
     return true;
 }
 
-typedef struct { uint32_t sends; } send_spy_t;
+typedef struct
+{
+    uint32_t sends;
+} send_spy_t;
 
-static bool send_spy(void *context,
-                     const uint8_t *data,
-                     size_t length)
+static bool send_spy(void *context, const uint8_t *data, size_t length)
 {
     send_spy_t *spy = context;
     if ((data == NULL) || (length == 0U))
@@ -237,9 +252,15 @@ static bool send_spy(void *context,
 
 static bool test_datalink_retry(void)
 {
-    send_spy_t spy = {0U};
+    send_spy_t spy =
+    {
+        0U
+    };
     ed_datalink_t link;
-    ed_frame_t frame = {0};
+    ed_frame_t frame =
+    {
+        0
+    };
     frame.sequence = 10U;
     TEST_ASSERT(ed_datalink_init(&link, send_spy, &spy, 5U, 2U));
     TEST_ASSERT(ed_datalink_send(&link, &frame, true));
@@ -261,9 +282,9 @@ static bool test_event_trace(void)
     ed_trace_init(&trace);
     for (size_t i = 0U; i < ED_TRACE_CAPACITY + 3U; i++)
     {
-        (void)memset(&record, 0, sizeof(record));
-        record.timestamp = (uint32_t)i;
-        record.signal = (ed_signal_t)i;
+        (void) memset(&record, 0, sizeof(record));
+        record.timestamp = (uint32_t) i;
+        record.signal = (ed_signal_t) i;
         ed_trace_write(&trace, &record);
     }
     TEST_ASSERT(trace.count == ED_TRACE_CAPACITY);
@@ -277,27 +298,55 @@ int main(void)
 {
     const test_case_t tests[] =
     {
-        { "mailbox", test_mailbox },
-        { "event_pool", test_event_pool },
-        { "scheduler_priority", test_scheduler_priority },
-        { "fsm", test_fsm },
-        { "hsm", test_hsm },
-        { "pubsub", test_pubsub },
-        { "serializer_parser", test_serializer_parser },
-        { "datalink_retry", test_datalink_retry },
-        { "event_trace", test_event_trace }
+        {
+            "mailbox", test_mailbox
+        },
+        {
+            "event_pool",
+            test_event_pool
+        },
+        {
+            "scheduler_priority",
+            test_scheduler_priority
+        },
+        {
+            "fsm",
+            test_fsm
+        },
+        {
+            "hsm",
+            test_hsm
+        },
+        {
+            "pubsub",
+            test_pubsub
+        },
+        {
+            "serializer_parser",
+            test_serializer_parser
+        },
+        {
+            "datalink_retry",
+            test_datalink_retry
+        },
+        {
+            "event_trace",
+            test_event_trace
+        }
     };
     size_t passed = 0U;
 
-    (void)printf("04-event-driven-system-components tests\n");
+    (void) printf("04-event-driven-system-components tests\n");
     for (size_t i = 0U; i < sizeof(tests) / sizeof(tests[0]); i++)
     {
         const bool ok = tests[i].function();
-        (void)printf("[%s] %s\n", ok ? "PASS" : "FAIL", tests[i].name);
-        if (ok) { passed++; }
+        (void) printf("[%s] %s\n", ok ? "PASS" : "FAIL", tests[i].name);
+        if (ok)
+        {
+            passed++;
+        }
     }
 
-    (void)printf("Summary: %zu/%zu PASS\n",
-                 passed, sizeof(tests) / sizeof(tests[0]));
+    (void) printf("Summary: %zu/%zu PASS\n", passed, sizeof(tests) / sizeof(tests[0]));
     return (passed == (sizeof(tests) / sizeof(tests[0]))) ? 0 : 1;
 }

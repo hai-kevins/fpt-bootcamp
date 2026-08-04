@@ -7,9 +7,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-typedef bool (*ed_link_send_bytes_t)(void *context,
-                                     const uint8_t *data,
-                                     size_t length);
+typedef bool (*ed_link_send_bytes_t)(void *context, const uint8_t *data, size_t length);
 
 typedef enum
 {
@@ -35,17 +33,10 @@ typedef struct
     uint32_t failure_count;
 } ed_datalink_t;
 
-bool ed_datalink_init(ed_datalink_t *link,
-                      ed_link_send_bytes_t send_bytes,
-                      void *send_context,
-                      uint32_t timeout_ticks,
-                      uint8_t retry_limit);
-bool ed_datalink_send(ed_datalink_t *link,
-                      const ed_frame_t *frame,
-                      bool require_ack);
-void ed_datalink_tick(ed_datalink_t *link,
-                      uint32_t elapsed_ticks);
-bool ed_datalink_ack(ed_datalink_t *link,
-                     uint16_t sequence);
+bool ed_datalink_init(ed_datalink_t *link, ed_link_send_bytes_t send_bytes, void *send_context, uint32_t timeout_ticks,
+    uint8_t retry_limit);
+bool ed_datalink_send(ed_datalink_t *link, const ed_frame_t *frame, bool require_ack);
+void ed_datalink_tick(ed_datalink_t *link, uint32_t elapsed_ticks);
+bool ed_datalink_ack(ed_datalink_t *link, uint16_t sequence);
 
 #endif

@@ -6,7 +6,11 @@
 
 extern uint32_t g_fake_time;
 static uint32_t g_count;
-static void handler(const ak_message_t *message) { (void)message; g_count++; }
+static void handler(const ak_message_t *message)
+{
+    (void) message;
+    g_count++;
+}
 
 bool test_timer(void)
 {
@@ -21,7 +25,7 @@ bool test_timer(void)
     ak_timer_process(19U);
     TEST_ASSERT_EQ(0U, g_count);
     ak_timer_process(20U);
-    (void)ak_task_run_until_idle(8U);
+    (void) ak_task_run_until_idle(8U);
     TEST_ASSERT_EQ(1U, g_count);
     return true;
 }

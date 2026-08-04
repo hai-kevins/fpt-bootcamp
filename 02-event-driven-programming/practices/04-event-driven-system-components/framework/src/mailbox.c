@@ -2,18 +2,14 @@
 
 #include <string.h>
 
-bool ed_mailbox_init(ed_mailbox_t *mailbox,
-                     size_t capacity,
-                     ed_mailbox_overflow_policy_t policy)
+bool ed_mailbox_init(ed_mailbox_t *mailbox, size_t capacity, ed_mailbox_overflow_policy_t policy)
 {
-    if ((mailbox == NULL) ||
-        (capacity == 0U) ||
-        (capacity > ED_MAILBOX_STORAGE_MAX))
+    if ((mailbox == NULL) || (capacity == 0U) || (capacity > ED_MAILBOX_STORAGE_MAX))
     {
         return false;
     }
 
-    (void)memset(mailbox, 0, sizeof(*mailbox));
+    (void) memset(mailbox, 0, sizeof (*mailbox));
     mailbox->capacity = capacity;
     mailbox->policy = policy;
     return true;
@@ -21,8 +17,7 @@ bool ed_mailbox_init(ed_mailbox_t *mailbox,
 
 bool ed_mailbox_post(ed_mailbox_t *mailbox, ed_event_t *event)
 {
-    if ((mailbox == NULL) || (event == NULL) ||
-        (mailbox->capacity == 0U))
+    if ((mailbox == NULL) || (event == NULL) || (mailbox->capacity == 0U))
     {
         return false;
     }

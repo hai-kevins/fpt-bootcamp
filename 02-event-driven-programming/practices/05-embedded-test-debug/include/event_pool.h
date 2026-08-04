@@ -27,29 +27,14 @@ typedef struct
     uint32_t release_count;
 } event_pool_t;
 
-bool event_pool_init(
-    event_pool_t *pool,
-    size_t capacity
-);
+bool event_pool_init(event_pool_t *pool, size_t capacity);
 
-event_t *event_pool_allocate(
-    event_pool_t *pool,
-    uint16_t signal
-);
+event_t *event_pool_allocate(event_pool_t *pool, uint16_t signal);
 
-bool event_pool_retain(
-    event_pool_t *pool,
-    event_t *event
-);
+bool event_pool_retain(event_pool_t *pool, event_t *event);
 
-bool event_pool_release(
-    event_pool_t *pool,
-    event_t *event
-);
+bool event_pool_release(event_pool_t *pool, event_t *event);
 
-uint16_t event_pool_reference_count(
-    const event_pool_t *pool,
-    const event_t *event
-);
+uint16_t event_pool_reference_count(const event_pool_t *pool, const event_t *event);
 
 #endif

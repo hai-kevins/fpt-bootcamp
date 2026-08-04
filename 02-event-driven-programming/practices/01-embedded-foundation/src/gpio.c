@@ -22,17 +22,14 @@ void gpio_led_init(void)
 {
     RCC_APB2ENR |= RCC_APB2ENR_IOPCEN;
 
-    GPIOC_CRH =
-        (GPIOC_CRH & ~(GPIO_CONFIG_MASK << LED_CONFIG_SHIFT)) |
-        (GPIO_OUTPUT_PP_2MHZ << LED_CONFIG_SHIFT);
+    GPIOC_CRH = (GPIOC_CRH & ~(GPIO_CONFIG_MASK << LED_CONFIG_SHIFT)) | (GPIO_OUTPUT_PP_2MHZ << LED_CONFIG_SHIFT);
 
     gpio_led_off();
 }
 
 void gpio_led_on(void)
 {
-    /* Blue Pill LED on PC13 is active-low. */
-    GPIOC_BSRR = (1UL << (LED_PIN + 16U));
+    /* Blue Pill LED on PC13 is active-low. */ GPIOC_BSRR = (1UL << (LED_PIN + 16U));
 }
 
 void gpio_led_off(void)

@@ -13,26 +13,20 @@ static void led_gpio_init(void)
 {
     RCC_APB2ENR |= RCC_APB2ENR_IOPCEN;
 
-    GPIOC_CRH =
-        (GPIOC_CRH & ~(0xFUL << LED_CONFIG_SHIFT)) |
-        (0x2UL << LED_CONFIG_SHIFT);
+    GPIOC_CRH = (GPIOC_CRH & ~(0xFUL << LED_CONFIG_SHIFT)) | (0x2UL << LED_CONFIG_SHIFT);
 
     platform_led_off();
 }
 
 static void button_gpio_init(void)
 {
-    RCC_APB2ENR |=
-        RCC_APB2ENR_AFIOEN |
-        RCC_APB2ENR_IOPAEN;
+    RCC_APB2ENR |= RCC_APB2ENR_AFIOEN | RCC_APB2ENR_IOPAEN;
 
-    GPIOA_CRL =
-        (GPIOA_CRL & ~0xFUL) |
-        0x8UL;
+    GPIOA_CRL = (GPIOA_CRL & ~0xFUL) | 0x8UL;
 
     GPIOA_ODR |= 1UL;
 
-    AFIO_EXTICR1 &= ~0xFUL;
+    AFIO_EXTICR1 &= ~ 0xFUL;
 
     EXTI_IMR |= 1UL;
     EXTI_RTSR |= 1UL;
@@ -86,12 +80,6 @@ void EXTI0_IRQHandler(void)
     {
         EXTI_PR = 1UL;
 
-        (void)dispatcher_post(
-            EVENT_SOURCE_ISR,
-            EVENT_DESTINATION_BUTTON,
-            SIGNAL_BUTTON_EDGE,
-            0UL,
-            platform_time_now_ms()
-        );
+        (void) dispatcher_post(EVENT_SOURCE_ISR, EVENT_DESTINATION_BUTTON, SIGNAL_BUTTON_EDGE, 0UL, platform_time_now_ms());
     }
 }

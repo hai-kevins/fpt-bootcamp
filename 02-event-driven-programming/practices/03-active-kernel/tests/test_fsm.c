@@ -16,13 +16,21 @@ static bool fsm_dispatch(ak_fsm_t *fsm, const ak_message_t *message)
 bool test_fsm_and_tsm(void)
 {
     ak_event_record_init();
-    ak_message_t message = {.signal = 1U};
+    ak_message_t message =
+    {
+        .signal = 1U
+    };
     ak_fsm_t fsm;
     ak_fsm_init(&fsm, 0U, 0, fsm_dispatch);
     TEST_ASSERT_TRUE(ak_fsm_handle(&fsm, &message));
     TEST_ASSERT_EQ(1U, fsm.state);
 
-    const ak_tsm_transition_t transitions[] = {{0U, 1U, 2U, 0}};
+    const ak_tsm_transition_t transitions[] =
+    {
+        {
+            0U, 1U, 2U, 0
+        }
+    };
     ak_tsm_t tsm;
     ak_tsm_init(&tsm, 0U, 0, transitions, 1U);
     TEST_ASSERT_TRUE(ak_tsm_handle(&tsm, &message));

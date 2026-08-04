@@ -70,21 +70,15 @@ int main(void)
     state_t state = OFF;
     bool pass = true;
 
-    for (size_t i = 0U;
-         i < sizeof(sequence) / sizeof(sequence[0]);
-         i++)
+    for (size_t i = 0U; i < sizeof(sequence) / sizeof(sequence[0]); i++)
     {
         pass = pass && dispatch(&state, sequence[i]);
     }
 
     pass = pass && (state == IDLE);
 
-    (void)printf(
-        "steps=%zu final=%s %s\n",
-        sizeof(sequence) / sizeof(sequence[0]),
-        state == IDLE ? "IDLE" : "OTHER",
-        pass ? "PASS" : "FAIL"
-    );
+    (void) printf("steps=%zu final=%s %s\n", sizeof(sequence) / sizeof(sequence[0]), state == IDLE ? "IDLE" : "OTHER",
+        pass ? "PASS" : "FAIL");
 
     return pass ? 0 : 1;
 }

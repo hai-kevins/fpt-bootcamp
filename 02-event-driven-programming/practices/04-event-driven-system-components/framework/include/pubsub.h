@@ -13,8 +13,7 @@
 
 typedef struct
 {
-    ed_active_object_t *subscribers[ED_PUBSUB_MAX_SIGNALS]
-                                      [ED_PUBSUB_MAX_SUBSCRIBERS];
+    ed_active_object_t *subscribers[ED_PUBSUB_MAX_SIGNALS][ED_PUBSUB_MAX_SUBSCRIBERS];
     size_t subscriber_count[ED_PUBSUB_MAX_SIGNALS];
     ed_event_pool_t *pool;
     uint32_t publish_count;
@@ -22,12 +21,8 @@ typedef struct
     uint32_t delivery_failure_count;
 } ed_pubsub_t;
 
-void ed_pubsub_init(ed_pubsub_t *pubsub,
-                    ed_event_pool_t *pool);
-bool ed_pubsub_subscribe(ed_pubsub_t *pubsub,
-                         ed_signal_t signal,
-                         ed_active_object_t *object);
-size_t ed_pubsub_publish(ed_pubsub_t *pubsub,
-                         const ed_event_t *prototype);
+void ed_pubsub_init(ed_pubsub_t *pubsub, ed_event_pool_t *pool);
+bool ed_pubsub_subscribe(ed_pubsub_t *pubsub, ed_signal_t signal, ed_active_object_t *object);
+size_t ed_pubsub_publish(ed_pubsub_t *pubsub, const ed_event_t *prototype);
 
 #endif

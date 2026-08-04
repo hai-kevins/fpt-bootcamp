@@ -26,19 +26,10 @@ int main(void)
         }
     }
 
-    const bool pass =
-        (samples == hours) &&
-        !leak &&
-        (resets == 0U);
+    const bool pass = (samples == hours) && !leak && (resets == 0U);
 
-    (void)printf(
-        "hours=%lu samples=%lu leak=%u resets=%lu %s\n",
-        (unsigned long)hours,
-        (unsigned long)samples,
-        leak ? 1U : 0U,
-        (unsigned long)resets,
-        pass ? "PASS" : "FAIL"
-    );
+    (void) printf("hours=%lu samples=%lu leak=%u resets=%lu %s\n", (unsigned long) hours, (unsigned long) samples,
+        leak ? 1U : 0U, (unsigned long) resets, pass ? "PASS" : "FAIL");
 
     return pass ? 0 : 1;
 }

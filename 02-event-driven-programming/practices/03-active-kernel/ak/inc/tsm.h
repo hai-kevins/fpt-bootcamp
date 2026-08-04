@@ -7,10 +7,7 @@
 
 #include "message.h"
 
-typedef void (*ak_tsm_action_t)(
-    void *context,
-    const ak_message_t *message
-);
+typedef void (*ak_tsm_action_t)(void *context, const ak_message_t *message);
 
 typedef struct
 {
@@ -28,17 +25,9 @@ typedef struct
     size_t transition_count;
 } ak_tsm_t;
 
-void ak_tsm_init(
-    ak_tsm_t *machine,
-    uint8_t initial_state,
-    void *context,
-    const ak_tsm_transition_t *transitions,
-    size_t transition_count
-);
+void ak_tsm_init(ak_tsm_t *machine, uint8_t initial_state, void *context, const ak_tsm_transition_t *transitions,
+    size_t transition_count);
 
-bool ak_tsm_handle(
-    ak_tsm_t *machine,
-    const ak_message_t *message
-);
+bool ak_tsm_handle(ak_tsm_t *machine, const ak_message_t *message);
 
 #endif

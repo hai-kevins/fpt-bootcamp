@@ -9,9 +9,9 @@ bool test_button_debounce_press(void)
     {
         .timestamp_ms = 10UL,
         .parameter = 0UL,
-        .signal = (uint16_t)SIGNAL_BUTTON_EDGE,
-        .source = (uint8_t)EVENT_SOURCE_ISR,
-        .destination = (uint8_t)EVENT_DESTINATION_BUTTON
+        .signal = (uint16_t) SIGNAL_BUTTON_EDGE,
+        .source = (uint8_t) EVENT_SOURCE_ISR,
+        .destination = (uint8_t) EVENT_DESTINATION_BUTTON
     };
 
     test_reset_framework();

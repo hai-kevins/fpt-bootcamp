@@ -30,7 +30,7 @@ static void stop_timer(void)
 {
     if (g_blink_timer != AK_TIMER_ID_INVALID)
     {
-        (void)ak_timer_cancel(g_blink_timer);
+        (void) ak_timer_cancel(g_blink_timer);
         g_blink_timer = AK_TIMER_ID_INVALID;
     }
 }
@@ -57,10 +57,9 @@ void task_led_handler(const ak_message_t *message)
     else if (message->signal == APP_SIGNAL_LED_BLINK_START)
     {
         uint32_t period = 500U;
-        if ((message->length == sizeof(period)) &&
-            (message->kind != AK_MESSAGE_PURE))
+        if ((message->length == sizeof(period)) && (message->kind != AK_MESSAGE_PURE))
         {
-            (void)memcpy(&period, message->payload, sizeof(period));
+            (void) memcpy(&period, message->payload, sizeof(period));
         }
         if (period == 0U)
         {
@@ -69,12 +68,7 @@ void task_led_handler(const ak_message_t *message)
         stop_timer();
         g_period_ms = period;
         g_state = LED_STATE_BLINKING;
-        g_blink_timer = ak_timer_start_periodic(
-            APP_TASK_LED,
-            APP_TASK_LED,
-            APP_SIGNAL_LED_BLINK_TICK,
-            g_period_ms
-        );
+        g_blink_timer = ak_timer_start_periodic(APP_TASK_LED, APP_TASK_LED, APP_SIGNAL_LED_BLINK_TICK, g_period_ms);
     }
     else if (message->signal == APP_SIGNAL_LED_BLINK_STOP)
     {
@@ -82,8 +76,7 @@ void task_led_handler(const ak_message_t *message)
         g_state = LED_STATE_OFF;
         led_off();
     }
-    else if ((message->signal == APP_SIGNAL_LED_BLINK_TICK) &&
-             (g_state == LED_STATE_BLINKING))
+    else if ((message->signal == APP_SIGNAL_LED_BLINK_TICK) && (g_state == LED_STATE_BLINKING))
     {
         led_toggle();
     }

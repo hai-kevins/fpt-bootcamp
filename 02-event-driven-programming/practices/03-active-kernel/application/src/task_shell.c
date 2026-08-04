@@ -35,15 +35,13 @@ static void write_u32(uint32_t value)
     }
     while (count > 0U)
     {
-        uart_write_byte((uint8_t)digits[--count]);
+        uart_write_byte((uint8_t) digits[--count]);
     }
 }
 
 static void post_pure(uint8_t destination, uint16_t signal)
 {
-    ak_message_t *message = ak_message_create_pure(
-        APP_TASK_SHELL, destination, signal
-    );
+    ak_message_t *message = ak_message_create_pure(APP_TASK_SHELL, destination, signal);
     if ((message != 0) && !ak_task_post(message))
     {
         ak_message_release(message);
@@ -54,10 +52,7 @@ static void execute_line(void)
 {
     if (strcmp(g_line, "help") == 0)
     {
-        uart_write_string(
-            "help task pool timer state led on|off|toggle "
-            "event dump|clear fatal show|test|clear error reset\r\n"
-        );
+        uart_write_string("help task pool timer state led on|off|toggle ""event dump|clear fatal show|test|clear error reset\r\n");
     }
     else if (strcmp(g_line, "task") == 0)
     {
@@ -125,7 +120,7 @@ static void execute_line(void)
     else if (strcmp(g_line, "event dump") == 0)
     {
         uart_write_string("event count=");
-        write_u32((uint32_t)ak_event_record_count());
+        write_u32((uint32_t) ak_event_record_count());
         uart_write_string(" overwritten=");
         write_u32(ak_event_record_overwritten());
         uart_write_string("\r\n");
@@ -179,8 +174,7 @@ void task_shell_init(void)
 
 void task_shell_handler(const ak_message_t *message)
 {
-    if ((message->signal != APP_SIGNAL_UART_RX_BYTE) ||
-        (message->length != 1U))
+    if ((message->signal != APP_SIGNAL_UART_RX_BYTE) || (message->length != 1U))
     {
         return;
     }
@@ -205,6 +199,6 @@ void task_shell_handler(const ak_message_t *message)
     }
     else if (g_length < (SHELL_LINE_CAPACITY - 1U))
     {
-        g_line[g_length++] = (char)byte;
+        g_line[g_length++] = (char) byte;
     }
 }

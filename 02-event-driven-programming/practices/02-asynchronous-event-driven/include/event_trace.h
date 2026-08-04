@@ -29,11 +29,7 @@ typedef struct
 
 void event_trace_init(void);
 void event_trace_clear(void);
-void event_trace_record(
-    event_trace_phase_t phase,
-    const event_t *event,
-    uint8_t state
-);
+void event_trace_record(event_trace_phase_t phase, const event_t *event, uint8_t state);
 size_t event_trace_count(void);
 bool event_trace_get(size_t index, event_trace_record_t *record);
 uint32_t event_trace_overwritten(void);

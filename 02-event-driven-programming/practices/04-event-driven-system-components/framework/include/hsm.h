@@ -9,10 +9,7 @@
 
 #define ED_HSM_NO_STATE (UINT8_MAX)
 
-typedef bool (*ed_hsm_state_handler_t)(void *context,
-                                       uint8_t state,
-                                       const ed_event_t *event,
-                                       uint8_t *next_state);
+typedef bool (*ed_hsm_state_handler_t)(void *context, uint8_t state, const ed_event_t *event, uint8_t *next_state);
 
 typedef struct
 {
@@ -26,13 +23,8 @@ typedef struct
     uint32_t unhandled_count;
 } ed_hsm_t;
 
-bool ed_hsm_init(ed_hsm_t *hsm,
-                 uint8_t initial_state,
-                 const uint8_t *parents,
-                 size_t state_count,
-                 ed_hsm_state_handler_t handler,
-                 void *context);
-bool ed_hsm_dispatch(ed_hsm_t *hsm,
-                     const ed_event_t *event);
+bool ed_hsm_init(ed_hsm_t *hsm, uint8_t initial_state, const uint8_t *parents, size_t state_count, ed_hsm_state_handler_t handler,
+    void *context);
+bool ed_hsm_dispatch(ed_hsm_t *hsm, const ed_event_t *event);
 
 #endif

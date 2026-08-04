@@ -76,7 +76,10 @@ static bool dispatch(app_t *app, signal_t signal)
 
 int main(void)
 {
-    app_t app = {0};
+    app_t app =
+    {
+        0
+    };
 
     bool pass = dispatch(&app, START);
     pass = pass && dispatch(&app, PAUSE);
@@ -87,15 +90,8 @@ int main(void)
     pass = pass && !dispatch(&app, UNKNOWN);
     pass = pass && dispatch(&app, STOP);
 
-    (void)printf(
-        "final=%s transitions=%u unhandled=%u %s\n",
-        app.state == IDLE ? "IDLE" : "OTHER",
-        app.transitions,
-        app.unhandled,
-        pass ? "PASS" : "FAIL"
-    );
+    (void) printf("final=%s transitions=%u unhandled=%u %s\n", app.state == IDLE ? "IDLE" : "OTHER", app.transitions,
+        app.unhandled, pass ? "PASS" : "FAIL");
 
-    return (pass && (app.state == IDLE) &&
-            (app.transitions == 7U) &&
-            (app.unhandled == 1U)) ? 0 : 1;
+    return (pass && (app.state == IDLE) && (app.transitions == 7U) && (app.unhandled == 1U)) ? 0 : 1;
 }

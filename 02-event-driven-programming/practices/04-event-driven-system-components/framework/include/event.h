@@ -24,13 +24,8 @@ typedef struct
     uint8_t payload[ED_EVENT_PAYLOAD_MAX];
 } ed_event_t;
 
-void ed_event_init_static(ed_event_t *event,
-                          ed_signal_t signal,
-                          uint8_t source,
-                          uint8_t destination);
+void ed_event_init_static(ed_event_t *event, ed_signal_t signal, uint8_t source, uint8_t destination);
 
-bool ed_event_set_payload(ed_event_t *event,
-                          const void *payload,
-                          size_t length);
+bool ed_event_set_payload(ed_event_t *event, const void *payload, size_t length);
 
 #endif

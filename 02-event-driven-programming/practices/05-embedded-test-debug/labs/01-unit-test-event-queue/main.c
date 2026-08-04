@@ -41,36 +41,32 @@ static bool get(queue_t *queue, uint16_t *value)
 
 int main(void)
 {
-    queue_t queue = {0};
+    queue_t queue =
+    {
+        0
+    };
     uint16_t value = 0U;
 
     const bool empty_pass = !get(&queue, &value);
 
-    (void)post(&queue, 1U);
-    (void)post(&queue, 2U);
-    (void)post(&queue, 3U);
+    (void) post(&queue, 1U);
+    (void) post(&queue, 2U);
+    (void) post(&queue, 3U);
 
     const bool full_pass = !post(&queue, 4U);
 
     bool fifo_pass = get(&queue, &value) && (value == 1U);
     fifo_pass = fifo_pass && get(&queue, &value) && (value == 2U);
 
-    (void)post(&queue, 4U);
-    (void)post(&queue, 5U);
+    (void) post(&queue, 4U);
+    (void) post(&queue, 5U);
 
     bool wrap_pass = get(&queue, &value) && (value == 3U);
     wrap_pass = wrap_pass && get(&queue, &value) && (value == 4U);
     wrap_pass = wrap_pass && get(&queue, &value) && (value == 5U);
 
-    (void)printf(
-        "empty=%s fifo=%s full=%s wrap=%s overflow=%lu\n",
-        empty_pass ? "PASS" : "FAIL",
-        fifo_pass ? "PASS" : "FAIL",
-        full_pass ? "PASS" : "FAIL",
-        wrap_pass ? "PASS" : "FAIL",
-        (unsigned long)queue.overflow
-    );
+    (void) printf("empty=%s fifo=%s full=%s wrap=%s overflow=%lu\n", empty_pass ? "PASS" : "FAIL", fifo_pass ? "PASS" : "FAIL",
+        full_pass ? "PASS" : "FAIL", wrap_pass ? "PASS" : "FAIL", (unsigned long) queue.overflow);
 
-    return (empty_pass && fifo_pass && full_pass &&
-            wrap_pass && (queue.overflow == 1U)) ? 0 : 1;
+    return (empty_pass && fifo_pass && full_pass && wrap_pass && (queue.overflow == 1U)) ? 0 : 1;
 }

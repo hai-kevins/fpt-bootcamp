@@ -3,12 +3,7 @@
 #include "ak_port.h"
 #include "event_record.h"
 
-void ak_fsm_init(
-    ak_fsm_t *fsm,
-    uint8_t initial_state,
-    void *context,
-    ak_fsm_dispatch_fn_t dispatch
-)
+void ak_fsm_init(ak_fsm_t *fsm, uint8_t initial_state, void *context, ak_fsm_dispatch_fn_t dispatch)
 {
     if (fsm != 0)
     {
@@ -18,10 +13,7 @@ void ak_fsm_init(
     }
 }
 
-bool ak_fsm_handle(
-    ak_fsm_t *fsm,
-    const ak_message_t *message
-)
+bool ak_fsm_handle(ak_fsm_t *fsm, const ak_message_t *message)
 {
     if ((fsm == 0) || (message == 0) || (fsm->dispatch == 0))
     {
@@ -34,7 +26,8 @@ void ak_fsm_transition(ak_fsm_t *fsm, uint8_t next_state)
 {
     if (fsm != 0)
     {
-        ak_event_record_t record = {
+        ak_event_record_t record =
+        {
             .timestamp = ak_port_time_now_ms(),
             .signal = 0U,
             .value = next_state,

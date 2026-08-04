@@ -14,9 +14,9 @@ bool test_event_queue_fifo(void)
         {
             .timestamp_ms = i,
             .parameter = i + 10UL,
-            .signal = (uint16_t)SIGNAL_SENSOR_READY,
-            .source = (uint8_t)EVENT_SOURCE_TEST,
-            .destination = (uint8_t)EVENT_DESTINATION_APP
+            .signal = (uint16_t) SIGNAL_SENSOR_READY,
+            .source = (uint8_t) EVENT_SOURCE_TEST,
+            .destination = (uint8_t) EVENT_DESTINATION_APP
         };
 
         TEST_ASSERT_TRUE(event_queue_post(&queue, &event));
@@ -35,14 +35,15 @@ bool test_event_queue_fifo(void)
 bool test_event_queue_wrap_and_overflow(void)
 {
     event_queue_t queue;
-    event_t event = {0};
+    event_t event =
+    {
+        0
+    };
     event_t output;
 
     event_queue_init(&queue);
 
-    for (uint32_t i = 0UL;
-         i < (uint32_t)EVENT_QUEUE_CAPACITY;
-         i++)
+    for (uint32_t i = 0UL; i < (uint32_t) EVENT_QUEUE_CAPACITY; i++)
     {
         event.parameter = i;
         TEST_ASSERT_TRUE(event_queue_post(&queue, &event));
@@ -63,10 +64,7 @@ bool test_event_queue_wrap_and_overflow(void)
         TEST_ASSERT_TRUE(event_queue_post(&queue, &event));
     }
 
-    TEST_ASSERT_EQ_U32(
-        EVENT_QUEUE_CAPACITY,
-        queue.high_water_mark
-    );
+    TEST_ASSERT_EQ_U32(EVENT_QUEUE_CAPACITY, queue.high_water_mark);
 
     return true;
 }

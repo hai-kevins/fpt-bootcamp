@@ -14,14 +14,12 @@ void ed_parser_init(ed_parser_t *parser)
 {
     if (parser != NULL)
     {
-        (void)memset(parser, 0, sizeof(*parser));
+        (void) memset(parser, 0, sizeof (*parser));
         parser_reset_state(parser);
     }
 }
 
-bool ed_parser_feed(ed_parser_t *parser,
-                    uint8_t byte,
-                    ed_frame_t *frame_ready)
+bool ed_parser_feed(ed_parser_t *parser, uint8_t byte, ed_frame_t *frame_ready)
 {
     if ((parser == NULL) || (frame_ready == NULL))
     {
@@ -49,8 +47,7 @@ bool ed_parser_feed(ed_parser_t *parser,
     parser->buffer[parser->index] = byte;
     parser->index++;
 
-    if ((parser->state == ED_PARSER_READ_HEADER) &&
-        (parser->index == ED_FRAME_HEADER_LEN))
+    if ((parser->state == ED_PARSER_READ_HEADER) && (parser->index == ED_FRAME_HEADER_LEN))
     {
         const uint8_t length = parser->buffer[10];
         if (length > ED_EVENT_PAYLOAD_MAX)
@@ -59,17 +56,13 @@ bool ed_parser_feed(ed_parser_t *parser,
             parser_reset_state(parser);
             return false;
         }
-        parser->expected_length = ED_FRAME_HEADER_LEN +
-                                  length + ED_FRAME_CRC_LEN;
+        parser->expected_length = ED_FRAME_HEADER_LEN + length + ED_FRAME_CRC_LEN;
         parser->state = ED_PARSER_READ_BODY;
     }
 
-    if ((parser->state == ED_PARSER_READ_BODY) &&
-        (parser->index == parser->expected_length))
+    if ((parser->state == ED_PARSER_READ_BODY) && (parser->index == parser->expected_length))
     {
-        const bool valid = ed_frame_decode(parser->buffer,
-                                           parser->expected_length,
-                                           frame_ready);
+        const bool valid = ed_frame_decode(parser->buffer, parser->expected_length, frame_ready);
         if (valid)
         {
             parser->frame_count++;

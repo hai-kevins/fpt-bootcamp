@@ -18,10 +18,6 @@ typedef struct
     uint32_t pool_failures;
 } statistics_snapshot_t;
 
-void statistics_capture(
-    statistics_snapshot_t *snapshot,
-    const event_queue_t *queue,
-    const event_pool_t *pool
-);
+void statistics_capture(statistics_snapshot_t *snapshot, const event_queue_t *queue, const event_pool_t *pool);
 
 #endif

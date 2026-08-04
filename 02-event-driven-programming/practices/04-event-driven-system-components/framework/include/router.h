@@ -10,8 +10,7 @@
 
 #define ED_ROUTER_MAX_OBJECTS (16U)
 
-typedef bool (*ed_remote_send_t)(void *context,
-                                 const ed_event_t *event);
+typedef bool (*ed_remote_send_t)(void *context, const ed_event_t *event);
 
 typedef struct
 {
@@ -26,15 +25,9 @@ typedef struct
     uint32_t route_failure_count;
 } ed_router_t;
 
-void ed_router_init(ed_router_t *router,
-                    uint8_t local_node,
-                    ed_event_pool_t *pool,
-                    ed_remote_send_t remote_send,
-                    void *remote_context);
-bool ed_router_register(ed_router_t *router,
-                        ed_active_object_t *object);
-bool ed_router_post(ed_router_t *router,
-                    uint8_t destination_node,
-                    ed_event_t *event);
+void ed_router_init(ed_router_t *router, uint8_t local_node, ed_event_pool_t *pool, ed_remote_send_t remote_send,
+    void *remote_context);
+bool ed_router_register(ed_router_t *router, ed_active_object_t *object);
+bool ed_router_post(ed_router_t *router, uint8_t destination_node, ed_event_t *event);
 
 #endif

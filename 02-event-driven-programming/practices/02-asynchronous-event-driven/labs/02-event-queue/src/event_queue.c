@@ -28,9 +28,7 @@ bool event_queue_post(event_queue_t *queue, const event_t *event)
     }
 
     queue->buffer[queue->head] = *event;
-    queue->head =
-        (uint16_t)((queue->head + 1U) %
-                   LAB02_QUEUE_CAPACITY);
+    queue->head = (uint16_t)((queue->head + 1U) % LAB02_QUEUE_CAPACITY);
     queue->count++;
 
     if (queue->count > queue->high_water_mark)
@@ -43,16 +41,13 @@ bool event_queue_post(event_queue_t *queue, const event_t *event)
 
 bool event_queue_get(event_queue_t *queue, event_t *event)
 {
-    if ((queue == NULL) || (event == NULL) ||
-        (queue->count == 0U))
+    if ((queue == NULL) || (event == NULL) || (queue->count == 0U))
     {
         return false;
     }
 
     *event = queue->buffer[queue->tail];
-    queue->tail =
-        (uint16_t)((queue->tail + 1U) %
-                   LAB02_QUEUE_CAPACITY);
+    queue->tail = (uint16_t)((queue->tail + 1U) % LAB02_QUEUE_CAPACITY);
     queue->count--;
 
     return true;

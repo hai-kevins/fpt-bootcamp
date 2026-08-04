@@ -6,7 +6,7 @@
 
 typedef enum
 {
-    COMMAND_INVALID=0,
+    COMMAND_INVALID = 0,
     COMMAND_LED_ON,
     COMMAND_LED_OFF,
     COMMAND_BLINK,

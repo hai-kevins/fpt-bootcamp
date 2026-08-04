@@ -21,17 +21,13 @@ void task_sensor_handler(const ak_message_t *message)
 {
     if (message->signal == APP_SIGNAL_SENSOR_SAMPLE)
     {
-        const sensor_data_t data = {
+        const sensor_data_t data =
+        {
             .temperature = 250U,
             .voltage = 3300U
         };
-        ak_message_t *sample = ak_message_create_common(
-            APP_TASK_SENSOR,
-            APP_TASK_APPLICATION,
-            APP_SIGNAL_SENSOR_DATA,
-            &data,
-            sizeof(data)
-        );
+        ak_message_t *sample = ak_message_create_common(APP_TASK_SENSOR, APP_TASK_APPLICATION, APP_SIGNAL_SENSOR_DATA,
+        &data, sizeof(data));
         if ((sample != 0) && !ak_task_post(sample))
         {
             ak_message_release(sample);

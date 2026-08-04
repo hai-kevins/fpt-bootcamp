@@ -29,9 +29,7 @@ typedef struct
     ed_mailbox_overflow_policy_t policy;
 } ed_mailbox_t;
 
-bool ed_mailbox_init(ed_mailbox_t *mailbox,
-                     size_t capacity,
-                     ed_mailbox_overflow_policy_t policy);
+bool ed_mailbox_init(ed_mailbox_t *mailbox, size_t capacity, ed_mailbox_overflow_policy_t policy);
 bool ed_mailbox_post(ed_mailbox_t *mailbox, ed_event_t *event);
 ed_event_t *ed_mailbox_get(ed_mailbox_t *mailbox);
 bool ed_mailbox_is_empty(const ed_mailbox_t *mailbox);

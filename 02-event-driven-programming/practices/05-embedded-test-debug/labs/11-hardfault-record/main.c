@@ -31,21 +31,10 @@ int main(void)
         .bfar = 0x40000001UL
     };
 
-    const bool pass =
-        (record.pc != 0U) &&
-        (record.lr != 0U) &&
-        (record.xpsr != 0U) &&
-        (record.cfsr != 0U);
+    const bool pass = (record.pc != 0U) && (record.lr != 0U) && (record.xpsr != 0U) && (record.cfsr != 0U);
 
-    (void)printf(
-        "pc=0x%08lX lr=0x%08lX xpsr=0x%08lX "
-        "cfsr=0x%08lX %s\n",
-        (unsigned long)record.pc,
-        (unsigned long)record.lr,
-        (unsigned long)record.xpsr,
-        (unsigned long)record.cfsr,
-        pass ? "PASS" : "FAIL"
-    );
+    (void) printf("pc=0x%08lX lr=0x%08lX xpsr=0x%08lX ""cfsr=0x%08lX %s\n", (unsigned long) record.pc, (unsigned long) record.lr,
+        (unsigned long) record.xpsr, (unsigned long) record.cfsr, pass ? "PASS" : "FAIL");
 
     return pass ? 0 : 1;
 }

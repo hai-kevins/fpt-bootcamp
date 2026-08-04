@@ -22,8 +22,7 @@ static bool test_fifo(void)
 
     for (uint32_t i = 0UL; i < 4UL; i++)
     {
-        if (!event_queue_get(&queue, &output) ||
-            (output.sequence != i))
+        if (!event_queue_get(&queue, &output) || (output.sequence != i))
         {
             return false;
         }
@@ -35,14 +34,15 @@ static bool test_fifo(void)
 static bool test_wraparound_and_full(void)
 {
     event_queue_t queue;
-    event_t event = {0};
+    event_t event =
+    {
+        0
+    };
     event_t output;
 
     event_queue_init(&queue);
 
-    for (uint32_t i = 0UL;
-         i < LAB02_QUEUE_CAPACITY;
-         i++)
+    for (uint32_t i = 0UL; i < LAB02_QUEUE_CAPACITY; i++)
     {
         event.sequence = i;
         if (!event_queue_post(&queue, &event))
@@ -51,8 +51,7 @@ static bool test_wraparound_and_full(void)
         }
     }
 
-    if (event_queue_post(&queue, &event) ||
-        (queue.overflow_count != 1UL))
+    if (event_queue_post(&queue, &event) || (queue.overflow_count != 1UL))
     {
         return false;
     }
@@ -74,8 +73,7 @@ static bool test_wraparound_and_full(void)
         }
     }
 
-    return queue.high_water_mark ==
-           LAB02_QUEUE_CAPACITY;
+    return queue.high_water_mark == LAB02_QUEUE_CAPACITY;
 }
 
 int main(void)
@@ -84,8 +82,7 @@ int main(void)
     const bool wrap = test_wraparound_and_full();
 
     printf("[%s] fifo\n", fifo ? "PASS" : "FAIL");
-    printf("[%s] wraparound-full\n",
-           wrap ? "PASS" : "FAIL");
+    printf("[%s] wraparound-full\n", wrap ? "PASS" : "FAIL");
 
     return (fifo && wrap) ? 0 : 1;
 }

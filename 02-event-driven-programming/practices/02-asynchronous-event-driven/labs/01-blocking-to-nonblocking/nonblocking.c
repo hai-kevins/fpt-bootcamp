@@ -12,29 +12,22 @@ int main(void)
     printf("LED ON at 0 ms\n");
     printf("LED timeout armed for 1000 ms\n");
 
-    for (uint32_t now_ms = 0UL;
-         now_ms <= led_deadline_ms;
-         now_ms += 100UL)
+    for (uint32_t now_ms = 0UL; now_ms <= led_deadline_ms; now_ms += 100UL)
     {
-        if (!button_handled &&
-            (now_ms >= button_arrival_ms))
+        if (!button_handled && (now_ms >= button_arrival_ms))
         {
             button_handled = true;
             button_handled_ms = now_ms;
-            printf("BUTTON handled at %lu ms\n",
-                   (unsigned long)now_ms);
+            printf("BUTTON handled at %lu ms\n", (unsigned long) now_ms);
         }
 
         if (now_ms == led_deadline_ms)
         {
-            printf("LED timeout handled at %lu ms\n",
-                   (unsigned long)now_ms);
+            printf("LED timeout handled at %lu ms\n", (unsigned long) now_ms);
         }
     }
 
-    printf("Response latency = %lu ms\n",
-           (unsigned long)
-               (button_handled_ms - button_arrival_ms));
+    printf("Response latency = %lu ms\n", (unsigned long)(button_handled_ms - button_arrival_ms));
 
     return (button_handled_ms == button_arrival_ms) ? 0 : 1;
 }

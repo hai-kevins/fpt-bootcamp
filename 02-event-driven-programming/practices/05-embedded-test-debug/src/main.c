@@ -10,11 +10,7 @@
 
 #include <stdio.h>
 
-static void dispatch_all(
-    event_queue_t *queue,
-    app_sm_t *app,
-    event_trace_t *trace
-)
+static void dispatch_all(event_queue_t *queue, app_sm_t *app, event_trace_t *trace)
 {
     event_t event;
 
@@ -24,15 +20,15 @@ static void dispatch_all(
         {
             .timestamp_ms = event.timestamp_ms,
             .signal = event.signal,
-            .argument = (uint16_t)event.argument,
+            .argument = (uint16_t) event.argument,
             .type = TRACE_TYPE_DISPATCH,
-            .source = (uint8_t)event.source,
+            .source = (uint8_t) event.source,
             .destination = 1U,
-            .state = (uint8_t)app->state
+            .state = (uint8_t) app->state
         };
 
         event_trace_write(trace, &record);
-        (void)app_sm_dispatch(app, &event);
+        (void) app_sm_dispatch(app, &event);
     }
 }
 
@@ -48,8 +44,8 @@ int main(void)
     crash_record_t crash;
     char output[160];
 
-    (void)event_queue_init(&queue, 8U);
-    (void)event_pool_init(&pool, 4U);
+    (void) event_queue_init(&queue, 8U);
+    (void) event_pool_init(&pool, 4U);
     fake_time_reset(&time_source);
     software_timer_init(&timers);
     app_sm_init(&app);
@@ -65,12 +61,7 @@ int main(void)
         .faults = &faults
     };
 
-    (void)shell_execute(
-        &shell,
-        "event start",
-        output,
-        sizeof(output)
-    );
+    (void) shell_execute(&shell, "event start", output, sizeof(output));
 
     dispatch_all(&queue, &app, &trace);
 
@@ -82,33 +73,18 @@ int main(void)
         .timestamp_ms = 0U
     };
 
-    (void)software_timer_start(
-        &timers,
-        0U,
-        fake_time_now(&time_source),
-        100U,
-        false,
-        &timeout
-    );
+    (void) software_timer_start(&timers, 0U, fake_time_now(&time_source), 100U, false, &timeout);
 
     fake_time_advance(&time_source, 100U);
-    software_timer_process(
-        &timers,
-        fake_time_now(&time_source),
-        &queue
-    );
+    software_timer_process(&timers, fake_time_now(&time_source), &queue);
     dispatch_all(&queue, &app, &trace);
 
-    event_t *diagnostic =
-        event_pool_allocate(
-            &pool,
-            EVENT_SIGNAL_DIAGNOSTIC
-        );
+    event_t *diagnostic = event_pool_allocate(&pool, EVENT_SIGNAL_DIAGNOSTIC);
 
     if (diagnostic != NULL)
     {
         diagnostic->argument = 0x1234U;
-        (void)event_pool_release(&pool, diagnostic);
+        (void) event_pool_release(&pool, diagnostic);
     }
 
     crash_record_prepare(&crash);
@@ -117,37 +93,19 @@ int main(void)
     crash.fatal_code = 0xE001U;
     crash.uptime_ms = fake_time_now(&time_source);
     crash.last_signal = app.last_signal;
-    crash.current_state = (uint8_t)app.state;
+    crash.current_state = (uint8_t) app.state;
     crash.current_component = 1U;
     crash.queue_overflow_count = queue.overflow_count;
     crash.pool_failure_count = pool.allocation_failures;
     crash_record_finalize(&crash);
 
-    (void)shell_execute(
-        &shell,
-        "stats",
-        output,
-        sizeof(output)
-    );
+    (void) shell_execute(&shell, "stats", output, sizeof(output));
 
-    (void)printf("Embedded Test/Debug demo\n");
-    (void)printf(
-        "state=%s transitions=%lu\n",
-        app_sm_state_name(app.state),
-        (unsigned long)app.transition_count
-    );
-    (void)printf(
-        "timer_expiry=%lu trace=%zu\n",
-        (unsigned long)timers.expiry_count,
-        trace.count
-    );
-    (void)printf("%s\n", output);
-    (void)printf(
-        "crash_record=%s\n",
-        crash_record_is_valid(&crash) ?
-            "VALID" :
-            "INVALID"
-    );
+    (void) printf("Embedded Test/Debug demo\n");
+    (void) printf("state=%s transitions=%lu\n", app_sm_state_name(app.state), (unsigned long) app.transition_count);
+    (void) printf("timer_expiry=%lu trace=%zu\n", (unsigned long) timers.expiry_count, trace.count);
+    (void) printf("%s\n", output);
+    (void) printf("crash_record=%s\n", crash_record_is_valid(&crash) ? "VALID" : "INVALID");
 
     return 0;
 }

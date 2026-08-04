@@ -26,29 +26,25 @@ void led_event_handler(const event_t *event)
         return;
     }
 
-    switch ((signal_t)event->signal)
+    switch ((signal_t) event->signal)
     {
-        case SIGNAL_LED_ON:
+        case SIGNAL_LED_ON :
         {
-            (void)software_timer_cancel(
-                SOFTWARE_TIMER_LED_BLINK
-            );
+            (void) software_timer_cancel(SOFTWARE_TIMER_LED_BLINK);
             platform_led_on();
             g_state = LED_STATE_ON;
             break;
         }
 
-        case SIGNAL_LED_OFF:
+        case SIGNAL_LED_OFF :
         {
-            (void)software_timer_cancel(
-                SOFTWARE_TIMER_LED_BLINK
-            );
+            (void) software_timer_cancel(SOFTWARE_TIMER_LED_BLINK);
             platform_led_off();
             g_state = LED_STATE_OFF;
             break;
         }
 
-        case SIGNAL_LED_BLINK_START:
+        case SIGNAL_LED_BLINK_START :
         {
             period_ms = event->parameter;
 
@@ -61,29 +57,20 @@ void led_event_handler(const event_t *event)
             platform_led_on();
             g_state = LED_STATE_BLINKING;
 
-            (void)software_timer_start(
-                SOFTWARE_TIMER_LED_BLINK,
-                EVENT_DESTINATION_LED,
-                SIGNAL_LED_TIMEOUT,
-                0UL,
-                period_ms,
-                true,
-                event->timestamp_ms
-            );
+            (void) software_timer_start(SOFTWARE_TIMER_LED_BLINK, EVENT_DESTINATION_LED, SIGNAL_LED_TIMEOUT, 0UL,
+                period_ms, true, event->timestamp_ms);
             break;
         }
 
-        case SIGNAL_LED_BLINK_STOP:
+        case SIGNAL_LED_BLINK_STOP :
         {
-            (void)software_timer_cancel(
-                SOFTWARE_TIMER_LED_BLINK
-            );
+            (void) software_timer_cancel(SOFTWARE_TIMER_LED_BLINK);
             platform_led_off();
             g_state = LED_STATE_OFF;
             break;
         }
 
-        case SIGNAL_LED_TIMEOUT:
+        case SIGNAL_LED_TIMEOUT :
         {
             if (g_state == LED_STATE_BLINKING)
             {

@@ -28,28 +28,13 @@ typedef struct
     uint32_t post_failures;
 } software_timer_service_t;
 
-void software_timer_init(
-    software_timer_service_t *service
-);
+void software_timer_init(software_timer_service_t *service);
 
-bool software_timer_start(
-    software_timer_service_t *service,
-    size_t timer_id,
-    uint32_t now_ms,
-    uint32_t delay_ms,
-    bool periodic,
-    const event_t *event
-);
+bool software_timer_start(software_timer_service_t *service, size_t timer_id, uint32_t now_ms, uint32_t delay_ms,
+    bool periodic, const event_t *event);
 
-bool software_timer_cancel(
-    software_timer_service_t *service,
-    size_t timer_id
-);
+bool software_timer_cancel(software_timer_service_t *service, size_t timer_id);
 
-void software_timer_process(
-    software_timer_service_t *service,
-    uint32_t now_ms,
-    event_queue_t *queue
-);
+void software_timer_process(software_timer_service_t *service, uint32_t now_ms, event_queue_t *queue);
 
 #endif

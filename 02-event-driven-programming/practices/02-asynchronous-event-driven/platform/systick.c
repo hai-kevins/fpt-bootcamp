@@ -9,10 +9,7 @@ static void systick_init(void)
 
     SYSTICK_LOAD = 7999UL;
     SYSTICK_VAL = 0UL;
-    SYSTICK_CTRL =
-        (1UL << 2U) |
-        (1UL << 1U) |
-        (1UL << 0U);
+    SYSTICK_CTRL = (1UL << 2U) | (1UL << 1U) | (1UL << 0U);
 }
 
 uint32_t platform_time_now_ms(void)

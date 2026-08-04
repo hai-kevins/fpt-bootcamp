@@ -19,19 +19,9 @@ typedef struct
 
 void ak_timer_system_init(void);
 
-ak_timer_id_t ak_timer_start_one_shot(
-    uint8_t source,
-    uint8_t destination,
-    uint16_t signal,
-    uint32_t delay_ms
-);
+ak_timer_id_t ak_timer_start_one_shot(uint8_t source, uint8_t destination, uint16_t signal, uint32_t delay_ms);
 
-ak_timer_id_t ak_timer_start_periodic(
-    uint8_t source,
-    uint8_t destination,
-    uint16_t signal,
-    uint32_t period_ms
-);
+ak_timer_id_t ak_timer_start_periodic(uint8_t source, uint8_t destination, uint16_t signal, uint32_t period_ms);
 
 bool ak_timer_restart(ak_timer_id_t timer_id, uint32_t period_ms);
 bool ak_timer_cancel(ak_timer_id_t timer_id);

@@ -49,7 +49,7 @@ uint32_t platform_critical_enter(void)
 
 void platform_critical_exit(uint32_t previous_state)
 {
-    (void)previous_state;
+    (void) previous_state;
 }
 
 uint32_t platform_time_now_ms(void)
@@ -86,7 +86,7 @@ void platform_uart_write_byte(uint8_t byte)
 {
     if (g_uart_length < (FAKE_UART_CAPACITY - 1U))
     {
-        g_uart_output[g_uart_length] = (char)byte;
+        g_uart_output[g_uart_length] = (char) byte;
         g_uart_length++;
         g_uart_output[g_uart_length] = '\0';
     }

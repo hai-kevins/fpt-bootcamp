@@ -36,14 +36,7 @@ typedef struct
 } event_trace_t;
 
 void event_trace_init(event_trace_t *trace);
-void event_trace_write(
-    event_trace_t *trace,
-    const event_trace_record_t *record
-);
-bool event_trace_get_oldest(
-    const event_trace_t *trace,
-    size_t index,
-    event_trace_record_t *record
-);
+void event_trace_write(event_trace_t *trace, const event_trace_record_t *record);
+bool event_trace_get_oldest(const event_trace_t *trace, size_t index, event_trace_record_t *record);
 
 #endif

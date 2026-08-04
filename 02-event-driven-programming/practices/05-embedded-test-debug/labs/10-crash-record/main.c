@@ -45,21 +45,11 @@ int main(void)
     };
 
     record.checksum = checksum(record);
-    const bool valid =
-        (record.magic == 0x43525348UL) &&
-        (checksum(record) == record.checksum);
+    const bool valid = (record.magic == 0x43525348UL) && (checksum(record) == record.checksum);
 
-    (void)printf(
-        "valid=%u fatal=0x%04lX task=%u signal=%u "
-        "state=%u uptime=%lu reset=%u\n",
-        valid ? 1U : 0U,
-        (unsigned long)record.fatal,
-        record.task,
-        record.signal,
-        record.state,
-        (unsigned long)record.uptime,
-        record.reset_reason
-    );
+    (void) printf("valid=%u fatal=0x%04lX task=%u signal=%u ""state=%u uptime=%lu reset=%u\n", valid ? 1U : 0U,
+        (unsigned long) record.fatal, record.task, record.signal, record.state, (unsigned long) record.uptime,
+        record.reset_reason);
 
     return valid ? 0 : 1;
 }

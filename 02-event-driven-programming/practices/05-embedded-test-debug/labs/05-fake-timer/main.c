@@ -11,12 +11,7 @@ typedef struct
     bool periodic;
 } timer_t;
 
-static void start(
-    timer_t *timer,
-    uint32_t now,
-    uint32_t delay,
-    bool periodic
-)
+static void start(timer_t *timer, uint32_t now, uint32_t delay, bool periodic)
 {
     timer->deadline = now + delay;
     timer->period = delay;
@@ -44,8 +39,14 @@ static void process(timer_t *timer, uint32_t now)
 int main(void)
 {
     uint32_t now = 0U;
-    timer_t one_shot = {0};
-    timer_t periodic = {0};
+    timer_t one_shot =
+    {
+        0
+    };
+    timer_t periodic =
+    {
+        0
+    };
 
     start(&one_shot, now, 1000U, false);
     start(&periodic, now, 1000U, true);
@@ -54,17 +55,10 @@ int main(void)
     process(&one_shot, now);
     process(&periodic, now);
 
-    const bool pass =
-        (one_shot.expiries == 1U) &&
-        (periodic.expiries == 3U);
+    const bool pass = (one_shot.expiries == 1U) && (periodic.expiries == 3U);
 
-    (void)printf(
-        "one_shot=%lu periodic=%lu now=%lu %s\n",
-        (unsigned long)one_shot.expiries,
-        (unsigned long)periodic.expiries,
-        (unsigned long)now,
-        pass ? "PASS" : "FAIL"
-    );
+    (void) printf("one_shot=%lu periodic=%lu now=%lu %s\n", (unsigned long) one_shot.expiries, (unsigned long) periodic.expiries,
+        (unsigned long) now, pass ? "PASS" : "FAIL");
 
     return pass ? 0 : 1;
 }

@@ -31,22 +31,13 @@ bool test_pool_reference_count(void)
     event_t *event = event_pool_allocate(&pool, 1U);
 
     TEST_ASSERT_NE(NULL, event);
-    TEST_ASSERT_EQ(
-        1U,
-        event_pool_reference_count(&pool, event)
-    );
+    TEST_ASSERT_EQ(1U, event_pool_reference_count(&pool, event));
 
     TEST_ASSERT_TRUE(event_pool_retain(&pool, event));
-    TEST_ASSERT_EQ(
-        2U,
-        event_pool_reference_count(&pool, event)
-    );
+    TEST_ASSERT_EQ(2U, event_pool_reference_count(&pool, event));
 
     TEST_ASSERT_TRUE(event_pool_release(&pool, event));
-    TEST_ASSERT_EQ(
-        1U,
-        event_pool_reference_count(&pool, event)
-    );
+    TEST_ASSERT_EQ(1U, event_pool_reference_count(&pool, event));
 
     TEST_ASSERT_TRUE(event_pool_release(&pool, event));
     TEST_ASSERT_EQ(0U, pool.used_count);

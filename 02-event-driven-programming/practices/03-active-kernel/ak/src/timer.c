@@ -27,13 +27,7 @@ static bool deadline_reached(uint32_t now, uint32_t deadline)
     return (int32_t)(now - deadline) >= 0;
 }
 
-static ak_timer_id_t timer_start(
-    uint8_t source,
-    uint8_t destination,
-    uint16_t signal,
-    uint32_t period_ms,
-    bool periodic
-)
+static ak_timer_id_t timer_start(uint8_t source, uint8_t destination, uint16_t signal, uint32_t period_ms, bool periodic)
 {
     if (period_ms == 0U)
     {
@@ -58,7 +52,8 @@ static ak_timer_id_t timer_start(
             }
             g_stats.starts++;
 
-            ak_event_record_t record = {
+            ak_event_record_t record =
+            {
                 .timestamp = ak_port_time_now_ms(),
                 .signal = signal,
                 .value = i,
@@ -77,34 +72,23 @@ static ak_timer_id_t timer_start(
 
 void ak_timer_system_init(void)
 {
-    (void)memset(g_timers, 0, sizeof(g_timers));
-    (void)memset(&g_stats, 0, sizeof(g_stats));
+    (void) memset(g_timers, 0, sizeof(g_timers));
+    (void) memset(&g_stats, 0, sizeof(g_stats));
 }
 
-ak_timer_id_t ak_timer_start_one_shot(
-    uint8_t source,
-    uint8_t destination,
-    uint16_t signal,
-    uint32_t delay_ms
-)
+ak_timer_id_t ak_timer_start_one_shot(uint8_t source, uint8_t destination, uint16_t signal, uint32_t delay_ms)
 {
     return timer_start(source, destination, signal, delay_ms, false);
 }
 
-ak_timer_id_t ak_timer_start_periodic(
-    uint8_t source,
-    uint8_t destination,
-    uint16_t signal,
-    uint32_t period_ms
-)
+ak_timer_id_t ak_timer_start_periodic(uint8_t source, uint8_t destination, uint16_t signal, uint32_t period_ms)
 {
     return timer_start(source, destination, signal, period_ms, true);
 }
 
 bool ak_timer_restart(ak_timer_id_t timer_id, uint32_t period_ms)
 {
-    if ((timer_id >= AK_TIMER_CAPACITY) || !g_timers[timer_id].active ||
-        (period_ms == 0U))
+    if ((timer_id >= AK_TIMER_CAPACITY) || !g_timers[timer_id].active || (period_ms == 0U))
     {
         return false;
     }
@@ -138,7 +122,8 @@ void ak_timer_process(uint32_t now_ms)
             ak_message_t *message;
             g_stats.expirations++;
 
-            ak_event_record_t record = {
+            ak_event_record_t record =
+            {
                 .timestamp = now_ms,
                 .signal = g_timers[i].signal,
                 .value = i,
@@ -149,11 +134,7 @@ void ak_timer_process(uint32_t now_ms)
             };
             ak_event_record_write(&record);
 
-            message = ak_message_create_pure(
-                g_timers[i].source,
-                g_timers[i].destination,
-                g_timers[i].signal
-            );
+            message = ak_message_create_pure(g_timers[i].source, g_timers[i].destination, g_timers[i].signal);
 
             if ((message == 0) || !ak_task_post(message))
             {

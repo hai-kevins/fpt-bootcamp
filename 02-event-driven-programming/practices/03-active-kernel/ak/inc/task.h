@@ -24,17 +24,13 @@ typedef struct
 
 void ak_task_system_init(void);
 
-bool ak_task_register(
-    uint8_t task_id,
-    uint8_t priority,
-    const char *name,
-    ak_task_handler_t handler
-);
+bool ak_task_register(uint8_t task_id, uint8_t priority, const char *name, ak_task_handler_t handler);
 
 /*
  * On success, queue/scheduler owns the message.
  * On failure, the caller still owns it and must release it.
  */
+
 bool ak_task_post(ak_message_t *message);
 bool ak_task_post_from_isr(ak_message_t *message);
 

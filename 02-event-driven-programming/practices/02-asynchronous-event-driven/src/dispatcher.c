@@ -14,9 +14,7 @@ void dispatcher_init(void)
 {
     event_queue_init(&g_queue);
 
-    for (uint32_t i = 0UL;
-         i < (uint32_t)EVENT_DESTINATION_COUNT;
-         i++)
+    for (uint32_t i = 0UL; i < (uint32_t) EVENT_DESTINATION_COUNT; i++)
     {
         g_handlers[i] = NULL;
     }
@@ -24,15 +22,10 @@ void dispatcher_init(void)
     g_invalid_destination_count = 0UL;
 }
 
-bool dispatcher_register(
-    event_destination_t destination,
-    event_handler_t handler
-)
+bool dispatcher_register(event_destination_t destination, event_handler_t handler)
 {
-    if (((uint32_t)destination >=
-         (uint32_t)EVENT_DESTINATION_COUNT) ||
-        (destination == EVENT_DESTINATION_NONE) ||
-        (handler == NULL))
+    if (((uint32_t) destination >= (uint32_t) EVENT_DESTINATION_COUNT) || (destination == EVENT_DESTINATION_NONE)
+        || (handler == NULL))
     {
         return false;
     }
@@ -53,31 +46,22 @@ bool dispatcher_post_event(const event_t *event)
 
     key = platform_critical_enter();
     posted = event_queue_post(&g_queue, event);
-    event_trace_record(
-        posted ? EVENT_TRACE_POST : EVENT_TRACE_DROP,
-        event,
-        0U
-    );
+    event_trace_record(posted ? EVENT_TRACE_POST : EVENT_TRACE_DROP, event, 0U);
     platform_critical_exit(key);
 
     return posted;
 }
 
-bool dispatcher_post(
-    event_source_t source,
-    event_destination_t destination,
-    signal_t signal,
-    uint32_t parameter,
-    uint32_t timestamp_ms
-)
+bool dispatcher_post(event_source_t source, event_destination_t destination, signal_t signal, uint32_t parameter,
+    uint32_t timestamp_ms)
 {
     const event_t event =
     {
         .timestamp_ms = timestamp_ms,
         .parameter = parameter,
-        .signal = (uint16_t)signal,
-        .source = (uint8_t)source,
-        .destination = (uint8_t)destination
+        .signal = (uint16_t) signal,
+        .source = (uint8_t) source,
+        .destination = (uint8_t) destination
     };
 
     return dispatcher_post_event(&event);
@@ -111,9 +95,7 @@ bool dispatcher_dispatch_once(void)
         platform_critical_exit(key);
     }
 
-    if ((event.destination == 0U) ||
-        (event.destination >=
-         (uint8_t)EVENT_DESTINATION_COUNT))
+    if ((event.destination == 0U) || (event.destination >= (uint8_t) EVENT_DESTINATION_COUNT))
     {
         const uint32_t key = platform_critical_enter();
         g_invalid_destination_count++;

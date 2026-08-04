@@ -38,13 +38,8 @@ int main(void)
 
     const bool pass = reproduced && fixed;
 
-    (void)printf(
-        "bug_reproduced=%u fixed=%u stale_timeout=%u %s\n",
-        reproduced ? 1U : 0U,
-        fixed ? 1U : 0U,
-        fixed_app.stale_timeout ? 1U : 0U,
-        pass ? "PASS" : "FAIL"
-    );
+    (void) printf("bug_reproduced=%u fixed=%u stale_timeout=%u %s\n", reproduced ? 1U : 0U, fixed ? 1U : 0U, fixed_app.stale_timeout ? 1U : 0U,
+        pass ? "PASS" : "FAIL");
 
     return pass ? 0 : 1;
 }

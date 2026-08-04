@@ -28,42 +28,14 @@ bool test_shell_commands(void)
         .faults = &faults
     };
 
-    TEST_ASSERT_TRUE(
-        shell_execute(
-            &context,
-            "event start",
-            output,
-            sizeof(output)
-        ) >= 0
-    );
+    TEST_ASSERT_TRUE(shell_execute(&context, "event start", output, sizeof(output)) >= 0);
     TEST_ASSERT_TRUE(strcmp(output, "OK") == 0);
     TEST_ASSERT_EQ(1U, queue.count);
 
-    TEST_ASSERT_TRUE(
-        shell_execute(
-            &context,
-            "fault pool on",
-            output,
-            sizeof(output)
-        ) >= 0
-    );
-    TEST_ASSERT_TRUE(
-        fault_injection_is_enabled(
-            &faults,
-            FAULT_INJECTION_POOL_FAILURE
-        )
-    );
+    TEST_ASSERT_TRUE(shell_execute(&context, "fault pool on", output, sizeof(output)) >= 0);
+    TEST_ASSERT_TRUE(fault_injection_is_enabled(&faults, FAULT_INJECTION_POOL_FAILURE));
 
-    TEST_ASSERT_TRUE(
-        shell_execute(
-            &context,
-            "unknown",
-            output,
-            sizeof(output)
-        ) >= 0
-    );
-    TEST_ASSERT_TRUE(
-        strcmp(output, "UNKNOWN_COMMAND") == 0
-    );
+    TEST_ASSERT_TRUE(shell_execute(&context, "unknown", output, sizeof(output)) >= 0);
+    TEST_ASSERT_TRUE(strcmp(output, "UNKNOWN_COMMAND") == 0);
     return true;
 }

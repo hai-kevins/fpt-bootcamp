@@ -17,11 +17,7 @@ void event_trace_clear(void)
     event_trace_init();
 }
 
-void event_trace_record(
-    event_trace_phase_t phase,
-    const event_t *event,
-    uint8_t state
-)
+void event_trace_record(event_trace_phase_t phase, const event_t *event, uint8_t state)
 {
     event_trace_record_t *record;
 
@@ -32,7 +28,7 @@ void event_trace_record(
 
     record = &g_records[g_head];
     record->event = *event;
-    record->phase = (uint8_t)phase;
+    record->phase = (uint8_t) phase;
     record->state = state;
     record->reserved = 0U;
 
@@ -63,9 +59,7 @@ bool event_trace_get(size_t index, event_trace_record_t *record)
         return false;
     }
 
-    oldest =
-        (g_head + EVENT_TRACE_CAPACITY - g_count) %
-        EVENT_TRACE_CAPACITY;
+    oldest = (g_head + EVENT_TRACE_CAPACITY - g_count) % EVENT_TRACE_CAPACITY;
     physical_index = (oldest + index) % EVENT_TRACE_CAPACITY;
 
     *record = g_records[physical_index];

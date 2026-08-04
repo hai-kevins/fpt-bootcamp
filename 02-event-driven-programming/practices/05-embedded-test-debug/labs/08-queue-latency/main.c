@@ -5,8 +5,20 @@
 
 int main(void)
 {
-    const uint32_t post[] = {10U, 20U, 30U, 40U};
-    const uint32_t dispatch[] = {15U, 30U, 50U, 50U};
+    const uint32_t post[] =
+    {
+        10U,
+        20U,
+        30U,
+        40U
+    };
+    const uint32_t dispatch[] =
+    {
+        15U,
+        30U,
+        50U,
+        50U
+    };
 
     uint32_t minimum = UINT32_MAX;
     uint32_t maximum = 0U;
@@ -30,18 +42,10 @@ int main(void)
     }
 
     const uint32_t average = total / 4U;
-    const bool pass =
-        (minimum == 5U) &&
-        (maximum == 20U) &&
-        (average == 11U);
+    const bool pass = (minimum == 5U) && (maximum == 20U) && (average == 11U);
 
-    (void)printf(
-        "min=%lu max=%lu avg=%lu %s\n",
-        (unsigned long)minimum,
-        (unsigned long)maximum,
-        (unsigned long)average,
-        pass ? "PASS" : "FAIL"
-    );
+    (void) printf("min=%lu max=%lu avg=%lu %s\n", (unsigned long) minimum, (unsigned long) maximum, (unsigned long) average,
+        pass ? "PASS" : "FAIL");
 
     return pass ? 0 : 1;
 }

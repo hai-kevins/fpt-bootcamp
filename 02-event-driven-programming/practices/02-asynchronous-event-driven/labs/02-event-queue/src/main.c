@@ -13,14 +13,12 @@ int main(void)
     {
         event.sequence = i;
         event.signal = (uint16_t)(100U + i);
-        (void)event_queue_post(&queue, &event);
+        (void) event_queue_post(&queue, &event);
     }
 
     while (event_queue_get(&queue, &output))
     {
-        printf("sequence=%lu signal=%u\n",
-               (unsigned long)output.sequence,
-               (unsigned int)output.signal);
+        printf("sequence=%lu signal=%u\n", (unsigned long) output.sequence, (unsigned int) output.signal);
     }
 
     return 0;

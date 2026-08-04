@@ -13,5 +13,5 @@ void platform_init(void)
 
 void platform_idle(void)
 {
-    __asm volatile ("wfi" ::: "memory");
+    __asm volatile("wfi" : : : "memory");
 }

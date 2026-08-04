@@ -27,16 +27,10 @@ typedef struct
     uint32_t checksum;
 } crash_record_t;
 
-void crash_record_prepare(
-    crash_record_t *record
-);
+void crash_record_prepare(crash_record_t *record);
 
-void crash_record_finalize(
-    crash_record_t *record
-);
+void crash_record_finalize(crash_record_t *record);
 
-bool crash_record_is_valid(
-    const crash_record_t *record
-);
+bool crash_record_is_valid(const crash_record_t *record);
 
 #endif

@@ -7,8 +7,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-typedef void (*ed_fsm_action_t)(void *context,
-                                const ed_event_t *event);
+typedef void (*ed_fsm_action_t)(void *context, const ed_event_t *event);
 
 typedef struct
 {
@@ -28,12 +27,8 @@ typedef struct
     uint32_t unhandled_count;
 } ed_fsm_t;
 
-void ed_fsm_init(ed_fsm_t *fsm,
-                 uint8_t initial_state,
-                 const ed_fsm_transition_t *transitions,
-                 size_t transition_count,
-                 void *context);
-bool ed_fsm_dispatch(ed_fsm_t *fsm,
-                     const ed_event_t *event);
+void ed_fsm_init(ed_fsm_t *fsm, uint8_t initial_state, const ed_fsm_transition_t *transitions, size_t transition_count,
+    void *context);
+bool ed_fsm_dispatch(ed_fsm_t *fsm, const ed_event_t *event);
 
 #endif

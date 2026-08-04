@@ -37,22 +37,10 @@ void test_reset_framework(void)
     led_init();
     uart_service_init();
 
-    (void)dispatcher_register(
-        EVENT_DESTINATION_APP,
-        app_event_handler
-    );
-    (void)dispatcher_register(
-        EVENT_DESTINATION_BUTTON,
-        button_event_handler
-    );
-    (void)dispatcher_register(
-        EVENT_DESTINATION_LED,
-        led_event_handler
-    );
-    (void)dispatcher_register(
-        EVENT_DESTINATION_UART,
-        uart_service_event_handler
-    );
+    (void) dispatcher_register(EVENT_DESTINATION_APP, app_event_handler);
+    (void) dispatcher_register(EVENT_DESTINATION_BUTTON, button_event_handler);
+    (void) dispatcher_register(EVENT_DESTINATION_LED, led_event_handler);
+    (void) dispatcher_register(EVENT_DESTINATION_UART, uart_service_event_handler);
 }
 
 void test_dispatch_all(void)

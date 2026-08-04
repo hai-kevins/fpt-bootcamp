@@ -33,10 +33,7 @@ static bool string_equal(const char *left, const char *right)
     return (*left == '\0') && (*right == '\0');
 }
 
-static bool string_starts_with(
-    const char *text,
-    const char *prefix
-)
+static bool string_starts_with(const char *text, const char *prefix)
 {
     if ((text == NULL) || (prefix == NULL))
     {
@@ -78,8 +75,7 @@ static bool parse_u32(const char *text, uint32_t *value)
 
         digit = (uint32_t)(*text - '0');
 
-        if ((result > 429496729U) ||
-            ((result == 429496729U) && (digit > 5U)))
+        if ((result > 429496729U) || ((result == 429496729U) && (digit > 5U)))
         {
             return false;
         }
@@ -116,9 +112,7 @@ static void write_u32(uint32_t value)
 
     bool started = false;
 
-    for (size_t i = 0U;
-         i < (sizeof(divisors) / sizeof(divisors[0]));
-         i++)
+    for (size_t i = 0U; i < (sizeof(divisors) / sizeof(divisors[0])); i++)
     {
         uint8_t digit = 0U;
 
@@ -128,20 +122,15 @@ static void write_u32(uint32_t value)
             digit++;
         }
 
-        if ((digit != 0U) || started ||
-            (divisors[i] == 1U))
+        if ((digit != 0U) || started || (divisors[i] == 1U))
         {
             started = true;
-            platform_uart_write_byte(
-                (uint8_t)((uint8_t)'0' + digit)
-            );
+            platform_uart_write_byte((uint8_t)((uint8_t)'0' + digit));
         }
     }
 }
 
-static void write_csv_record(
-    const event_trace_record_t *record
-)
+static void write_csv_record(const event_trace_record_t *record)
 {
     if (record == NULL)
     {
@@ -150,15 +139,15 @@ static void write_csv_record(
 
     write_u32(record->event.timestamp_ms);
     platform_uart_write_byte((uint8_t)',');
-    write_u32((uint32_t)record->event.source);
+    write_u32((uint32_t) record->event.source);
     platform_uart_write_byte((uint8_t)',');
-    write_u32((uint32_t)record->event.destination);
+    write_u32((uint32_t) record->event.destination);
     platform_uart_write_byte((uint8_t)',');
-    write_u32((uint32_t)record->event.signal);
+    write_u32((uint32_t) record->event.signal);
     platform_uart_write_byte((uint8_t)',');
     write_u32(record->event.parameter);
     platform_uart_write_byte((uint8_t)',');
-    write_u32((uint32_t)record->phase);
+    write_u32((uint32_t) record->phase);
     platform_uart_write_string("\r\n");
 }
 
@@ -167,9 +156,7 @@ static void dump_trace(void)
     event_trace_record_t record;
     const size_t count = event_trace_count();
 
-    platform_uart_write_string(
-        "timestamp,source,destination,signal,parameter,phase\r\n"
-    );
+    platform_uart_write_string("timestamp,source,destination,signal,parameter,phase\r\n");
 
     for (size_t i = 0U; i < count; i++)
     {
@@ -186,63 +173,29 @@ static void execute_command(uint32_t timestamp_ms)
 
     if (string_equal(g_command, "help"))
     {
-        platform_uart_write_string(
-            "help | led on | led off | blink <ms> | "
-            "blink stop | status | trace | reset | error\r\n"
-        );
+        platform_uart_write_string("help | led on | led off | blink <ms> | ""blink stop | status | trace | reset | error\r\n");
     }
     else if (string_equal(g_command, "led on"))
     {
-        (void)dispatcher_post(
-            EVENT_SOURCE_UART,
-            EVENT_DESTINATION_LED,
-            SIGNAL_LED_ON,
-            0UL,
-            timestamp_ms
-        );
+        (void) dispatcher_post(EVENT_SOURCE_UART, EVENT_DESTINATION_LED, SIGNAL_LED_ON, 0UL, timestamp_ms);
     }
     else if (string_equal(g_command, "led off"))
     {
-        (void)dispatcher_post(
-            EVENT_SOURCE_UART,
-            EVENT_DESTINATION_LED,
-            SIGNAL_LED_OFF,
-            0UL,
-            timestamp_ms
-        );
+        (void) dispatcher_post(EVENT_SOURCE_UART, EVENT_DESTINATION_LED, SIGNAL_LED_OFF, 0UL, timestamp_ms);
     }
     else if (string_equal(g_command, "blink stop"))
     {
-        (void)dispatcher_post(
-            EVENT_SOURCE_UART,
-            EVENT_DESTINATION_LED,
-            SIGNAL_LED_BLINK_STOP,
-            0UL,
-            timestamp_ms
-        );
+        (void) dispatcher_post(EVENT_SOURCE_UART, EVENT_DESTINATION_LED, SIGNAL_LED_BLINK_STOP, 0UL, timestamp_ms);
     }
-    else if (string_starts_with(g_command, "blink ") &&
-             parse_u32(&g_command[6], &blink_period_ms) &&
-             (blink_period_ms >= 50UL) &&
-             (blink_period_ms <= 5000UL))
+    else if (string_starts_with(g_command, "blink ") && parse_u32(&g_command[6], &blink_period_ms) && (blink_period_ms >= 50UL)
+        && (blink_period_ms <= 5000UL))
     {
-        (void)dispatcher_post(
-            EVENT_SOURCE_UART,
-            EVENT_DESTINATION_LED,
-            SIGNAL_LED_BLINK_START,
-            blink_period_ms,
-            timestamp_ms
-        );
+        (void) dispatcher_post(EVENT_SOURCE_UART, EVENT_DESTINATION_LED, SIGNAL_LED_BLINK_START, blink_period_ms,
+        timestamp_ms);
     }
     else if (string_equal(g_command, "status"))
     {
-        (void)dispatcher_post(
-            EVENT_SOURCE_UART,
-            EVENT_DESTINATION_APP,
-            SIGNAL_UART_STATUS_REQUEST,
-            0UL,
-            timestamp_ms
-        );
+        (void) dispatcher_post(EVENT_SOURCE_UART, EVENT_DESTINATION_APP, SIGNAL_UART_STATUS_REQUEST, 0UL, timestamp_ms);
     }
     else if (string_equal(g_command, "trace"))
     {
@@ -250,23 +203,11 @@ static void execute_command(uint32_t timestamp_ms)
     }
     else if (string_equal(g_command, "reset"))
     {
-        (void)dispatcher_post(
-            EVENT_SOURCE_UART,
-            EVENT_DESTINATION_APP,
-            SIGNAL_RESET_REQUEST,
-            0UL,
-            timestamp_ms
-        );
+        (void) dispatcher_post(EVENT_SOURCE_UART, EVENT_DESTINATION_APP, SIGNAL_RESET_REQUEST, 0UL, timestamp_ms);
     }
     else if (string_equal(g_command, "error"))
     {
-        (void)dispatcher_post(
-            EVENT_SOURCE_UART,
-            EVENT_DESTINATION_APP,
-            SIGNAL_ERROR_DETECTED,
-            0UL,
-            timestamp_ms
-        );
+        (void) dispatcher_post(EVENT_SOURCE_UART, EVENT_DESTINATION_APP, SIGNAL_ERROR_DETECTED, 0UL, timestamp_ms);
     }
     else if (g_length > 0U)
     {
@@ -289,9 +230,9 @@ void uart_service_event_handler(const event_t *event)
         return;
     }
 
-    switch ((signal_t)event->signal)
+    switch ((signal_t) event->signal)
     {
-        case SIGNAL_UART_RX_BYTE:
+        case SIGNAL_UART_RX_BYTE :
         {
             byte = (uint8_t)(event->parameter & 0xFFUL);
 
@@ -312,38 +253,32 @@ void uart_service_event_handler(const event_t *event)
 
             if (g_length < (UART_COMMAND_CAPACITY - 1U))
             {
-                g_command[g_length] = (char)byte;
+                g_command[g_length] = (char) byte;
                 g_length++;
             }
             else
             {
                 g_length = 0U;
                 g_command[0] = '\0';
-                platform_uart_write_string(
-                    "\r\nERR: command too long\r\n> "
-                );
+                platform_uart_write_string("\r\nERR: command too long\r\n> ");
             }
             break;
         }
 
-        case SIGNAL_UART_STATUS_BOOT:
-            platform_uart_write_string("APP state: BOOT\r\n");
-            break;
+        case SIGNAL_UART_STATUS_BOOT : platform_uart_write_string("APP state: BOOT\r\n");
+        break;
 
-        case SIGNAL_UART_STATUS_IDLE:
-            platform_uart_write_string("APP state: IDLE\r\n");
-            break;
+        case SIGNAL_UART_STATUS_IDLE : platform_uart_write_string("APP state: IDLE\r\n");
+        break;
 
-        case SIGNAL_UART_STATUS_ACTIVE:
-            platform_uart_write_string("APP state: ACTIVE\r\n");
-            break;
+        case SIGNAL_UART_STATUS_ACTIVE : platform_uart_write_string("APP state: ACTIVE\r\n");
+        break;
 
-        case SIGNAL_UART_STATUS_ERROR:
-            platform_uart_write_string("APP state: ERROR\r\n");
-            break;
+        case SIGNAL_UART_STATUS_ERROR : platform_uart_write_string("APP state: ERROR\r\n");
+        break;
 
         default:
-            break;
+        break;
     }
 }
 

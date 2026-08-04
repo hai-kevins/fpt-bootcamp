@@ -22,13 +22,9 @@ typedef struct
 } ed_event_pool_t;
 
 void ed_event_pool_init(ed_event_pool_t *pool);
-ed_event_t *ed_event_pool_allocate(ed_event_pool_t *pool,
-                                   ed_signal_t signal,
-                                   uint8_t source,
-                                   uint8_t destination);
+ed_event_t *ed_event_pool_allocate(ed_event_pool_t *pool, ed_signal_t signal, uint8_t source, uint8_t destination);
 bool ed_event_pool_retain(ed_event_pool_t *pool, ed_event_t *event);
 bool ed_event_pool_release(ed_event_pool_t *pool, ed_event_t *event);
-bool ed_event_pool_owns(const ed_event_pool_t *pool,
-                        const ed_event_t *event);
+bool ed_event_pool_owns(const ed_event_pool_t *pool, const ed_event_t *event);
 
 #endif

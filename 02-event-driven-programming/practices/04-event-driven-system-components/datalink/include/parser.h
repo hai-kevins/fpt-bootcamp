@@ -25,8 +25,6 @@ typedef struct
 } ed_parser_t;
 
 void ed_parser_init(ed_parser_t *parser);
-bool ed_parser_feed(ed_parser_t *parser,
-                    uint8_t byte,
-                    ed_frame_t *frame_ready);
+bool ed_parser_feed(ed_parser_t *parser, uint8_t byte, ed_frame_t *frame_ready);
 
 #endif

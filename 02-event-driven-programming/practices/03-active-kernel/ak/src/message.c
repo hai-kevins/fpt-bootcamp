@@ -9,15 +9,8 @@ static ak_message_t g_pool[AK_MESSAGE_POOL_CAPACITY];
 static bool g_used[AK_MESSAGE_POOL_CAPACITY];
 static ak_message_pool_stats_t g_stats;
 
-static ak_message_t *message_allocate(
-    ak_message_kind_t kind,
-    uint8_t source,
-    uint8_t destination,
-    uint16_t signal,
-    const void *data,
-    size_t length,
-    size_t maximum_length
-)
+static ak_message_t *message_allocate(ak_message_kind_t kind, uint8_t source, uint8_t destination, uint16_t signal,
+    const void *data, size_t length, size_t maximum_length)
 {
     ak_message_t *message = 0;
     uint32_t key;
@@ -58,23 +51,24 @@ static ak_message_t *message_allocate(
         message->signal = signal;
         message->source = source;
         message->destination = destination;
-        message->kind = (uint8_t)kind;
-        message->length = (uint8_t)length;
+        message->kind = (uint8_t) kind;
+        message->length = (uint8_t) length;
         message->reference_count = 1U;
 
         if (length > 0U)
         {
-            (void)memcpy(message->payload, data, length);
+            (void) memcpy(message->payload, data, length);
         }
 
-        ak_event_record_t record = {
+        ak_event_record_t record =
+        {
             .timestamp = ak_port_time_now_ms(),
             .signal = signal,
-            .value = (uint16_t)length,
+            .value = (uint16_t) length,
             .type = AK_RECORD_MESSAGE_ALLOC,
             .source = source,
             .destination = destination,
-            .state = (uint8_t)kind
+            .state = (uint8_t) kind
         };
         ak_event_record_write(&record);
     }
@@ -84,50 +78,27 @@ static ak_message_t *message_allocate(
 
 void ak_message_system_init(void)
 {
-    (void)memset(g_pool, 0, sizeof(g_pool));
-    (void)memset(g_used, 0, sizeof(g_used));
-    (void)memset(&g_stats, 0, sizeof(g_stats));
+    (void) memset(g_pool, 0, sizeof(g_pool));
+    (void) memset(g_used, 0, sizeof(g_used));
+    (void) memset(&g_stats, 0, sizeof(g_stats));
     g_stats.capacity = AK_MESSAGE_POOL_CAPACITY;
 }
 
-ak_message_t *ak_message_create_pure(
-    uint8_t source,
-    uint8_t destination,
-    uint16_t signal
-)
+ak_message_t *ak_message_create_pure(uint8_t source, uint8_t destination, uint16_t signal)
 {
-    return message_allocate(
-        AK_MESSAGE_PURE, source, destination, signal,
-        0, 0U, 0U
-    );
+    return message_allocate(AK_MESSAGE_PURE, source, destination, signal, 0, 0U, 0U);
 }
 
-ak_message_t *ak_message_create_common(
-    uint8_t source,
-    uint8_t destination,
-    uint16_t signal,
-    const void *data,
-    size_t length
-)
+ak_message_t *ak_message_create_common(uint8_t source, uint8_t destination, uint16_t signal, const void *data,
+    size_t length)
 {
-    return message_allocate(
-        AK_MESSAGE_COMMON, source, destination, signal,
-        data, length, AK_COMMON_PAYLOAD_CAPACITY
-    );
+    return message_allocate(AK_MESSAGE_COMMON, source, destination, signal, data, length, AK_COMMON_PAYLOAD_CAPACITY);
 }
 
-ak_message_t *ak_message_create_dynamic(
-    uint8_t source,
-    uint8_t destination,
-    uint16_t signal,
-    const void *data,
-    size_t length
-)
+ak_message_t *ak_message_create_dynamic(uint8_t source, uint8_t destination, uint16_t signal, const void *data,
+    size_t length)
 {
-    return message_allocate(
-        AK_MESSAGE_DYNAMIC, source, destination, signal,
-        data, length, AK_DYNAMIC_PAYLOAD_CAPACITY
-    );
+    return message_allocate(AK_MESSAGE_DYNAMIC, source, destination, signal, data, length, AK_DYNAMIC_PAYLOAD_CAPACITY);
 }
 
 bool ak_message_retain(ak_message_t *message)
@@ -141,8 +112,7 @@ bool ak_message_retain(ak_message_t *message)
     }
 
     key = ak_port_critical_enter();
-    if ((message->reference_count > 0U) &&
-        (message->reference_count < UINT8_MAX))
+    if ((message->reference_count > 0U) && (message->reference_count < UINT8_MAX))
     {
         message->reference_count++;
         result = true;
@@ -190,7 +160,7 @@ const void *ak_message_data(const ak_message_t *message)
 
 size_t ak_message_length(const ak_message_t *message)
 {
-    return (message == 0) ? 0U : (size_t)message->length;
+    return (message == 0) ? 0U : (size_t) message->length;
 }
 
 ak_message_pool_stats_t ak_message_pool_stats(void)

@@ -23,23 +23,12 @@ typedef struct
     uint32_t overflow_count;
 } event_queue_t;
 
-bool event_queue_init(
-    event_queue_t *queue,
-    size_t capacity
-);
+bool event_queue_init(event_queue_t *queue, size_t capacity);
 
-bool event_queue_post(
-    event_queue_t *queue,
-    const event_t *event
-);
+bool event_queue_post(event_queue_t *queue, const event_t *event);
 
-bool event_queue_get(
-    event_queue_t *queue,
-    event_t *event
-);
+bool event_queue_get(event_queue_t *queue, event_t *event);
 
-bool event_queue_is_empty(
-    const event_queue_t *queue
-);
+bool event_queue_is_empty(const event_queue_t *queue);
 
 #endif

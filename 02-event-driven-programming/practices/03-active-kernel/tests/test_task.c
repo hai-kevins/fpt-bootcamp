@@ -4,7 +4,10 @@
 #include "task.h"
 
 static uint16_t g_last_signal;
-static void handler(const ak_message_t *message) { g_last_signal = message->signal; }
+static void handler(const ak_message_t *message)
+{
+    g_last_signal = message->signal;
+}
 
 bool test_task_scheduler(void)
 {

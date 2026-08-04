@@ -2,27 +2,19 @@
 
 #include <string.h>
 
-bool event_queue_init(
-    event_queue_t *queue,
-    size_t capacity
-)
+bool event_queue_init(event_queue_t *queue, size_t capacity)
 {
-    if ((queue == NULL) ||
-        (capacity == 0U) ||
-        (capacity > EVENT_QUEUE_MAX_CAPACITY))
+    if ((queue == NULL) || (capacity == 0U) || (capacity > EVENT_QUEUE_MAX_CAPACITY))
     {
         return false;
     }
 
-    (void)memset(queue, 0, sizeof(*queue));
+    (void) memset(queue, 0, sizeof (*queue));
     queue->capacity = capacity;
     return true;
 }
 
-bool event_queue_post(
-    event_queue_t *queue,
-    const event_t *event
-)
+bool event_queue_post(event_queue_t *queue, const event_t *event)
 {
     if ((queue == NULL) || (event == NULL))
     {
@@ -48,14 +40,9 @@ bool event_queue_post(
     return true;
 }
 
-bool event_queue_get(
-    event_queue_t *queue,
-    event_t *event
-)
+bool event_queue_get(event_queue_t *queue, event_t *event)
 {
-    if ((queue == NULL) ||
-        (event == NULL) ||
-        (queue->count == 0U))
+    if ((queue == NULL) || (event == NULL) || (queue->count == 0U))
     {
         return false;
     }
@@ -67,9 +54,7 @@ bool event_queue_get(
     return true;
 }
 
-bool event_queue_is_empty(
-    const event_queue_t *queue
-)
+bool event_queue_is_empty(const event_queue_t *queue)
 {
     return (queue == NULL) || (queue->count == 0U);
 }

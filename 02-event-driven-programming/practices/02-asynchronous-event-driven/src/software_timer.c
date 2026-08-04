@@ -22,9 +22,7 @@ static bool time_reached(uint32_t now_ms, uint32_t deadline_ms)
 
 void software_timer_init(void)
 {
-    for (uint32_t i = 0UL;
-         i < (uint32_t)SOFTWARE_TIMER_COUNT;
-         i++)
+    for (uint32_t i = 0UL; i < (uint32_t) SOFTWARE_TIMER_COUNT; i++)
     {
         g_timers[i].active = false;
         g_timers[i].periodic = false;
@@ -36,22 +34,13 @@ void software_timer_init(void)
     }
 }
 
-bool software_timer_start(
-    software_timer_id_t id,
-    event_destination_t destination,
-    signal_t signal,
-    uint32_t parameter,
-    uint32_t delay_ms,
-    bool periodic,
-    uint32_t now_ms
-)
+bool software_timer_start(software_timer_id_t id, event_destination_t destination, signal_t signal, uint32_t parameter,
+    uint32_t delay_ms, bool periodic, uint32_t now_ms)
 {
     timer_slot_t *timer;
 
-    if (((uint32_t)id >= (uint32_t)SOFTWARE_TIMER_COUNT) ||
-        (destination == EVENT_DESTINATION_NONE) ||
-        (signal == SIGNAL_NONE) ||
-        (delay_ms == 0UL))
+    if (((uint32_t) id >= (uint32_t) SOFTWARE_TIMER_COUNT) || (destination == EVENT_DESTINATION_NONE) || (signal == SIGNAL_NONE)
+        || (delay_ms == 0UL))
     {
         return false;
     }
@@ -70,7 +59,7 @@ bool software_timer_start(
 
 bool software_timer_cancel(software_timer_id_t id)
 {
-    if ((uint32_t)id >= (uint32_t)SOFTWARE_TIMER_COUNT)
+    if ((uint32_t) id >= (uint32_t) SOFTWARE_TIMER_COUNT)
     {
         return false;
     }
@@ -81,7 +70,7 @@ bool software_timer_cancel(software_timer_id_t id)
 
 bool software_timer_is_active(software_timer_id_t id)
 {
-    if ((uint32_t)id >= (uint32_t)SOFTWARE_TIMER_COUNT)
+    if ((uint32_t) id >= (uint32_t) SOFTWARE_TIMER_COUNT)
     {
         return false;
     }
@@ -91,25 +80,16 @@ bool software_timer_is_active(software_timer_id_t id)
 
 void software_timer_process(uint32_t now_ms)
 {
-    for (uint32_t i = 0UL;
-         i < (uint32_t)SOFTWARE_TIMER_COUNT;
-         i++)
+    for (uint32_t i = 0UL; i < (uint32_t) SOFTWARE_TIMER_COUNT; i++)
     {
         timer_slot_t *timer = &g_timers[i];
 
-        if (!timer->active ||
-            !time_reached(now_ms, timer->deadline_ms))
+        if (!timer->active || !time_reached(now_ms, timer->deadline_ms))
         {
             continue;
         }
 
-        (void)dispatcher_post(
-            EVENT_SOURCE_TIMER,
-            timer->destination,
-            timer->signal,
-            timer->parameter,
-            now_ms
-        );
+        (void) dispatcher_post(EVENT_SOURCE_TIMER, timer->destination, timer->signal, timer->parameter, now_ms);
 
         if (timer->periodic)
         {

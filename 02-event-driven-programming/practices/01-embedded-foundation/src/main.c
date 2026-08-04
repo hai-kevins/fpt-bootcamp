@@ -10,7 +10,7 @@ static void delay_cycles(volatile uint32_t cycles)
 {
     while (cycles > 0UL)
     {
-        __asm volatile ("nop" ::: "memory");
+        __asm volatile("nop" : : : "memory");
         cycles--;
     }
 }
@@ -28,13 +28,7 @@ int main(void)
         }
     }
 
-    uart1_send_string(
-        "\r\n"
-        "STM32F103 bare-metal foundation\r\n"
-        "Clock: HSI 8 MHz\r\n"
-        "USART1: 9600 8-N-1\r\n"
-        "Type characters to test echo.\r\n"
-    );
+    uart1_send_string("\r\n""STM32F103 bare-metal foundation\r\n""Clock: HSI 8 MHz\r\n""USART1: 9600 8-N-1\r\n""Type characters to test echo.\r\n");
 
     for (;;)
     {

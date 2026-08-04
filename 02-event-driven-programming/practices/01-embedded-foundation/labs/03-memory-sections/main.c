@@ -13,11 +13,11 @@ int main(void)
     g_uninitialized_counter++;
     g_static_buffer[0] = UINT8_C(0xA5);
 
-    printf("firmware version      : 0x%08" PRIX32 "\n", g_firmware_version);
-    printf("initialized counter   : %" PRIu32 "\n", g_initialized_counter);
-    printf("uninitialized counter : %" PRIu32 "\n", g_uninitialized_counter);
-    printf("static buffer[0]       : 0x%02" PRIX8 "\n", g_static_buffer[0]);
-    printf("private value          : %" PRIu32 "\n", g_private_value);
+    printf("firmware version      : 0x%08" PRIX32"\n", g_firmware_version);
+    printf("initialized counter   : %" PRIu32"\n", g_initialized_counter);
+    printf("uninitialized counter : %" PRIu32"\n", g_uninitialized_counter);
+    printf("static buffer[0]       : 0x%02" PRIX8"\n", g_static_buffer[0]);
+    printf("private value          : %" PRIu32"\n", g_private_value);
 
     return 0;
 }

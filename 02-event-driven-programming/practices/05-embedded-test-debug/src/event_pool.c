@@ -2,10 +2,7 @@
 
 #include <string.h>
 
-static event_pool_block_t *find_block(
-    event_pool_t *pool,
-    const event_t *event
-)
+static event_pool_block_t *find_block(event_pool_t *pool, const event_t *event)
 {
     if ((pool == NULL) || (event == NULL))
     {
@@ -23,10 +20,7 @@ static event_pool_block_t *find_block(
     return NULL;
 }
 
-static const event_pool_block_t *find_block_const(
-    const event_pool_t *pool,
-    const event_t *event
-)
+static const event_pool_block_t *find_block_const(const event_pool_t *pool, const event_t *event)
 {
     if ((pool == NULL) || (event == NULL))
     {
@@ -44,27 +38,19 @@ static const event_pool_block_t *find_block_const(
     return NULL;
 }
 
-bool event_pool_init(
-    event_pool_t *pool,
-    size_t capacity
-)
+bool event_pool_init(event_pool_t *pool, size_t capacity)
 {
-    if ((pool == NULL) ||
-        (capacity == 0U) ||
-        (capacity > EVENT_POOL_MAX_BLOCKS))
+    if ((pool == NULL) || (capacity == 0U) || (capacity > EVENT_POOL_MAX_BLOCKS))
     {
         return false;
     }
 
-    (void)memset(pool, 0, sizeof(*pool));
+    (void) memset(pool, 0, sizeof (*pool));
     pool->capacity = capacity;
     return true;
 }
 
-event_t *event_pool_allocate(
-    event_pool_t *pool,
-    uint16_t signal
-)
+event_t *event_pool_allocate(event_pool_t *pool, uint16_t signal)
 {
     if (pool == NULL)
     {
@@ -77,7 +63,7 @@ event_t *event_pool_allocate(
 
         if (!block->used)
         {
-            (void)memset(&block->event, 0, sizeof(block->event));
+            (void) memset(&block->event, 0, sizeof(block->event));
             block->event.signal = signal;
             block->reference_count = 1U;
             block->used = true;
@@ -98,16 +84,11 @@ event_t *event_pool_allocate(
     return NULL;
 }
 
-bool event_pool_retain(
-    event_pool_t *pool,
-    event_t *event
-)
+bool event_pool_retain(event_pool_t *pool, event_t *event)
 {
     event_pool_block_t *block = find_block(pool, event);
 
-    if ((block == NULL) ||
-        (!block->used) ||
-        (block->reference_count == UINT16_MAX))
+    if ((block == NULL) || (!block->used) || (block->reference_count == UINT16_MAX))
     {
         return false;
     }
@@ -116,16 +97,11 @@ bool event_pool_retain(
     return true;
 }
 
-bool event_pool_release(
-    event_pool_t *pool,
-    event_t *event
-)
+bool event_pool_release(event_pool_t *pool, event_t *event)
 {
     event_pool_block_t *block = find_block(pool, event);
 
-    if ((block == NULL) ||
-        (!block->used) ||
-        (block->reference_count == 0U))
+    if ((block == NULL) || (!block->used) || (block->reference_count == 0U))
     {
         return false;
     }
@@ -135,7 +111,7 @@ bool event_pool_release(
     if (block->reference_count == 0U)
     {
         block->used = false;
-        (void)memset(&block->event, 0, sizeof(block->event));
+        (void) memset(&block->event, 0, sizeof(block->event));
         pool->used_count--;
         pool->release_count++;
     }
@@ -143,13 +119,9 @@ bool event_pool_release(
     return true;
 }
 
-uint16_t event_pool_reference_count(
-    const event_pool_t *pool,
-    const event_t *event
-)
+uint16_t event_pool_reference_count(const event_pool_t *pool, const event_t *event)
 {
-    const event_pool_block_t *block =
-        find_block_const(pool, event);
+    const event_pool_block_t *block = find_block_const(pool, event);
 
     if ((block == NULL) || (!block->used))
     {

@@ -11,8 +11,7 @@
 void platform_led_init(void)
 {
     RCC_APB2ENR |= RCC_APB2ENR_IOPCEN;
-    GPIOC_CRH = (GPIOC_CRH & ~(0xFUL << LED_SHIFT)) |
-                (0x2UL << LED_SHIFT);
+    GPIOC_CRH = (GPIOC_CRH & ~(0xFUL << LED_SHIFT)) | (0x2UL << LED_SHIFT);
     platform_led_off();
 }
 
@@ -21,7 +20,7 @@ void platform_button_init(void)
     RCC_APB2ENR |= RCC_APB2ENR_AFIOEN | RCC_APB2ENR_IOPAEN;
     GPIOA_CRL = (GPIOA_CRL & ~0xFUL) | 0x8UL;
     GPIOA_ODR |= 1UL;
-    AFIO_EXTICR1 &= ~0xFUL;
+    AFIO_EXTICR1 &= ~ 0xFUL;
     EXTI_IMR |= 1UL;
     EXTI_RTSR |= 1UL;
     EXTI_FTSR |= 1UL;
@@ -29,16 +28,33 @@ void platform_button_init(void)
     NVIC_ISER0 = (1UL << 6U);
 }
 
-void platform_led_on(void) { GPIOC_BSRR = (1UL << (LED_PIN + 16U)); }
-void platform_led_off(void) { GPIOC_BSRR = (1UL << LED_PIN); }
+void platform_led_on(void)
+{
+    GPIOC_BSRR = (1UL << (LED_PIN + 16U));
+}
+
+void platform_led_off(void)
+{
+    GPIOC_BSRR = (1UL << LED_PIN);
+}
+
 void platform_led_toggle(void)
 {
-    if (platform_led_is_on()) platform_led_off(); else platform_led_on();
+    if (platform_led_is_on())
+    {
+        platform_led_off();
+    }
+        else
+        {
+            platform_led_on();
+        }
 }
+
 bool platform_led_is_on(void)
 {
     return (GPIOC_ODR & (1UL << LED_PIN)) == 0UL;
 }
+
 bool platform_button_is_pressed(void)
 {
     return (GPIOA_IDR & 1UL) == 0UL;

@@ -30,8 +30,7 @@ bool event_queue_post(event_queue_t *queue, const event_t *event)
     }
 
     queue->buffer[queue->head] = *event;
-    queue->head =
-        (uint16_t)((queue->head + 1U) % EVENT_QUEUE_CAPACITY);
+    queue->head = (uint16_t)((queue->head + 1U) % EVENT_QUEUE_CAPACITY);
     queue->count++;
     queue->post_count++;
 
@@ -56,8 +55,7 @@ bool event_queue_get(event_queue_t *queue, event_t *event)
     }
 
     *event = queue->buffer[queue->tail];
-    queue->tail =
-        (uint16_t)((queue->tail + 1U) % EVENT_QUEUE_CAPACITY);
+    queue->tail = (uint16_t)((queue->tail + 1U) % EVENT_QUEUE_CAPACITY);
     queue->count--;
     queue->get_count++;
 
@@ -71,8 +69,7 @@ bool event_queue_is_empty(const event_queue_t *queue)
 
 bool event_queue_is_full(const event_queue_t *queue)
 {
-    return (queue != NULL) &&
-           (queue->count >= EVENT_QUEUE_CAPACITY);
+    return (queue != NULL) && (queue->count >= EVENT_QUEUE_CAPACITY);
 }
 
 uint16_t event_queue_count(const event_queue_t *queue)

@@ -20,21 +20,9 @@ typedef struct
 } fault_injection_t;
 
 void fault_injection_init(fault_injection_t *faults);
-void fault_injection_enable(
-    fault_injection_t *faults,
-    fault_injection_id_t fault
-);
-void fault_injection_disable(
-    fault_injection_t *faults,
-    fault_injection_id_t fault
-);
-bool fault_injection_is_enabled(
-    const fault_injection_t *faults,
-    fault_injection_id_t fault
-);
-bool fault_injection_trigger(
-    fault_injection_t *faults,
-    fault_injection_id_t fault
-);
+void fault_injection_enable(fault_injection_t *faults, fault_injection_id_t fault);
+void fault_injection_disable(fault_injection_t *faults, fault_injection_id_t fault);
+bool fault_injection_is_enabled(const fault_injection_t *faults, fault_injection_id_t fault);
+bool fault_injection_trigger(fault_injection_t *faults, fault_injection_id_t fault);
 
 #endif

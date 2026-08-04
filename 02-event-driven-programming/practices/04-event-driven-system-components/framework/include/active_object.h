@@ -10,8 +10,7 @@
 
 typedef struct ed_active_object ed_active_object_t;
 
-typedef void (*ed_event_handler_t)(ed_active_object_t *object,
-                                   const ed_event_t *event);
+typedef void (*ed_event_handler_t)(ed_active_object_t *object, const ed_event_t *event);
 
 struct ed_active_object
 {
@@ -24,15 +23,9 @@ struct ed_active_object
     uint32_t dispatch_count;
 };
 
-bool ed_active_object_init(ed_active_object_t *object,
-                           uint8_t id,
-                           uint8_t priority,
-                           const char *name,
-                           size_t mailbox_capacity,
-                           ed_event_handler_t handler,
-                           void *context);
-bool ed_active_object_post(ed_active_object_t *object,
-                           ed_event_t *event);
+bool ed_active_object_init(ed_active_object_t *object, uint8_t id, uint8_t priority, const char *name, size_t mailbox_capacity,
+    ed_event_handler_t handler, void *context);
+bool ed_active_object_post(ed_active_object_t *object, ed_event_t *event);
 bool ed_active_object_ready(const ed_active_object_t *object);
 
 #endif

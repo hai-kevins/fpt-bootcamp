@@ -1,5 +1,6 @@
 #include "app_sm.h"
 #include <stdio.h>
+
 int main(void)
 {
     app_sm_t sm;
@@ -12,12 +13,10 @@ int main(void)
         APP_RESET_REQUEST
     };
     app_sm_init(&sm);
-    for (size_t i=0U; i<sizeof(sequence)/sizeof(sequence[0]); i++)
+    for (size_t i = 0U; i < sizeof(sequence) / sizeof(sequence[0]); i++)
     {
-        app_sm_dispatch(&sm,sequence[i]);
-        printf("event=%d state=%d transitions=%u\n",
-               (int)sequence[i],(int)sm.state,
-               sm.transition_count);
+        app_sm_dispatch(&sm, sequence[i]);
+        printf("event=%d state=%d transitions=%u\n", (int) sequence[i], (int) sm.state, sm.transition_count);
     }
-    return (sm.state==APP_IDLE) ? 0 : 1;
+    return (sm.state == APP_IDLE) ? 0 : 1;
 }

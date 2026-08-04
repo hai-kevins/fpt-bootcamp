@@ -41,10 +41,7 @@ typedef struct
 } ed_trace_t;
 
 void ed_trace_init(ed_trace_t *trace);
-void ed_trace_write(ed_trace_t *trace,
-                    const ed_trace_record_t *record);
-bool ed_trace_get_oldest(const ed_trace_t *trace,
-                         size_t index,
-                         ed_trace_record_t *record);
+void ed_trace_write(ed_trace_t *trace, const ed_trace_record_t *record);
+bool ed_trace_get_oldest(const ed_trace_t *trace, size_t index, ed_trace_record_t *record);
 
 #endif

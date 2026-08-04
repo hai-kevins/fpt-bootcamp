@@ -16,15 +16,8 @@ typedef enum
 
 void software_timer_init(void);
 
-bool software_timer_start(
-    software_timer_id_t id,
-    event_destination_t destination,
-    signal_t signal,
-    uint32_t parameter,
-    uint32_t delay_ms,
-    bool periodic,
-    uint32_t now_ms
-);
+bool software_timer_start(software_timer_id_t id, event_destination_t destination, signal_t signal, uint32_t parameter,
+    uint32_t delay_ms, bool periodic, uint32_t now_ms);
 
 bool software_timer_cancel(software_timer_id_t id);
 bool software_timer_is_active(software_timer_id_t id);

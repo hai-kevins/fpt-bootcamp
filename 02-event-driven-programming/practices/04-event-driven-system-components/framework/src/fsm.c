@@ -1,10 +1,7 @@
 #include "fsm.h"
 
-void ed_fsm_init(ed_fsm_t *fsm,
-                 uint8_t initial_state,
-                 const ed_fsm_transition_t *transitions,
-                 size_t transition_count,
-                 void *context)
+void ed_fsm_init(ed_fsm_t *fsm, uint8_t initial_state, const ed_fsm_transition_t *transitions, size_t transition_count,
+    void *context)
 {
     if (fsm == NULL)
     {
@@ -19,11 +16,9 @@ void ed_fsm_init(ed_fsm_t *fsm,
     fsm->unhandled_count = 0U;
 }
 
-bool ed_fsm_dispatch(ed_fsm_t *fsm,
-                     const ed_event_t *event)
+bool ed_fsm_dispatch(ed_fsm_t *fsm, const ed_event_t *event)
 {
-    if ((fsm == NULL) || (event == NULL) ||
-        (fsm->transitions == NULL))
+    if ((fsm == NULL) || (event == NULL) || (fsm->transitions == NULL))
     {
         return false;
     }
@@ -32,8 +27,7 @@ bool ed_fsm_dispatch(ed_fsm_t *fsm,
     {
         const ed_fsm_transition_t *transition = &fsm->transitions[i];
 
-        if ((transition->state == fsm->state) &&
-            (transition->signal == event->signal))
+        if ((transition->state == fsm->state) && (transition->signal == event->signal))
         {
             if (transition->action != NULL)
             {

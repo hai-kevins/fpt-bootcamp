@@ -46,9 +46,9 @@ int main(void)
             const event_t timeout =
             {
                 .timestamp_ms = platform_time_now_ms(),
-                .signal = (uint16_t)EVENT_DEBOUNCE_TIMEOUT
+                .signal = (uint16_t) EVENT_DEBOUNCE_TIMEOUT
             };
-            (void)post_event(&timeout);
+            (void) post_event(&timeout);
         }
 
         if (!event_queue_get(&g_queue, &event))
@@ -57,15 +57,13 @@ int main(void)
             continue;
         }
 
-        if ((event_signal_t)event.signal == EVENT_BUTTON_EDGE)
+        if ((event_signal_t) event.signal == EVENT_BUTTON_EDGE)
         {
             software_timer_start(event.timestamp_ms, 20UL);
         }
-        else if ((event_signal_t)event.signal ==
-                 EVENT_DEBOUNCE_TIMEOUT)
+        else if ((event_signal_t) event.signal == EVENT_DEBOUNCE_TIMEOUT)
         {
-            const bool current =
-                platform_button_is_pressed();
+            const bool current = platform_button_is_pressed();
 
             if (current != g_stable_pressed)
             {
