@@ -358,18 +358,18 @@ Quy ước:
 
 ## 9. Danh sách bài thực hành
 
-| Bài | Chủ đề | Kết quả chính |
-|---:|---|---|
-| 1 | Exception stack inspection | Quan sát MSP, PSP, EXC_RETURN và hardware frame |
-| 2 | Initial task stack | Tạo Cortex-M3 initial frame và test trên host |
-| 3 | SVC first task | Khởi động task đầu tiên bằng PSP |
-| 4 | Cooperative PendSV | Hai task tự `yield()` và giữ local context |
-| 5 | Priority scheduler host | Test ready queue, bitmap, FIFO và rotation |
-| 6 | Fixed-priority target | Task priority cao preempt task thấp |
-| 7 | SysTick time slice | Hai worker cùng priority luân phiên không cần `yield()` |
-| 8 | ISR preemption | EXTI0 wake high task rồi defer switch qua PendSV |
-| 9 | Round-robin | Ba task cùng priority không bị starvation |
-| 10 | Context-switch stress | Kiểm tra stack guard, local counter và switch lâu dài |
+| Bài | Chủ đề | Môi trường | Kết quả chính |
+|---:|---|---|---|
+| 1 | Exception Stack Inspection | STM32F103 | Quan sát MSP, PSP, EXC_RETURN và hardware exception frame |
+| 2 | Initial Task Stack | Host | Tạo Cortex-M3 initial stack frame và kiểm tra layout |
+| 3 | SVC First Task | STM32F103 | Khởi động task đầu tiên bằng SVC và PSP |
+| 4 | Cooperative PendSV | STM32F103 | Hai task tự `yield()` qua PendSV và giữ local context |
+| 5 | Priority Scheduler Policy | Host | Kiểm tra ready queue, bitmap, FIFO và rotation policy |
+| 6 | Fixed-priority Scheduler | STM32F103 | Cho task ưu tiên cao preempt task ưu tiên thấp |
+| 7 | SysTick Time Slice | STM32F103 | Luân phiên hai worker cùng priority mà không cần `yield()` |
+| 8 | ISR Preemption | STM32F103 | EXTI0 đánh thức high task và defer switch qua PendSV |
+| 9 | Round-robin | STM32F103 | Luân phiên ba task cùng priority mà không starvation |
+| 10 | Context-switch Stress | STM32F103 | Kiểm tra stack guard, local counter và switch dài hạn |
 
 ---
 

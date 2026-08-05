@@ -247,18 +247,18 @@ make flash-stlink
 
 ## 9. Danh sách bài thực hành
 
-| Bài | Chủ đề | Kết quả chính |
-|---:|---|---|
-| 1 | Static ring-buffer queue | FIFO, wrap, full/empty và item copy |
-| 2 | Blocking queue host | Waiters, no-wait, timeout và direct handoff model |
-| 3 | Queue from ISR | EXTI0 gửi message và defer PendSV |
-| 4 | Message pool | Fixed blocks, exhaustion và double-free detection |
-| 5 | Software timer list | One-shot, periodic, ordering và wrap |
-| 6 | Timer service task | Callback trong task context |
-| 7 | Timestamp backends | DWT, GPIO marker và overhead |
-| 8 | Context-switch benchmark | Yield/switch latency statistics |
-| 9 | Event/message latency | ISR-to-task và queue latency |
-| 10 | Target console | Queue, pool, timers và benchmark tích hợp |
+| Bài | Chủ đề | Môi trường | Kết quả chính |
+|---:|---|---|---|
+| 1 | Static Ring-buffer Queue | Host | Kiểm tra FIFO, wraparound, full/empty và item copy |
+| 2 | Blocking Queue | Host | Mô phỏng waiter, no-wait, timeout và direct handoff |
+| 3 | Queue from ISR | STM32F103 | EXTI0 gửi message từ ISR và defer PendSV |
+| 4 | Message Pool | Host | Quản lý fixed blocks, exhaustion và double-free detection |
+| 5 | Software Timer List | Host | Kiểm tra one-shot, periodic, ordering và tick wrap |
+| 6 | Timer Service Task | STM32F103 | Chạy callback trong task context thay vì SysTick ISR |
+| 7 | Timestamp Backends | STM32F103 | So sánh DWT, GPIO marker và overhead đo thời gian |
+| 8 | Context-switch Benchmark | STM32F103 | Đo yield/switch latency và thống kê min/max/average |
+| 9 | Event and Message Latency | STM32F103 | Đo ISR-to-task latency và queue message latency |
+| 10 | Communication Benchmark Console | STM32F103 | Tích hợp queue, pool, timer, benchmark và UART console |
 
 ---
 

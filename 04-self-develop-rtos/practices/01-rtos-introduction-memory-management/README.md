@@ -349,18 +349,18 @@ Quy ước:
 
 ## 9. Danh sách bài thực hành
 
-| Bài | Chủ đề | Kết quả chính |
-|---:|---|---|
-| 1 | MCU memory layout | In địa chỉ section và linker symbol qua UART |
-| 2 | Startup sections | Kiểm tra copy `.data` và clear `.bss` |
-| 3 | Stack high-water | Fill pattern và đo stack usage |
-| 4 | Static memory budget | Tính RAM cho task, TCB, queue, timer và event pool |
-| 5 | First-fit basic | Một block free, allocate/free cơ bản |
-| 6 | Block splitting | Tách block lớn thành used block và free remainder |
-| 7 | Block coalescing | Gộp các free block liền kề |
-| 8 | Invalid free | Phát hiện pointer ngoài heap, pointer giữa block và double free |
-| 9 | Fragmentation | Thống kê internal/external fragmentation và randomized test |
-| 10 | Target demo | Chạy allocator hoàn chỉnh trên STM32F103 |
+| Bài | Chủ đề | Môi trường | Kết quả chính |
+|---:|---|---|---|
+| 1 | MCU Memory Layout | STM32F103 | In địa chỉ section và linker symbol qua UART |
+| 2 | Startup Sections | STM32F103 | Kiểm tra copy `.data` và clear `.bss` sau reset |
+| 3 | Stack High-water Mark | Host | Dùng fill pattern để đo mức sử dụng stack |
+| 4 | Static Memory Budget | Host | Tính RAM cho task, TCB, queue, timer và event pool |
+| 5 | First-fit Basic | Host | Cài một free block và thao tác allocate/free cơ bản |
+| 6 | Block Splitting | Host | Tách block lớn thành used block và free remainder |
+| 7 | Block Coalescing | Host | Gộp các free block liền kề sau khi giải phóng |
+| 8 | Invalid Free Detection | Host | Phát hiện pointer ngoài heap, pointer giữa block và double free |
+| 9 | Fragmentation | Host | Đo internal/external fragmentation và chạy randomized test |
+| 10 | Allocator Target Demo | STM32F103 | Chạy allocator hoàn chỉnh và command-line explorer trên target |
 
 ---
 

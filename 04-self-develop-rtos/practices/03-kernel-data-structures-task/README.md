@@ -379,18 +379,18 @@ Quy ước:
 
 ## 9. Danh sách bài thực hành
 
-| Bài | Chủ đề | Kết quả chính |
-|---:|---|---|
-| 1 | Singly linked list | Push, pop, find, count và cycle detection |
-| 2 | Intrusive doubly list | Insert/remove O(1), duyệt hai chiều và `container_of` |
-| 3 | List invariants | Owner, duplicate insertion, wrong-list removal và corruption |
-| 4 | TCB layout | `sizeof`, `offsetof` và `saved_sp` tại offset 0 |
-| 5 | Static task creation | Tạo task từ TCB/stack tĩnh và validate input |
-| 6 | Task stack initialization | Initial frame, guard word và high-water |
-| 7 | All-task registry | Lưu, duyệt và tìm task bằng intrusive node |
-| 8 | Priority ready queues | FIFO ready queues, rotation và ready bitmap |
-| 9 | TCB in multiple lists | Một TCB tham gia registry và ready queue bằng hai node |
-| 10 | Target Task Inspector | Quan sát TCB và list trên STM32F103 qua UART |
+| Bài | Chủ đề | Môi trường | Kết quả chính |
+|---:|---|---|---|
+| 1 | Singly Linked List | Host | Thực hiện push, pop, find, count và cycle detection |
+| 2 | Intrusive Doubly Linked List | Host | Insert/remove O(1), duyệt hai chiều và dùng `container_of` |
+| 3 | List Invariants | Host | Phát hiện duplicate insertion, wrong-list removal và corruption |
+| 4 | TCB Layout | Host | Kiểm tra `sizeof`, `offsetof` và `saved_sp` tại offset 0 |
+| 5 | Static Task Creation | Host | Tạo task từ TCB/stack tĩnh và validate input |
+| 6 | Task Stack Initialization | Host | Tạo initial frame, guard word và đo high-water mark |
+| 7 | All-task Registry | Host | Lưu, duyệt và tìm task bằng intrusive node |
+| 8 | Priority Ready Queues | Host | Cài FIFO ready queues, rotation và ready bitmap |
+| 9 | TCB in Multiple Lists | Host | Cho một TCB tham gia registry và ready queue bằng hai node |
+| 10 | Target Task Inspector | STM32F103 | Quan sát TCB, registry và ready queue qua UART |
 
 ---
 

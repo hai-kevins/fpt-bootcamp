@@ -385,19 +385,18 @@ Quy ước:
 
 ## 9. Danh sách bài thực hành
 
-| Bài | Chủ đề | Kết quả chính |
-|---:|---|---|
-| 1 | Task state machine | Transition matrix và invalid transition detection |
-| 2 | Efficient blocking | READY → BLOCKED → READY và ready bitmap |
-| 3 | Delayed list | Sorted deadlines và tick wrap-around |
-| 4 | Delay-until | Chu kỳ tuyệt đối và drift comparison |
-| 5 | Semaphore | Binary/counting semaphore, timeout và waiter order |
-| 6 | ISR semaphore wake | EXTI0 wakes high task, PendSV deferred switch |
-| 7 | Mutex ownership | Owner-only unlock và timeout |
-| 8 | Priority inheritance | High/Medium/Low inversion scenario |
-| 9 | Suspend/resume | SUSPENDED không auto-wake |
-| 10 | Target playground | Toàn bộ task state và synchronization trên STM32 |
-
+| Bài | Chủ đề | Môi trường | Kết quả chính |
+|---:|---|---|---|
+| 1 | Task State Machine | Host | Kiểm tra transition matrix và phát hiện transition không hợp lệ |
+| 2 | Efficient Blocking | Host | Chuyển `READY -> BLOCKED -> READY` và cập nhật ready bitmap |
+| 3 | Delayed List and Tick Wrap | Host | Sắp xếp deadline và xử lý tick counter wrap-around |
+| 4 | Delay and Delay-until | Host | So sánh chu kỳ tuyệt đối với drift của delay tương đối |
+| 5 | Semaphore | Host | Kiểm tra binary/counting semaphore, timeout và waiter order |
+| 6 | ISR Semaphore Wake | STM32F103 | EXTI0 đánh thức high task và defer switch qua PendSV |
+| 7 | Mutex Ownership | Host | Chỉ owner được unlock và hỗ trợ timeout khi chờ mutex |
+| 8 | Priority Inheritance | Host | Mô phỏng inversion High/Medium/Low và nâng effective priority |
+| 9 | Suspend and Resume | Host | Đảm bảo task `SUSPENDED` không tự động wake theo timeout |
+| 10 | Target Synchronization Playground | STM32F103 | Tích hợp task state, semaphore, mutex và priority inheritance |
 ---
 
 ## 10. Quy trình học đề xuất
