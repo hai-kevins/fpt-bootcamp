@@ -45,7 +45,8 @@ KERNEL_SOURCES := \
 APP_SOURCES := \
 	application/src/app.c application/src/task_list.c \
 	application/src/task_app.c application/src/task_button.c \
-	application/src/task_led.c application/src/task_shell.c \
+	application/src/task_led.c application/src/cmd_line.c \
+	application/src/task_shell.c \
 	application/src/task_sensor.c application/src/main.c
 
 DRIVER_SOURCES := driver/src/led.c driver/src/button.c driver/src/uart.c
@@ -68,11 +69,12 @@ HOST_TEST := $(BUILD_DIR)/host/test_runner
 HOST_SOURCES := $(KERNEL_SOURCES) \
 	application/src/app.c application/src/task_list.c \
 	application/src/task_app.c application/src/task_button.c \
-	application/src/task_led.c application/src/task_shell.c \
+	application/src/task_led.c application/src/cmd_line.c \
+	application/src/task_shell.c \
 	application/src/task_sensor.c \
 	tests/fakes.c tests/test_message.c tests/test_task.c tests/test_timer.c \
 	tests/test_fsm.c tests/test_event_record.c tests/test_fatal.c \
-	tests/test_application.c tests/test_main.c
+	tests/test_application.c tests/test_cmd_line.c tests/test_main.c
 HOST_CFLAGS := -std=c11 -O0 -g3 \
 	-Wall -Wextra -Werror -Wshadow -Wundef \
 	-Wconversion -Wsign-conversion \

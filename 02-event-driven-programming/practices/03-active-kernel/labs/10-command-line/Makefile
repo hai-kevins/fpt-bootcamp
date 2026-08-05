@@ -2,7 +2,7 @@ TARGET := lab10-command-line
 BUILD_DIR ?= build
 CC ?= gcc
 CFLAGS := -std=c11 -O0 -g3 -Wall -Wextra -Werror -Wshadow -Wundef -Wconversion -Wsign-conversion -fsanitize=address,undefined -Iinclude
-SOURCES := src/main.c
+SOURCES := src/cmd_line.c src/main.c
 
 .PHONY: all test run clean rebuild
 all: test

@@ -61,7 +61,7 @@ Sau khi hoàn thành repository này, người học có thể:
 ├── startup/
 │   └── startup.c
 ├── include/
-│   ├── command_parser.h
+│   ├── cmd_line.h
 │   ├── compiler.h
 │   ├── gpio.h
 │   ├── heap.h
@@ -73,7 +73,7 @@ Sau khi hoàn thành repository này, người học có thể:
 │   ├── systick.h
 │   └── uart.h
 ├── src/
-│   ├── command_parser.c
+│   ├── cmd_line.c
 │   ├── gpio.c
 │   ├── heap.c
 │   ├── heap_stats.c
@@ -84,6 +84,8 @@ Sau khi hoàn thành repository này, người học có thể:
 │   ├── stack_monitor.c
 │   ├── systick.c
 │   └── uart.c
+├── tests/
+│   └── test_cmd_line.c
 ├── labs/
 │   ├── README.md
 │   ├── 01-memory-layout/
@@ -99,6 +101,7 @@ Sau khi hoàn thành repository này, người học có thể:
 ├── docs/
 │   ├── allocation-models.md
 │   ├── allocator-design.md
+│   ├── command-line-table.md
 │   ├── memory-map.md
 │   ├── rtos-introduction.md
 │   └── startup-flow.md
@@ -140,6 +143,16 @@ First-fit allocator
 ```
 
 Allocator chỉ phục vụ đào tạo. Một production RTOS kernel vẫn nên ưu tiên hướng `static-first`.
+
+### Command-line table pattern
+
+Firmware root sử dụng `cmd_line_t` với ba trường `cmd`, `func`, `info`. Parser tách tên lệnh, trim phần argument, tìm entry trong bảng và gọi callback. Lệnh `help` được sinh trực tiếp từ trường `info`, còn `alloc` và `free` dùng parser `uint32_t` có kiểm tra overflow.
+
+Kiểm thử riêng parser trên host:
+
+```bash
+make test
+```
 
 ---
 

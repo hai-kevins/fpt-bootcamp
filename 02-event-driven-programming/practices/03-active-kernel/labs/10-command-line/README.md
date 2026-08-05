@@ -35,3 +35,7 @@ Command hợp lệ tạo message; command không hợp lệ bị từ chối và
 2. Command dài quá buffer xử lý thế nào?
 3. Parser chạy trong ISR có phù hợp không?
 4. Lệnh diagnostics nào cần read-only?
+
+## Table pattern
+
+Lab dùng `cmd_line_t` và function pointer thay cho chuỗi `strcmp()` trong shell. Handler chỉ mô phỏng việc post message, không gọi driver trực tiếp.

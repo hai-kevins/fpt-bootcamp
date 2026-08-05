@@ -50,6 +50,7 @@ SOURCES := \
 	src/app.c \
 	src/button.c \
 	src/led.c \
+	src/cmd_line.c \
 	src/uart_service.c \
 	src/main.c \
 	platform/platform.c \
@@ -76,6 +77,7 @@ HOST_SOURCES := \
 	src/app.c \
 	src/button.c \
 	src/led.c \
+	src/cmd_line.c \
 	src/uart_service.c \
 	tests/fakes.c \
 	tests/test_support.c \
@@ -84,6 +86,7 @@ HOST_SOURCES := \
 	tests/test_button_sm.c \
 	tests/test_led_sm.c \
 	tests/test_app_sm.c \
+	tests/test_cmd_line.c \
 	tests/test_main.c
 
 HOST_CFLAGS := \

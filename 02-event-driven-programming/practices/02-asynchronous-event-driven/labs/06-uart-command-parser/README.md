@@ -1,4 +1,4 @@
-# Lab 06 - UART Command Parser
+# Lab 06 - UART Command Table Parser
 
 ## Mục tiêu
 
@@ -32,3 +32,7 @@ Input không hợp lệ phải trả `false` và `COMMAND_INVALID`.
 2. Command object nên chứa pointer hay copy parameter?
 3. Buffer command cần policy gì khi overflow?
 4. Parser được nối với UART ISR qua event sequence nào?
+
+## Table pattern
+
+Lab sử dụng `cmd_line_t` với `cmd`, `func`, `info`. Parser truyền riêng phần arguments đã trim cho callback và trả `cmd_line_status_t`.

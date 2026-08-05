@@ -24,6 +24,8 @@ TARGET_FLAGS :=
 LINKER_DRIVER :=
 endif
 
+HOST_CC ?= gcc
+
 CPU_FLAGS := -mcpu=cortex-m3 -mthumb
 CFLAGS := $(TARGET_FLAGS) $(CPU_FLAGS) \
 	-std=c11 -Og -g3 \
@@ -48,7 +50,7 @@ SOURCES := \
 	$(SRC_DIR)/gpio.c \
 	$(SRC_DIR)/uart.c \
 	$(SRC_DIR)/systick.c \
-	$(SRC_DIR)/command_parser.c \
+	$(SRC_DIR)/cmd_line.c \
 	$(SRC_DIR)/heap.c \
 	$(SRC_DIR)/heap_stats.c \
 	$(SRC_DIR)/memory_layout.c \
@@ -63,7 +65,16 @@ HEX := $(BUILD_DIR)/$(TARGET).hex
 LST := $(BUILD_DIR)/$(TARGET).lst
 MAP := $(BUILD_DIR)/$(TARGET).map
 
-.PHONY: all clean rebuild size sections symbols symbols-size disasm \
+HOST_TEST := $(BUILD_DIR)/host/test_cmd_line
+HOST_SOURCES := $(SRC_DIR)/cmd_line.c tests/test_cmd_line.c
+HOST_CFLAGS := \
+	-std=c11 -O0 -g3 \
+	-Wall -Wextra -Werror -Wshadow -Wundef \
+	-Wconversion -Wsign-conversion \
+	-fsanitize=address,undefined \
+	-I$(INCLUDE_DIR)
+
+.PHONY: all test clean rebuild size sections symbols symbols-size disasm \
 	flash-stlink flash-openocd erase help
 
 all: $(ELF) $(BIN) $(HEX) $(LST) size
@@ -84,6 +95,13 @@ $(HEX): $(ELF)
 
 $(LST): $(ELF)
 	$(OBJDUMP) -d -S $< > $@
+
+$(HOST_TEST): $(HOST_SOURCES)
+	@mkdir -p $(dir $@)
+	$(HOST_CC) $(HOST_CFLAGS) $(HOST_SOURCES) -o $@
+
+test: $(HOST_TEST)
+	$(HOST_TEST)
 
 size: $(ELF)
 	$(SIZE) $<
@@ -119,6 +137,7 @@ clean:
 help:
 	@echo "Final project only: RTOS Memory Explorer"
 	@echo "Build   : make | make TOOLCHAIN=clang"
+	@echo "Test    : make test"
 	@echo "Inspect : make size | make sections | make symbols | make symbols-size | make disasm"
 	@echo "Flash   : make flash-stlink | make flash-openocd | make erase"
 	@echo "Clean   : make clean | make rebuild"

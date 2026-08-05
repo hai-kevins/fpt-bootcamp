@@ -72,6 +72,7 @@ Sau khi hoàn thành repository này, người học có thể:
 ├── include/
 │   ├── app.h
 │   ├── button.h
+│   ├── cmd_line.h
 │   ├── compiler.h
 │   ├── dispatcher.h
 │   ├── event.h
@@ -85,6 +86,7 @@ Sau khi hoàn thành repository này, người học có thể:
 ├── src/
 │   ├── app.c
 │   ├── button.c
+│   ├── cmd_line.c
 │   ├── dispatcher.c
 │   ├── event_queue.c
 │   ├── event_trace.c
@@ -108,6 +110,7 @@ Sau khi hoàn thành repository này, người học có thể:
 │   ├── test.h
 │   ├── test_app_sm.c
 │   ├── test_button_sm.c
+│   ├── test_cmd_line.c
 │   ├── test_event_queue.c
 │   ├── test_led_sm.c
 │   ├── test_main.c
@@ -127,6 +130,7 @@ Sau khi hoàn thành repository này, người học có thể:
 │   └── 10-superloop-vs-event-driven/
 ├── docs/
 │   ├── architecture.md
+│   ├── command-line-table.md
 │   ├── event-list.md
 │   ├── sequence-diagrams.md
 │   └── state-machines.md
@@ -170,6 +174,21 @@ Luồng demo:
 7. USART1 ISR post từng byte cho UART Service.
 8. UART Service parse lệnh và post event.
 9. Dispatcher ghi trace cho post, dispatch, complete và drop.
+
+### Command-line table pattern
+
+`uart_service.c` chỉ chịu trách nhiệm gom dòng và tạo context chứa `timestamp_ms`. Việc nhận diện command được chuyển sang bảng `cmd_line_t`; callback của từng entry tiếp tục post event qua Dispatcher, nên UART shell không phá vỡ kiến trúc event-driven.
+
+Các command gốc được nhóm theo command + argument:
+
+```text
+led on
+led off
+blink 500
+blink stop
+```
+
+Trong đó `led` và `blink` là tên command, phần còn lại được parser truyền riêng cho handler.
 
 ---
 

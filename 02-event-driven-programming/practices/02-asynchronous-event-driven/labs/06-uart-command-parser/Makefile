@@ -7,7 +7,7 @@ CFLAGS := -std=c11 -O0 -g3 \
 	-Wconversion -Wsign-conversion \
 	-fsanitize=address,undefined -Iinclude
 
-SOURCES := src/command_parser.c src/main.c
+SOURCES := src/cmd_line.c src/main.c
 
 .PHONY: all run clean rebuild test
 
@@ -21,7 +21,7 @@ run: $(BUILD_DIR)/$(TARGET)
 	$(BUILD_DIR)/$(TARGET)
 
 TEST_TARGET := $(BUILD_DIR)/test_runner
-TEST_SOURCES := src/command_parser.c tests/test_main.c
+TEST_SOURCES := src/cmd_line.c tests/test_main.c
 
 $(TEST_TARGET): $(TEST_SOURCES)
 	@mkdir -p $(dir $@)

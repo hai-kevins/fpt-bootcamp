@@ -9,6 +9,7 @@ bool test_timer_periodic(void);
 bool test_button_debounce_press(void);
 bool test_led_state_machine(void);
 bool test_app_state_machine(void);
+bool test_cmd_line_parser(void);
 
 int main(void)
 {
@@ -19,6 +20,7 @@ int main(void)
     test_run("button_debounce_press", test_button_debounce_press);
     test_run("led_state_machine", test_led_state_machine);
     test_run("app_state_machine", test_app_state_machine);
+    test_run("cmd_line_parser", test_cmd_line_parser);
 
     printf("\nSummary: passed=%lu failed=%lu\n", (unsigned long) g_test_passed, (unsigned long) g_test_failed);
 

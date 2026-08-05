@@ -78,7 +78,9 @@ Sau khi hoàn thành repository này, người học có thể:
 │   └── src/
 ├── application/
 │   ├── include/
+│   │   └── cmd_line.h
 │   └── src/
+│       └── cmd_line.c
 ├── driver/
 │   ├── inc/
 │   └── src/
@@ -135,6 +137,16 @@ Task priority:
 | LED | 3 | LED and blink timer |
 | Shell | 2 | UART line buffer |
 | Sensor | 1 | Sensor sample state |
+
+### Command-line table pattern
+
+Shell task dùng bảng `cmd_line_t` thay cho chuỗi `strcmp()` dài. Callback chỉ tạo message hoặc đọc thống kê kernel; quyền sở hữu LED, application state và reset vẫn thuộc các task tương ứng. Các nhóm lệnh `led`, `event` và `fatal` nhận subcommand qua phần arguments đã được trim.
+
+Lõi parser được kiểm thử trên host cùng toàn bộ kernel bằng:
+
+```bash
+make test
+```
 
 ---
 

@@ -16,6 +16,7 @@ bool test_fsm_and_tsm(void);
 bool test_event_record(void);
 bool test_fatal_record(void);
 bool test_application_flow(void);
+bool test_cmd_line_parser(void);
 
 int main(void)
 {
@@ -47,6 +48,10 @@ int main(void)
         {
             "application_flow",
             test_application_flow
+        },
+        {
+            "cmd_line_parser",
+            test_cmd_line_parser
         }
     };
     unsigned passed = 0U;
