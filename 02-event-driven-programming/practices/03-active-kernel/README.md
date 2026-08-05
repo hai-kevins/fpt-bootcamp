@@ -283,24 +283,21 @@ Mỗi lab tạo executable trong `build/` của chính lab. Toàn bộ Lab 01-13
 
 ## 8. Danh sách bài thực hành
 
-| Bài | Nội dung | Kết quả chính |
-|---:|---|---|
-| 1 | Đọc cấu trúc AK | Task/message/timer/FSM/TSM |
-| 2 | Hai task | START -> HELLO routing |
-| 3 | Pure Message | LED signal không payload |
-| 4 | Common Message | Player status và length check |
-| 5 | Dynamic Message | Fixed pool và high-water |
-| 6 | One-shot Timer | Button debounce 20 ms |
-| 7 | Periodic Timer | Heartbeat và đổi chu kỳ |
-| 8 | FSM | IDLE/RUNNING/PAUSED/ERROR |
-| 9 | TSM | Transition table |
-| 10 | Command Line | Shell post message |
-| 11 | Pool Stress Test | Failure counter và latency model |
-| 12 | Event Record | 64 event cuối cùng |
-| 13 | Fatal Record | Code/task/time/restart |
-
-Lab 14 Mini Game đã được bỏ.
-
+| Bài | Chủ đề | Môi trường | Kết quả chính |
+|---:|---|---|---|
+| 1 | AK Structure | Host | Khảo sát task, message, timer, FSM và TSM |
+| 2 | Two Tasks | Host | Định tuyến message `START -> HELLO` giữa hai task |
+| 3 | Pure Message | Host | Gửi LED signal không kèm payload |
+| 4 | Common Message | Host | Truyền player status và kiểm tra payload length |
+| 5 | Dynamic Message | Host | Cấp phát fixed pool và theo dõi high-water mark |
+| 6 | One-shot Timer | Host | Mô phỏng button debounce 20 ms |
+| 7 | Periodic Timer | Host | Tạo heartbeat và thay đổi chu kỳ timer |
+| 8 | FSM | Host | Xử lý các trạng thái `IDLE/RUNNING/PAUSED/ERROR` |
+| 9 | TSM | Host | Mô tả chuyển trạng thái bằng transition table |
+| 10 | Command Line | Host | Parse shell theo table pattern và post message |
+| 11 | Pool Stress Test | Host | Theo dõi failure counter và mô hình latency |
+| 12 | Event Record | Host | Lưu vòng 64 event gần nhất |
+| 13 | Fatal Record | Host | Lưu code, task, time và restart counter |
 ---
 
 ## 9. Quy trình học đề xuất

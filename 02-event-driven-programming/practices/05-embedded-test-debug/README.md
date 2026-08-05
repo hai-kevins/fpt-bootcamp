@@ -322,26 +322,26 @@ Quy ước:
 
 ## 8. Danh sách bài thực hành
 
-| Bài | Chủ đề | Kết quả chính |
-|---:|---|---|
-| 01 | Unit Test Event Queue | Empty, FIFO, Full, Wraparound và Overflow |
-| 02 | Unit Test Event Pool | Allocate, Exhaustion, Free, Reuse và Double Free |
-| 03 | Unit Test State Machine | Test mọi transition của IDLE/RUNNING/PAUSED/ERROR |
-| 04 | Event Spy | Kiểm tra handler post đúng signal |
-| 05 | Fake Timer | One-shot và periodic timer không dùng thời gian thật |
-| 06 | UART Shell | help, state, pool, mailbox, event và test |
-| 07 | Binary Event Trace | Ring buffer 128 record, dump/clear/stats |
-| 08 | Queue Latency | Min, max và average từ post tới dispatch |
-| 09 | Handler Execution Time | Phát hiện handler vượt ngưỡng |
-| 10 | Crash Record | Fatal, task, signal, state, uptime và reset reason |
-| 11 | HardFault Record | PC, LR, xPSR và Fault Status Register |
-| 12 | Automated Use Case | Boot, Button, Mode, Timeout, Error và Recovery |
-| 13 | Fault Injection | Pool, CRC, Sensor và Flash failure |
-| 14 | Regression Test | Tái hiện bug cũ và xác nhận fix |
-| 15 | Stress Test | Event burst, drop, queue max, pool max và handler max |
-| 16 | Soak Test | Mô phỏng chạy 12 giờ và statistics định kỳ |
-| 17 | Continuous Integration | Build, Test, Sanitizer, Firmware, Size và Artifact |
-| 18 | Hardware-in-the-Loop | Reset board, gửi command, đọc result và report |
+| Bài | Chủ đề | Môi trường | Kết quả chính |
+|---:|---|---|---|
+| 01 | Unit Test Event Queue | Host | Kiểm tra empty, FIFO, full, wraparound và overflow |
+| 02 | Unit Test Event Pool | Host | Kiểm tra allocate, exhaustion, free, reuse và double free |
+| 03 | Unit Test State Machine | Host | Kiểm tra mọi transition của `IDLE/RUNNING/PAUSED/ERROR` |
+| 04 | Event Spy | Host | Xác nhận handler post đúng signal và dữ liệu mong đợi |
+| 05 | Fake Timer | Host | Kiểm tra one-shot và periodic timer không dùng thời gian thật |
+| 06 | UART Shell | Host | Thực thi các lệnh help, state, pool, mailbox, event và test |
+| 07 | Binary Event Trace | Host | Lưu ring buffer 128 record và hỗ trợ dump/clear/stats |
+| 08 | Queue Latency | Host | Đo min, max và average từ lúc post tới dispatch |
+| 09 | Handler Execution Time | Host | Đo thời gian handler và phát hiện trường hợp vượt ngưỡng |
+| 10 | Crash Record | Host | Lưu fatal, task, signal, state, uptime và reset reason |
+| 11 | HardFault Record | Host | Mô hình hóa việc lưu PC, LR, xPSR và Fault Status Register |
+| 12 | Automated Use Case | Host | Tự động kiểm tra Boot, Button, Mode, Timeout, Error và Recovery |
+| 13 | Fault Injection | Host | Chủ động tạo lỗi pool, CRC, sensor và flash |
+| 14 | Regression Test | Host | Tái hiện bug cũ và xác nhận bản sửa không bị hồi quy |
+| 15 | Stress Test | Host | Theo dõi event burst, drop, queue max, pool max và handler max |
+| 16 | Soak Test | Host | Mô phỏng chạy dài hạn và kiểm tra statistics định kỳ |
+| 17 | Continuous Integration | Host | Tự động hóa build, test, sanitizer, firmware, size và artifact |
+| 18 | Hardware-in-the-Loop | Host | Mô phỏng workflow reset board, gửi command, đọc result và tạo report |
 
 ---
 
