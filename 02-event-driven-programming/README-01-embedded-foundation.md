@@ -1,1592 +1,478 @@
-# Chủ đề 1 - Kiến thức nền tảng trong Embedded System Programming
-## Computer Architecture, Memory và Bare-Metal Project
+# Chủ đề 1 — Kiến thức nền tảng trong Embedded System Programming
+## Computer Architecture, Memory, Toolchain và Bare-Metal Runtime
 
-> Mục tiêu của chủ đề này là xây dựng nền tảng vững chắc về kiến trúc máy tính, địa chỉ, bộ nhớ và quy trình tạo một dự án bare-metal cho vi điều khiển ARM Cortex-M.
->
-> Nội dung trọng tâm gồm CPU và bus, không gian địa chỉ, Flash/SRAM, con trỏ, Memory-Mapped I/O, startup code, linker script, Makefile, quy trình build và kiểm thử firmware tối thiểu.
+> Tài liệu này trình bày **thuần lý thuyết** các nền tảng cần có trước khi học Event-Driven Programming trên vi điều khiển. Trọng tâm là hiểu CPU nhìn chương trình như thế nào, dữ liệu tồn tại ở đâu, phần mềm truy cập phần cứng ra sao, và một firmware bare-metal hình thành từ reset đến `main()` như thế nào.
 
 ---
 
-## Mục lục
+## 1. Embedded system nhìn từ góc độ phần mềm
 
-1. [Mục tiêu học tập](#1-mục-tiêu-học-tập)
-2. [Kiến thức cần chuẩn bị](#2-kiến-thức-cần-chuẩn-bị)
-3. [Cấu trúc tổng quát của một hệ thống nhúng](#3-cấu-trúc-tổng-quát-của-một-hệ-thống-nhúng)
-4. [CPU và kiến trúc ARM Cortex-M](#4-cpu-và-kiến-trúc-arm-cortex-m)
-5. [Địa chỉ và không gian địa chỉ](#5-địa-chỉ-và-không-gian-địa-chỉ)
-6. [Bộ nhớ trong hệ thống nhúng](#6-bộ-nhớ-trong-hệ-thống-nhúng)
-7. [Con trỏ và thao tác bộ nhớ trong C](#7-con-trỏ-và-thao-tác-bộ-nhớ-trong-c)
-8. [Thanh ghi ngoại vi và Memory-Mapped I/O](#8-thanh-ghi-ngoại-vi-và-memory-mapped-io)
-9. [Quy trình khởi động của vi điều khiển](#9-quy-trình-khởi-động-của-vi-điều-khiển)
-10. [Các thành phần của dự án bare-metal](#10-các-thành-phần-của-dự-án-bare-metal)
-11. [Ví dụ tối thiểu](#11-ví-dụ-tối-thiểu)
-12. [Quy trình build và phân tích firmware](#12-quy-trình-build-và-phân-tích-firmware)
-13. [Quy trình phát triển dự án bare-metal](#13-quy-trình-phát-triển-dự-án-bare-metal)
-14. [Best Practices](#14-best-practices)
-15. [Anti-pattern và lỗi thường gặp](#15-anti-pattern-và-lỗi-thường-gặp)
-16. [Kiểm thử](#16-kiểm-thử)
-17. [Bài thực hành](#17-bài-thực-hành)
-18. [Tiêu chí hoàn thành](#18-tiêu-chí-hoàn-thành)
-19. [Cấu trúc repository đề xuất](#19-cấu-trúc-repository-đề-xuất)
-20. [Tài liệu tham khảo](#20-tài-liệu-tham-khảo)
-21. [Tổng kết](#21-tổng-kết)
+Một hệ thống nhúng là một hệ thống tính toán được thiết kế để thực hiện một tập chức năng tương đối xác định, thường gắn trực tiếp với phần cứng vật lý. Khác với máy tính đa dụng, firmware thường phải làm việc dưới các ràng buộc đồng thời về bộ nhớ, năng lượng, thời gian đáp ứng, độ tin cậy và khả năng quan sát lỗi.
 
----
-
-# 1. Mục tiêu học tập
-
-Sau khi hoàn thành chủ đề này, người học cần có khả năng:
-
-- Giải thích được CPU, thanh ghi, bus, Flash, SRAM và ngoại vi.
-- Hiểu sự khác nhau giữa địa chỉ, dữ liệu và giá trị được lưu tại địa chỉ.
-- Hiểu cách chương trình C được bố trí trong Flash và RAM.
-- Sử dụng con trỏ để đọc và ghi dữ liệu tại một địa chỉ xác định.
-- Hiểu cơ chế Memory-Mapped I/O.
-- Giải thích được quá trình MCU khởi động từ Reset Handler đến `main()`.
-- Tạo được một dự án bare-metal bằng:
-  - ARM GCC
-  - Makefile
-  - Linker Script
-  - Startup Code
-- Build được các file:
-  - `.elf`
-  - `.bin`
-  - `.hex`
-  - `.map`
-- Đọc được thông tin kích thước chương trình bằng `arm-none-eabi-size`.
-- Thực hiện được một ví dụ GPIO hoặc UART ở mức thanh ghi.
-
----
-
-# 2. Kiến thức cần chuẩn bị
-
-Trước khi bắt đầu, người học nên nắm:
-
-- C cơ bản:
-  - Biến
-  - Hàm
-  - Mảng
-  - Cấu trúc
-  - Con trỏ
-  - Toán tử bit
-- Hệ nhị phân và hệ hexadecimal.
-- Các phép toán:
-  - AND: `&`
-  - OR: `|`
-  - XOR: `^`
-  - NOT: `~`
-  - Dịch trái: `<<`
-  - Dịch phải: `>>`
-- Cách sử dụng terminal Linux cơ bản.
-- Cách sử dụng Git ở mức cơ bản.
-
-Ví dụ:
-
-```c
-uint32_t value = 0x00000001U;
-
-value |=  (1U << 5);   // Set bit 5
-value &= ~(1U << 5);   // Clear bit 5
-value ^=  (1U << 5);   // Toggle bit 5
-```
-
----
-
-# 3. Cấu trúc tổng quát của một hệ thống nhúng
-
-Một vi điều khiển thường gồm các thành phần chính:
+Về bản chất, phần mềm nhúng luôn nằm trên một chuỗi phụ thuộc:
 
 ```text
-+------------------------------------------------------+
-|                    Microcontroller                   |
-|                                                      |
-|  +----------+       +----------+       +----------+  |
-|  |   CPU    |<----->|   Bus    |<----->|  Memory  |  |
-|  | Cortex-M |       | AHB/APB  |       | Flash/RAM|  |
-|  +----------+       +----------+       +----------+  |
-|       |                   |                   |      |
-|       |                   +-------------------+      |
-|       |                                              |
-|       +-------------> Peripherals                    |
-|                       GPIO, UART, SPI, I2C, Timer    |
-+------------------------------------------------------+
+Application logic
+      ↓
+Software architecture
+      ↓
+Drivers / platform abstraction
+      ↓
+CPU + memory + peripherals
+      ↓
+Electrical hardware
 ```
 
-## CPU
-
-CPU thực hiện các công việc:
-
-1. Đọc lệnh từ bộ nhớ.
-2. Giải mã lệnh.
-3. Thực thi lệnh.
-4. Cập nhật thanh ghi.
-5. Đọc hoặc ghi dữ liệu.
-6. Xử lý ngắt.
-
-Chu trình này thường được mô tả bằng ba bước:
-
-```text
-Fetch -> Decode -> Execute
-```
-
-## Bus
-
-Bus là đường truyền kết nối CPU, bộ nhớ và ngoại vi.
-
-Các nhóm bus thường gặp trên Cortex-M:
-
-- AHB: tốc độ cao.
-- APB: kết nối ngoại vi.
-- System bus: truy cập SRAM và ngoại vi.
-- I-Code bus: lấy lệnh từ Flash.
-- D-Code bus: truy cập dữ liệu trong vùng code.
-
-## Bộ nhớ
-
-Hai vùng quan trọng nhất:
-
-- Flash:
-  - Lưu chương trình.
-  - Không mất dữ liệu khi mất điện.
-- SRAM:
-  - Lưu biến trong lúc chạy.
-  - Mất dữ liệu khi mất điện.
-
-## Ngoại vi
-
-Ví dụ:
-
-- GPIO
-- UART
-- SPI
-- I2C
-- ADC
-- Timer
-- CAN
-- USB
-
-CPU điều khiển ngoại vi bằng cách đọc và ghi vào các thanh ghi ngoại vi.
+Một lỗi ở tầng dưới có thể biểu hiện như lỗi ở tầng trên. Vì vậy người làm firmware cần hiểu không chỉ cú pháp C mà còn phải hiểu cách chương trình được ánh xạ xuống kiến trúc máy.
 
 ---
 
-# 4. CPU và kiến trúc ARM Cortex-M
+## 2. Mô hình CPU — Memory — Peripheral
 
-ARM Cortex-M là dòng CPU được thiết kế cho vi điều khiển.
+Một vi điều khiển điển hình có thể được mô hình hóa bởi bốn nhóm thành phần chính:
 
-Một số thanh ghi quan trọng:
+- **CPU core**: thực thi instruction, giữ register, xử lý exception và interrupt.
+- **Memory**: Flash/ROM chứa code và dữ liệu bất biến; SRAM chứa dữ liệu thay đổi trong runtime.
+- **Peripheral**: GPIO, UART, SPI, I2C, timer, ADC, DMA, watchdog…
+- **Interconnect/bus**: nối CPU, memory và peripheral trong một không gian truy cập thống nhất.
 
-| Thanh ghi | Chức năng |
-|---|---|
-| `R0-R12` | Thanh ghi đa dụng |
-| `SP` | Stack Pointer |
-| `LR` | Link Register |
-| `PC` | Program Counter |
-| `xPSR` | Thanh ghi trạng thái |
+CPU không “hiểu” khái niệm biến C, object hay driver. CPU chỉ thao tác trên register, địa chỉ và instruction. Compiler biến khái niệm bậc cao của C thành chuỗi instruction; linker quyết định mỗi phần của chương trình nằm ở địa chỉ nào.
 
-## Program Counter
+### 2.1 Register
 
-`PC` chứa địa chỉ của lệnh đang hoặc sắp được thực thi.
+Register là vùng lưu trữ tốc độ cao nằm trong CPU. Trên ARM Cortex-M, các register tổng quát giữ toán hạng và kết quả tạm thời; một số register có vai trò kiến trúc đặc biệt:
 
-```text
-PC -> địa chỉ lệnh trong Flash
-```
+- **PC — Program Counter**: địa chỉ instruction đang/chuẩn bị được thực thi.
+- **SP — Stack Pointer**: chỉ vị trí đỉnh stack hiện tại.
+- **LR — Link Register**: thường lưu return address khi gọi hàm; trong exception còn mang giá trị đặc biệt mô tả cách exception return.
+- **xPSR**: chứa condition flags và trạng thái kiến trúc.
 
-## Stack Pointer
+Khả năng hiểu PC, SP và LR là nền tảng để đọc call stack, phân tích crash và hiểu context switch sau này.
 
-`SP` trỏ tới vùng stack trong RAM.
+### 2.2 Bus và memory transaction
 
-Stack thường được dùng cho:
+Khi CPU đọc một biến, điều xảy ra vật lý không phải là “đọc biến” mà là tạo một memory transaction tới địa chỉ tương ứng. Interconnect giải mã địa chỉ và chuyển transaction tới Flash, SRAM hoặc peripheral phù hợp.
 
-- Biến cục bộ.
-- Địa chỉ quay về của hàm.
-- Lưu thanh ghi khi gọi hàm.
-- Lưu context khi xảy ra ngắt.
+Do đó hai câu lệnh C giống nhau về hình thức có thể có bản chất rất khác nhau:
 
-## Link Register
-
-`LR` thường chứa địa chỉ quay về sau khi hàm kết thúc.
-
-Ví dụ:
-
-```c
-void foo(void)
-{
-    // Khi gọi foo(), địa chỉ quay về được lưu trong LR.
-}
-```
+- đọc SRAM: lấy dữ liệu bình thường;
+- đọc peripheral register: có thể làm thay đổi trạng thái phần cứng;
+- đọc vùng không tồn tại: có thể tạo BusFault/HardFault.
 
 ---
 
-# 5. Địa chỉ và không gian địa chỉ
+## 3. Address space và memory map
 
-## Địa chỉ là gì?
+**Address space** là tập hợp các địa chỉ mà CPU có khả năng phát sinh. **Memory map** mô tả vùng địa chỉ nào được ánh xạ tới tài nguyên nào.
 
-Địa chỉ là một số dùng để xác định vị trí trong không gian bộ nhớ.
+Trên vi điều khiển, “memory” theo nghĩa lập trình không chỉ là RAM. Peripheral register cũng thường nằm trong address space. Đây là cơ sở của **memory-mapped I/O**.
 
-Ví dụ:
-
-```text
-Địa chỉ: 0x20000000
-Giá trị: 0x12345678
-```
-
-Có thể hình dung:
+Một memory map có thể được hình dung như:
 
 ```text
-Address       Value
-0x20000000 -> 0x78
-0x20000001 -> 0x56
-0x20000002 -> 0x34
-0x20000003 -> 0x12
+0x0000_0000  ─┐
+              │ Code / Flash aliases
+              │
+0x2000_0000  ─┤ SRAM
+              │
+0x4000_0000  ─┤ Peripheral registers
+              │
+0xE000_0000  ─┤ Cortex-M system control space
+              │
+0xFFFF_FFFF  ─┘
 ```
 
-Trong hệ little-endian, byte thấp được lưu tại địa chỉ thấp.
+Địa chỉ cụ thể phụ thuộc MCU, nhưng tư duy không đổi: địa chỉ là một phần của giao diện phần cứng.
 
-## Không gian địa chỉ
+### 3.1 Alignment
 
-Cortex-M 32-bit thường có không gian địa chỉ lý thuyết:
+Nhiều kiến trúc ưu tiên hoặc yêu cầu dữ liệu được căn chỉnh theo kích thước tự nhiên. Ví dụ word 32-bit thường thuận lợi nhất khi địa chỉ chia hết cho 4. Compiler có thể chèn padding vào `struct` để đảm bảo alignment.
 
-```text
-0x00000000 -> 0xFFFFFFFF
-```
+Alignment ảnh hưởng tới:
 
-Không phải toàn bộ vùng này đều được triển khai vật lý.
+- kích thước cấu trúc dữ liệu;
+- hiệu năng memory access;
+- tính hợp lệ của một số instruction;
+- ABI giữa C và assembly;
+- layout của TCB hoặc message trong kernel.
 
-Một bản đồ bộ nhớ điển hình:
+### 3.2 Endianness
 
-```text
-0x00000000  +-----------------------------+
-            | Code / Flash                |
-0x1FFFFFFF  +-----------------------------+
+Endianness mô tả thứ tự byte của một giá trị nhiều byte trong bộ nhớ. Với little-endian, byte ít quan trọng nhất nằm ở địa chỉ thấp hơn. Endianness đặc biệt quan trọng khi:
 
-0x20000000  +-----------------------------+
-            | SRAM                        |
-0x3FFFFFFF  +-----------------------------+
-
-0x40000000  +-----------------------------+
-            | Peripheral                  |
-0x5FFFFFFF  +-----------------------------+
-
-0xE0000000  +-----------------------------+
-            | Cortex-M System Control     |
-0xFFFFFFFF  +-----------------------------+
-```
-
-Địa chỉ thực tế của từng vùng phụ thuộc vào MCU.
+- đọc raw memory;
+- xử lý network/protocol frame;
+- serialize dữ liệu;
+- đọc register nhiều byte từ peripheral;
+- phân tích dump/debugger.
 
 ---
 
-# 6. Bộ nhớ trong hệ thống nhúng
+## 4. C memory model trong firmware
 
-Một chương trình C thường được chia thành các section.
+Ở mức executable, chương trình thường được chia thành nhiều **section**. Những section quan trọng nhất gồm:
 
-## `.text`
+### 4.1 `.text`
 
-Chứa mã máy của chương trình.
+Chứa machine code và thường nằm trong Flash. Tính chất quan trọng là code cần có địa chỉ ổn định để vector table, function pointer và call instruction hoạt động chính xác.
 
-Ví dụ:
+### 4.2 `.rodata`
 
-```c
-int add(int a, int b)
-{
-    return a + b;
-}
-```
+Chứa dữ liệu chỉ đọc như string literal hoặc bảng hằng. Việc đặt dữ liệu bất biến trong Flash giúp tiết kiệm SRAM.
 
-Hàm `add()` thường được đặt trong `.text`.
+### 4.3 `.data`
 
-## `.rodata`
+Chứa biến global/static có giá trị khởi tạo khác 0. Giá trị ban đầu phải tồn tại trong image ở Flash nhưng biến runtime phải ở RAM. Vì vậy startup code cần **copy initialization image từ Flash sang RAM**.
 
-Chứa dữ liệu chỉ đọc.
+### 4.4 `.bss`
 
-```c
-static const char message[] = "Hello";
-```
+Chứa biến global/static có giá trị khởi tạo bằng 0 hoặc không khai báo initializer. Không cần lưu hàng nghìn byte số 0 trong firmware image; linker chỉ lưu kích thước và startup code zero-fill vùng tương ứng trong RAM.
 
-## `.data`
+### 4.5 Stack
 
-Chứa biến toàn cục hoặc biến `static` đã được khởi tạo với giá trị khác 0.
+Stack phục vụ call frame, biến local, saved register và exception frame. Stack tăng/giảm theo ABI của kiến trúc. Trên hệ embedded, stack overflow nguy hiểm vì thường không có MMU bảo vệ giữa các vùng bộ nhớ.
 
-```c
-uint32_t system_counter = 10U;
-```
+### 4.6 Heap
 
-Giá trị ban đầu được lưu trong Flash, sau đó được sao chép sang RAM khi khởi động.
+Heap là vùng cấp phát động. Heap không tự tồn tại chỉ vì dùng C; runtime/allocator phải quản lý nó. Trong firmware thời gian thực, heap gây các câu hỏi về fragmentation, bounded execution time, allocation failure và ownership.
 
-## `.bss`
+### 4.7 Lifetime và storage duration
 
-Chứa biến toàn cục hoặc biến `static` chưa khởi tạo hoặc khởi tạo bằng 0.
+Cần phân biệt:
 
-```c
-uint32_t error_counter;
-static uint8_t rx_buffer[128];
-```
+- automatic storage: thường gắn với stack frame;
+- static storage: tồn tại suốt runtime;
+- dynamic storage: tồn tại từ allocation đến free;
+- register/temporary value: có thể chỉ tồn tại trong register do compiler quyết định.
 
-Khi khởi động, vùng `.bss` phải được gán bằng 0.
-
-## Heap
-
-Heap thường được sử dụng bởi:
-
-```c
-malloc();
-calloc();
-realloc();
-free();
-```
-
-Trong firmware nhỏ, việc sử dụng cấp phát động cần được cân nhắc vì có thể gây:
-
-- Fragmentation.
-- Khó xác định thời gian thực thi.
-- Khó dự đoán mức sử dụng RAM.
-- Lỗi thiếu bộ nhớ tại runtime.
-
-## Stack
-
-Stack được sử dụng cho:
-
-- Biến cục bộ.
-- Tham số hàm.
-- Địa chỉ quay về.
-- Context của interrupt.
-
-Ví dụ:
-
-```c
-void process(void)
-{
-    uint8_t local_buffer[64];
-}
-```
-
-`local_buffer` thường nằm trên stack.
-
-## Sơ đồ bố trí Flash và RAM
-
-```text
-FLASH
-+--------------------------+
-| Vector Table             |
-+--------------------------+
-| .text                    |
-+--------------------------+
-| .rodata                  |
-+--------------------------+
-| Initial value of .data   |
-+--------------------------+
-
-SRAM
-+--------------------------+  Low address
-| .data                    |
-+--------------------------+
-| .bss                     |
-+--------------------------+
-| Heap                     |
-|          grows up        |
-+--------------------------+
-|                          |
-+--------------------------+
-|          grows down      |
-| Stack                    |
-+--------------------------+  High address
-```
+Đây là nền tảng để hiểu vì sao gửi pointer tới biến local qua event queue có thể tạo dangling pointer.
 
 ---
 
-# 7. Con trỏ và thao tác bộ nhớ trong C
+## 5. Pointer: cầu nối giữa C và phần cứng
 
-## Đọc dữ liệu tại địa chỉ
+Pointer biểu diễn một địa chỉ có kiểu. Trong embedded, pointer được dùng không chỉ cho cấu trúc dữ liệu mà còn để truy cập memory-mapped peripheral.
 
-```c
-#include <stdint.h>
+Ba thuộc tính cần luôn tách biệt:
 
-uint32_t read_memory(uint32_t address)
-{
-    volatile uint32_t *ptr = (volatile uint32_t *)address;
-    return *ptr;
-}
-```
+1. **Giá trị địa chỉ** — pointer đang trỏ tới đâu.
+2. **Kiểu dữ liệu** — compiler hiểu kích thước và cách diễn giải dữ liệu như thế nào.
+3. **Quyền truy cập/lifetime** — địa chỉ đó có hợp lệ để đọc/ghi tại thời điểm hiện tại hay không.
 
-## Ghi dữ liệu tại địa chỉ
+### 5.1 `volatile`
 
-```c
-#include <stdint.h>
+`volatile` nói với compiler rằng giá trị có thể thay đổi bởi tác nhân mà compiler không nhìn thấy trong luồng C bình thường, ví dụ peripheral hoặc ISR. Nó ngăn một số tối ưu hóa đọc/ghi, nhưng **không tạo atomicity, mutual exclusion hay memory ownership**.
 
-void write_memory(uint32_t address, uint32_t value)
-{
-    volatile uint32_t *ptr = (volatile uint32_t *)address;
-    *ptr = value;
-}
-```
+Đây là nhầm lẫn rất phổ biến: `volatile` không làm một biến trở nên thread-safe.
 
-## Vì sao cần `volatile`?
+### 5.2 `const`
 
-`volatile` thông báo cho compiler rằng giá trị có thể thay đổi ngoài luồng thực thi thông thường.
+`const` thể hiện contract không sửa dữ liệu qua một access path. Nó giúp API rõ ownership và ý định hơn, nhưng không nhất thiết có nghĩa dữ liệu vật lý nằm trong ROM.
 
-Các trường hợp thường dùng:
+### 5.3 Pointer aliasing
 
-- Thanh ghi ngoại vi.
-- Biến được thay đổi trong ISR.
-- Biến dùng chung giữa nhiều context.
-- Vùng nhớ được cập nhật bởi DMA.
-
-Ví dụ:
-
-```c
-volatile uint32_t *gpio_output =
-    (volatile uint32_t *)0x40000000U;
-```
-
-Không có `volatile`, compiler có thể tối ưu bỏ một số lần đọc hoặc ghi.
-
-## Lưu ý an toàn
-
-Không được đọc hoặc ghi vào địa chỉ tùy ý.
-
-Một địa chỉ không hợp lệ có thể gây:
-
-- HardFault.
-- BusFault.
-- Memory Management Fault.
-- Hành vi không xác định.
+Khi nhiều pointer có thể trỏ cùng một vùng nhớ, reasoning về state trở nên khó hơn. Trong firmware lớn, aliasing không kiểm soát là nguồn gây coupling và race condition. Kiến trúc event-driven thường cố giảm shared mutable state để giảm vấn đề này.
 
 ---
 
-# 8. Thanh ghi ngoại vi và Memory-Mapped I/O
+## 6. Memory-mapped I/O và peripheral register
 
-Trong vi điều khiển, thanh ghi ngoại vi được ánh xạ vào không gian địa chỉ.
+Trong memory-mapped I/O, peripheral register được ánh xạ vào address space của CPU. Đọc/ghi địa chỉ tương ứng tạo bus transaction tới peripheral.
 
-Ví dụ giả định:
+Một register thường có các bit field điều khiển chức năng độc lập. Do đó thao tác phổ biến là:
 
-```text
-GPIO_BASE       = 0x40020000
-GPIO_MODE_REG   = GPIO_BASE + 0x00
-GPIO_OUTPUT_REG = GPIO_BASE + 0x14
-```
+- đọc register;
+- mask bit cần thay đổi;
+- tạo giá trị mới;
+- ghi lại register.
 
-## Cách 1: Truy cập trực tiếp
+Đây gọi là **read-modify-write**. Nó có thể không an toàn nếu register đồng thời bị thay đổi bởi ISR hoặc phần cứng. Một số MCU cung cấp set/reset register riêng để tránh race của read-modify-write.
 
-```c
-#define GPIO_BASE        (0x40020000U)
-#define GPIO_MODE_REG    (*(volatile uint32_t *)(GPIO_BASE + 0x00U))
-#define GPIO_OUTPUT_REG  (*(volatile uint32_t *)(GPIO_BASE + 0x14U))
-```
+### 6.1 Register side effects
 
-Ghi thanh ghi:
+Không phải register nào cũng là một biến RAM. Một lần đọc có thể clear flag; một lần ghi `1` có thể clear interrupt status; một số bit là write-only hoặc reserved. Vì vậy datasheet/reference manual là một phần của contract phần mềm.
 
-```c
-GPIO_OUTPUT_REG |= (1U << 5);
-```
+### 6.2 Clock gating
 
-## Cách 2: Sử dụng struct
-
-```c
-#include <stdint.h>
-
-typedef struct
-{
-    volatile uint32_t MODE;
-    volatile uint32_t TYPE;
-    volatile uint32_t SPEED;
-    volatile uint32_t PULL;
-    volatile uint32_t INPUT;
-    volatile uint32_t OUTPUT;
-} gpio_registers_t;
-
-#define GPIOA_BASE (0x40020000U)
-#define GPIOA      ((gpio_registers_t *)GPIOA_BASE)
-```
-
-Sử dụng:
-
-```c
-GPIOA->OUTPUT |= (1U << 5);
-```
-
-Cách dùng struct dễ đọc và dễ bảo trì hơn, nhưng phải bảo đảm offset của các thành viên khớp với datasheet.
-
-## Read-Modify-Write
-
-```c
-GPIOA->OUTPUT |= (1U << 5);
-```
-
-Dòng trên tương đương:
-
-```c
-uint32_t value = GPIOA->OUTPUT;
-value = value | (1U << 5);
-GPIOA->OUTPUT = value;
-```
-
-Cần cẩn thận khi thao tác với:
-
-- Thanh ghi có bit tự xóa.
-- Thanh ghi Write-1-to-Clear.
-- Thanh ghi được thay đổi bởi phần cứng.
-- Thanh ghi được sử dụng đồng thời trong interrupt.
+Nhiều peripheral chỉ hoạt động khi clock tương ứng được enable. Nếu phần mềm truy cập register đúng địa chỉ nhưng peripheral chưa có clock, hành vi có thể không như dự kiến. Điều này cho thấy cấu hình peripheral là một state machine phần cứng, không chỉ là các câu lệnh rời rạc.
 
 ---
 
-# 9. Quy trình khởi động của vi điều khiển
+## 7. Exception và interrupt trên Cortex-M
 
-Sau khi reset, Cortex-M thường thực hiện:
+Exception là cơ chế CPU tạm dừng luồng hiện tại để xử lý một sự kiện có mức ưu tiên. Interrupt từ peripheral là một lớp exception.
+
+Khi exception xảy ra, Cortex-M tự động lưu một phần context lên stack, sau đó lấy handler address từ vector table. Cơ chế này làm giảm chi phí software entry nhưng tạo ra những quy tắc quan trọng về stack, priority và reentrancy.
+
+### 7.1 Interrupt latency
+
+Interrupt latency là thời gian từ khi interrupt đủ điều kiện được nhận tới khi handler bắt đầu thực thi. Nó bị ảnh hưởng bởi:
+
+- interrupt masking;
+- exception priority;
+- instruction đang thực thi;
+- nested interrupt;
+- bus/memory latency.
+
+### 7.2 ISR design
+
+ISR nên ngắn vì ISR chạy trong exception context và có thể trì hoãn các công việc khác. Trong Event-Driven Programming, ISR thường chỉ:
+
+1. xác nhận nguồn interrupt;
+2. thu dữ liệu tối thiểu;
+3. biến hardware occurrence thành event;
+4. rời ISR nhanh.
+
+Phần xử lý dài được deferred sang event handler ở thread/main context.
+
+---
+
+## 8. Reset sequence và startup runtime
+
+Khi MCU reset, CPU chưa biết khái niệm C runtime. Firmware phải tự tạo môi trường để C hoạt động đúng.
+
+Luồng khái niệm:
 
 ```text
 Reset
-  |
-  v
-Đọc Initial Stack Pointer từ Vector Table (phần tử đầu tiên)
-  |
-  v
-Đọc địa chỉ Reset_Handler từ Vector Table (phần tử thứ hai)
-  |
-  v
-Thực thi Reset_Handler
-  |
-  +--> Copy .data từ Flash sang RAM
-  |
-  +--> Khởi tạo vùng nhớ .bss (biến toàn cục = 0)
-  |
-  +--> Khởi tạo clock và runtime
-  |
-  v
+  ↓
+Đọc initial stack pointer
+  ↓
+Đọc Reset_Handler từ vector table
+  ↓
+Thiết lập runtime memory
+  ├─ copy .data Flash → RAM
+  └─ zero .bss
+  ↓
+Khởi tạo clock/runtime cần thiết
+  ↓
 Gọi main()
 ```
 
-## Vector Table
+### 8.1 Vector table
 
-Hai phần tử đầu tiên thường là:
+Vector table chứa initial stack pointer và địa chỉ các exception handler. Vị trí của vector table phải phù hợp với cách CPU boot và linker script.
+
+### 8.2 Reset handler
+
+Reset handler là cầu nối giữa trạng thái phần cứng sau reset và môi trường ngôn ngữ C. Nếu `.data` không được copy hoặc `.bss` không được zero, semantics mà C programmer giả định sẽ bị phá vỡ.
+
+### 8.3 Constructor/runtime library
+
+Với C++ hoặc một số runtime, startup còn có thể phải chạy static constructors, setup libc hoặc initialize floating-point support. Bare-metal nghĩa là không có hệ điều hành đứng dưới làm thay những việc đó.
+
+---
+
+## 9. Compiler, assembler, linker và binary image
+
+Quy trình tạo firmware thường gồm:
 
 ```text
-Vector[0] = Initial Stack Pointer
-Vector[1] = Reset Handler
+Source C/C++
+   ↓ compiler
+Assembly / object code
+   ↓ assembler
+Object files (.o)
+   ↓ linker + linker script
+ELF executable
+   ↓ objcopy / image tool
+BIN / HEX / firmware image
 ```
 
-Các phần tử tiếp theo là địa chỉ của các exception và interrupt handler.
+### 9.1 Compiler
 
-Ví dụ:
+Compiler chuyển source sang machine code nhưng chưa quyết định địa chỉ cuối cùng cho mọi symbol. Mỗi object file có section và relocation information.
 
-```c
-typedef void (*isr_handler_t)(void);
+### 9.2 Linker
 
-extern uint32_t _estack;
+Linker hợp nhất object files, resolve symbol, áp dụng relocation và đặt section vào memory region. Đây là bước biến “các module riêng lẻ” thành một address space thống nhất.
 
-void Reset_Handler(void);
-void Default_Handler(void);
+### 9.3 ELF
 
-__attribute__((section(".isr_vector")))
-const isr_handler_t vector_table[] =
-{
-    (isr_handler_t)&_estack,
-    Reset_Handler,
-    Default_Handler,
-    Default_Handler,
-};
-```
-
-## Reset Handler
-
-Reset Handler chịu trách nhiệm chuẩn bị môi trường C.
-
-Pseudo-code:
-
-```c
-void Reset_Handler(void)
-{
-    copy_data_section();
-    clear_bss_section();
-    system_init();
-    main();
-
-    while (1)
-    {
-    }
-}
-```
+ELF không chỉ chứa machine code mà còn có symbol table, section, relocation/debug info và program headers. Vì vậy ELF rất hữu ích cho debugger và phân tích firmware, dù thiết bị cuối có thể chỉ flash BIN/HEX.
 
 ---
 
-# 10. Các thành phần của dự án bare-metal
+## 10. Linker script: hợp đồng giữa executable và memory map
 
-Một dự án bare-metal tối thiểu thường có:
+Linker script mô tả:
 
-## Toolchain
+- Flash bắt đầu ở đâu và dài bao nhiêu;
+- RAM bắt đầu ở đâu và dài bao nhiêu;
+- section nào đặt ở vùng nào;
+- symbol biên của `.data`, `.bss`, stack, heap;
+- section nào phải giữ lại dù linker garbage collection.
 
-Ví dụ:
+Có hai địa chỉ quan trọng đối với một section như `.data`:
+
+- **VMA — Virtual Memory Address**: nơi section tồn tại khi chương trình chạy;
+- **LMA — Load Memory Address**: nơi dữ liệu khởi tạo được lưu trong image.
+
+Với `.data`, VMA thường ở RAM còn LMA ở Flash. Startup code copy từ LMA tới VMA.
+
+### 10.1 Symbol linker
+
+Linker có thể tạo symbol không phải biến C thật, ví dụ `_sdata`, `_edata`, `_sbss`, `_ebss`. C/assembly dùng địa chỉ của các symbol này để biết biên vùng cần khởi tạo.
+
+### 10.2 Garbage collection
+
+Khi linker loại bỏ section không được tham chiếu, vector table hoặc metadata có thể vô tình bị xóa nếu không được đánh dấu giữ lại. Điều này thể hiện một nguyên tắc: những thứ được phần cứng tham chiếu bằng địa chỉ không nhất thiết xuất hiện trong call graph mà linker nhìn thấy.
+
+---
+
+## 11. ABI và function call
+
+**ABI — Application Binary Interface** quy định cách binary tương tác:
+
+- argument đi qua register nào;
+- return value nằm ở đâu;
+- register nào caller/callee phải bảo toàn;
+- stack alignment;
+- layout một số kiểu dữ liệu.
+
+Hiểu ABI là điều kiện để:
+
+- đọc disassembly;
+- viết startup/assembly;
+- hiểu exception frame;
+- tự làm context switch;
+- debug stack corruption.
+
+Trong RTOS, context switch thực chất là bảo toàn đủ trạng thái theo ABI/architecture để một task có thể tiếp tục như thể chưa từng bị tạm dừng.
+
+---
+
+## 12. Stack, call frame và nguy cơ corruption
+
+Mỗi lần gọi hàm có thể cần lưu return address, local variables hoặc callee-saved registers. Compiler quyết định chi tiết frame theo optimization và ABI.
+
+Stack corruption có thể đến từ:
+
+- buffer overflow;
+- recursion sâu;
+- ISR nesting;
+- stack sizing sai;
+- ghi pointer sai vùng;
+- DMA ghi vượt buffer.
+
+Triệu chứng thường không xuất hiện ngay tại điểm gây lỗi. Một byte ghi sai có thể phá LR hoặc saved register và chỉ crash khi function return.
+
+Đây là lý do stack watermark, guard pattern và fault dump quan trọng trong hệ embedded.
+
+---
+
+## 13. Concurrency bắt đầu từ đâu?
+
+Ngay cả firmware “single-thread” vẫn có concurrency nếu có interrupt. Main context và ISR có thể truy cập cùng dữ liệu tại các thời điểm xen kẽ.
+
+Một phép toán C tưởng như đơn giản có thể gồm nhiều instruction:
 
 ```text
-arm-none-eabi-gcc
-arm-none-eabi-objcopy
-arm-none-eabi-size
-arm-none-eabi-gdb
+load → modify → store
 ```
 
-## Source Code
+Nếu ISR chen giữa, có thể xảy ra lost update. Vì vậy cần phân biệt:
 
-Các file C và Assembly:
+- **atomic operation**: không thể quan sát trạng thái trung gian theo model đang xét;
+- **critical section**: vùng tạm ngăn concurrent access;
+- **volatile access**: chỉ ràng buộc compiler optimization;
+- **memory ordering**: thứ tự quan sát load/store.
+
+Những khái niệm này sẽ trở thành nền tảng cho event queue, scheduler và synchronization.
+
+---
+
+## 14. Determinism và bounded behavior
+
+Firmware thời gian thực không chỉ cần “nhanh”, mà cần khả năng dự đoán thời gian trong giới hạn có thể phân tích.
+
+Một thiết kế có tính deterministic tốt thường ưu tiên:
+
+- thời gian xử lý handler có giới hạn;
+- cấu trúc dữ liệu có complexity rõ;
+- tránh allocation không kiểm soát trong đường thời gian quan trọng;
+- tránh blocking vô hạn;
+- giới hạn kích thước queue/buffer;
+- biết rõ worst plausible path.
+
+Determinism là sợi dây nối từ bare-metal foundation sang Event-Driven Programming và RTOS.
+
+---
+
+## 15. Debug model: source không phải sự thật duy nhất
+
+Khi firmware sai, cần nhìn hệ thống ở nhiều mức:
 
 ```text
-main.c
-startup.c
-system.c
+Source code
+Assembly
+Registers
+Memory
+Peripheral state
+Interrupt state
+Timing
+Electrical signal
 ```
 
-## Startup Code
+Source cho biết ý định; machine state mới cho biết điều CPU đang thực sự làm. Các công cụ như debugger, disassembler, map file, logic analyzer và trace đều cung cấp góc nhìn khác nhau lên cùng một hệ thống.
 
-Startup Code:
+### 15.1 Symbol và map
 
-- Định nghĩa vector table.
-- Cài đặt Reset Handler.
-- Sao chép `.data`.
-- Xóa `.bss`.
-- Gọi `main()`.
+Symbol map giúp trả lời:
 
-## Linker Script
+- function/variable nằm ở địa chỉ nào;
+- module nào chiếm Flash/RAM;
+- section nào lớn bất thường;
+- symbol nào không được link vào.
 
-Linker Script mô tả:
+### 15.2 Disassembly
 
-- Flash bắt đầu ở đâu.
-- RAM bắt đầu ở đâu.
-- Dung lượng từng vùng.
-- Section nào được đặt vào Flash.
-- Section nào được đặt vào RAM.
-- Stack được đặt ở đâu.
+Disassembly hữu ích khi cần xác minh:
 
-## Makefile
-
-Makefile tự động hóa:
-
-- Compile.
-- Assemble.
-- Link.
-- Tạo `.bin`.
-- Tạo `.hex`.
-- Hiển thị kích thước chương trình.
-- Clean build.
-
-## Debug Configuration
-
-Có thể sử dụng:
-
-- OpenOCD.
-- ST-Link.
-- GDB.
-- J-Link.
+- compiler đã tối ưu như thế nào;
+- một access có thực sự được phát sinh;
+- ISR prologue/epilogue;
+- stack usage;
+- branch path;
+- ABI contract giữa C và assembly.
 
 ---
 
-# 11. Ví dụ tối thiểu
+## 16. Tại sao nền tảng này cần cho Event-Driven Programming?
 
-> Các địa chỉ dưới đây chỉ mang tính minh họa. Khi chạy trên board thật, phải thay bằng địa chỉ trong Reference Manual của MCU.
+Event-Driven Programming không xóa bỏ phần cứng; nó chỉ tổ chức phần mềm theo abstraction cao hơn. Mọi event queue cuối cùng vẫn nằm trong RAM, mọi timer event cuối cùng vẫn dựa trên hardware time source, mọi ISR vẫn tuân theo Cortex-M exception model.
 
-## 12.1 `src/main.c`
+Các mối liên hệ trực tiếp:
 
-```c
-#include <stdint.h>
-
-#define GPIO_BASE       (0x40020000U)
-#define GPIO_MODE       (*(volatile uint32_t *)(GPIO_BASE + 0x00U))
-#define GPIO_OUTPUT     (*(volatile uint32_t *)(GPIO_BASE + 0x14U))
-
-#define LED_PIN         (5U)
-
-static void delay_cycles(volatile uint32_t cycles)
-{
-    while (cycles > 0U)
-    {
-        __asm volatile ("nop");
-        cycles--;
-    }
-}
-
-int main(void)
-{
-    GPIO_MODE |= (1U << (LED_PIN * 2U));
-
-    while (1)
-    {
-        GPIO_OUTPUT ^= (1U << LED_PIN);
-        delay_cycles(100000U);
-    }
-}
-```
-
-## 12.2 `startup/startup.c`
-
-```c
-#include <stdint.h>
-
-extern uint32_t _sidata;
-extern uint32_t _sdata;
-extern uint32_t _edata;
-extern uint32_t _sbss;
-extern uint32_t _ebss;
-extern uint32_t _estack;
-
-int main(void);
-
-void Reset_Handler(void);
-void Default_Handler(void);
-
-typedef void (*isr_handler_t)(void);
-
-__attribute__((section(".isr_vector")))
-const isr_handler_t vector_table[] =
-{
-    (isr_handler_t)&_estack,
-    Reset_Handler,
-    Default_Handler,
-    Default_Handler,
-};
-
-void Reset_Handler(void)
-{
-    uint32_t *src = &_sidata;
-    uint32_t *dst = &_sdata;
-
-    while (dst < &_edata)
-    {
-        *dst = *src;
-        dst++;
-        src++;
-    }
-
-    dst = &_sbss;
-
-    while (dst < &_ebss)
-    {
-        *dst = 0U;
-        dst++;
-    }
-
-    (void)main();
-
-    while (1)
-    {
-    }
-}
-
-void Default_Handler(void)
-{
-    while (1)
-    {
-    }
-}
-```
-
-## 12.3 `linker/memory.ld`
-
-```ld
-ENTRY(Reset_Handler)
-
-MEMORY
-{
-    FLASH (rx)  : ORIGIN = 0x08000000, LENGTH = 128K
-    RAM   (rwx) : ORIGIN = 0x20000000, LENGTH = 20K
-}
-
-_estack = ORIGIN(RAM) + LENGTH(RAM);
-
-SECTIONS
-{
-    .isr_vector :
-    {
-        . = ALIGN(4);
-        KEEP(*(.isr_vector))
-        . = ALIGN(4);
-    } > FLASH
-
-    .text :
-    {
-        . = ALIGN(4);
-        *(.text)
-        *(.text*)
-        *(.rodata)
-        *(.rodata*)
-        . = ALIGN(4);
-        _etext = .;
-    } > FLASH
-
-    _sidata = LOADADDR(.data);
-
-    .data :
-    {
-        . = ALIGN(4);
-        _sdata = .;
-        *(.data)
-        *(.data*)
-        . = ALIGN(4);
-        _edata = .;
-    } > RAM AT > FLASH
-
-    .bss :
-    {
-        . = ALIGN(4);
-        _sbss = .;
-        *(.bss)
-        *(.bss*)
-        *(COMMON)
-        . = ALIGN(4);
-        _ebss = .;
-    } > RAM
-}
-```
-
-## 12.4 `Makefile`
-
-```makefile
-TARGET := embedded_foundation
-
-BUILD_DIR := build
-SRC_DIR := src
-STARTUP_DIR := startup
-LINKER_SCRIPT := linker/memory.ld
-
-CC := arm-none-eabi-gcc
-OBJCOPY := arm-none-eabi-objcopy
-SIZE := arm-none-eabi-size
-
-CPU_FLAGS := -mcpu=cortex-m3 -mthumb
-CFLAGS := $(CPU_FLAGS) \
-          -std=c11 \
-          -Wall \
-          -Wextra \
-          -Werror \
-          -ffreestanding \
-          -fdata-sections \
-          -ffunction-sections \
-          -O0 \
-          -g3
-
-LDFLAGS := $(CPU_FLAGS) \
-           -T$(LINKER_SCRIPT) \
-           -nostartfiles \
-           -Wl,--gc-sections \
-           -Wl,-Map=$(BUILD_DIR)/$(TARGET).map
-
-SOURCES := $(SRC_DIR)/main.c \
-           $(STARTUP_DIR)/startup.c
-
-OBJECTS := $(patsubst %.c,$(BUILD_DIR)/%.o,$(SOURCES))
-
-ELF := $(BUILD_DIR)/$(TARGET).elf
-BIN := $(BUILD_DIR)/$(TARGET).bin
-HEX := $(BUILD_DIR)/$(TARGET).hex
-
-.PHONY: all clean size
-
-all: $(ELF) $(BIN) $(HEX) size
-
-$(ELF): $(OBJECTS)
-	@mkdir -p $(dir $@)
-	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
-
-$(BUILD_DIR)/%.o: %.c
-	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
-
-$(BIN): $(ELF)
-	$(OBJCOPY) -O binary $< $@
-
-$(HEX): $(ELF)
-	$(OBJCOPY) -O ihex $< $@
-
-size: $(ELF)
-	$(SIZE) $<
-
-clean:
-	rm -rf $(BUILD_DIR)
-```
+- hiểu **memory/lifetime** → hiểu payload ownership;
+- hiểu **interrupt** → hiểu event source và deferred processing;
+- hiểu **stack** → hiểu giới hạn handler và callback;
+- hiểu **memory-mapped I/O** → thiết kế driver tách biệt application;
+- hiểu **linker/startup** → hiểu toàn bộ runtime trước khi framework chạy;
+- hiểu **determinism** → thiết kế run-to-completion handler và bounded queue.
 
 ---
 
-# 12. Quy trình build và phân tích firmware
+## 17. Các nguyên tắc cốt lõi
 
-## Cài đặt toolchain
-
-Ubuntu/Debian:
-
-```bash
-sudo apt update
-sudo apt install gcc-arm-none-eabi binutils-arm-none-eabi make
-```
-
-Kiểm tra:
-
-```bash
-arm-none-eabi-gcc --version
-arm-none-eabi-size --version
-make --version
-```
-
-## Build
-
-```bash
-make
-```
-
-Các file đầu ra:
-
-```text
-build/embedded_foundation.elf
-build/embedded_foundation.bin
-build/embedded_foundation.hex
-build/embedded_foundation.map
-```
-
-## Xem kích thước chương trình
-
-```bash
-arm-none-eabi-size build/embedded_foundation.elf
-```
-
-Ví dụ:
-
-```text
-   text    data     bss     dec     hex
-   1024      16     256    1296     510
-```
-
-Ý nghĩa:
-
-- `text`: code và dữ liệu chỉ đọc.
-- `data`: dữ liệu khởi tạo nằm trong RAM.
-- `bss`: dữ liệu zero-initialized nằm trong RAM.
-- `dec`: tổng kích thước dạng decimal.
-- `hex`: tổng kích thước dạng hexadecimal.
-
-## Xem symbol
-
-```bash
-arm-none-eabi-nm -n build/embedded_foundation.elf
-```
-
-## Disassembly
-
-```bash
-arm-none-eabi-objdump -d build/embedded_foundation.elf
-```
-
-## Xem section
-
-```bash
-arm-none-eabi-objdump -h build/embedded_foundation.elf
-```
+1. CPU chỉ thực thi instruction và thao tác trên register/địa chỉ; “biến”, “object”, “task” là abstraction phần mềm.
+2. Memory map là hợp đồng giữa địa chỉ CPU và tài nguyên phần cứng.
+3. Peripheral register không phải RAM thông thường và có thể có side effect.
+4. `volatile` không thay thế atomicity hay synchronization.
+5. `.data` cần copy từ Flash sang RAM; `.bss` cần zero trước khi C runtime được coi là hợp lệ.
+6. Linker script quyết định executable tồn tại ở đâu trong memory map.
+7. Vector table và startup code là phần của runtime, không phải chi tiết phụ.
+8. Stack corruption thường biểu hiện muộn hơn điểm gây lỗi.
+9. Interrupt tạo concurrency ngay cả khi không có RTOS.
+10. Bounded execution và ownership rõ ràng là nền tảng của firmware có thể kiểm soát.
 
 ---
 
-# 13. Quy trình phát triển dự án bare-metal
-
-Quy trình phát triển nên đi từ kiến thức phần cứng đến firmware có thể build, flash và kiểm tra:
-
-```text
-Đọc Datasheet / Reference Manual
-        |
-        v
-Xác định memory map và peripheral
-        |
-        v
-Tạo startup code và vector table
-        |
-        v
-Viết linker script
-        |
-        v
-Tạo Makefile và cấu hình toolchain
-        |
-        v
-Viết driver GPIO/UART tối thiểu
-        |
-        v
-Build ELF/BIN/HEX/MAP
-        |
-        v
-Phân tích section, symbol và kích thước
-        |
-        v
-Flash, chạy thử và ghi lại kết quả
-```
-
-## Bước 1 — Xác định target
-
-Ghi rõ:
-
-- MCU và board.
-- Kiến trúc CPU.
-- Địa chỉ Flash và SRAM.
-- Dung lượng Flash và SRAM.
-- Clock mặc định.
-- Chân GPIO/UART sử dụng.
-- Công cụ flash và debug.
-
-## Bước 2 — Chuẩn bị nền tảng khởi động
-
-Tạo:
-
-- Vector table.
-- `Reset_Handler`.
-- Logic copy `.data`.
-- Logic clear `.bss`.
-- Linker script.
-- Entry point.
-
-Chỉ chuyển sang driver khi firmware đã vào được `main()` ổn định.
-
-## Bước 3 — Xây dựng driver tối thiểu
-
-Bắt đầu bằng:
-
-1. GPIO output.
-2. UART polling.
-3. SysTick hoặc timer cơ bản nếu cần.
-
-Mỗi driver phải có interface rõ ràng và không để application truy cập trực tiếp quá nhiều thanh ghi.
-
-## Bước 4 — Build và phân tích
-
-Sau mỗi thay đổi:
-
-```bash
-make clean
-make
-arm-none-eabi-size build/embedded_foundation.elf
-arm-none-eabi-objdump -h build/embedded_foundation.elf
-arm-none-eabi-nm -n build/embedded_foundation.elf
-```
-
-Kiểm tra:
-
-- Section có nằm đúng vùng nhớ không.
-- Symbol startup có tồn tại không.
-- Vector table có được giữ lại không.
-- Flash/RAM có vượt giới hạn không.
-
-## Bước 5 — Chạy trên target
-
-Xác nhận theo thứ tự:
-
-1. Firmware flash thành công.
-2. MCU vào `Reset_Handler`.
-3. MCU vào `main()`.
-4. GPIO hoạt động.
-5. UART gửi được dữ liệu.
-6. Không xảy ra HardFault.
-7. Kết quả được ghi lại trong tài liệu project.
-
----
-
-# 14. Best Practices
-
-## Về tổ chức source code
-
-- Tách `startup/`, `linker/`, `src/`, `include/`, `docs/` và `build/`.
-- Không đặt toàn bộ startup, driver và application trong một file.
-- Header chỉ công khai interface cần thiết.
-- Dùng `static` cho hàm và biến chỉ sử dụng nội bộ module.
-- Dùng tên file và tên symbol thể hiện đúng trách nhiệm.
-
-## Về truy cập thanh ghi
-
-- Luôn đối chiếu địa chỉ và bit field với Reference Manual.
-- Dùng kiểu số nguyên có kích thước rõ ràng như `uint32_t`.
-- Dùng `volatile` cho thanh ghi và vùng nhớ có thể thay đổi ngoài luồng thực thi thông thường.
-- Dùng mask và macro có tên thay vì magic number rải rác.
-- Bật clock ngoại vi trước khi truy cập thanh ghi ngoại vi.
-
-## Về startup và linker
-
-- Giữ vector table bằng `KEEP(*(.isr_vector))`.
-- Căn chỉnh section theo yêu cầu của kiến trúc.
-- Phân biệt địa chỉ load trong Flash và địa chỉ chạy trong RAM.
-- Kiểm tra `_sidata`, `_sdata`, `_edata`, `_sbss`, `_ebss` và `_estack`.
-- Không sao chép startup code hoặc linker script từ MCU khác mà không kiểm tra memory map.
-
-## Về build
-
-- Bật warning nghiêm ngặt như `-Wall`, `-Wextra` và `-Werror` trong giai đoạn học.
-- Tạo file `.map` trong mỗi lần link.
-- Dùng `size`, `nm` và `objdump` để kiểm tra output.
-- Clean build khi thay đổi linker script, startup code hoặc compiler flags.
-- Không commit thư mục `build/` nếu repository không yêu cầu lưu binary.
-
-## Về tài liệu
-
-- Ghi rõ MCU, board, clock, toolchain và cách flash.
-- Vẽ memory map và startup flow.
-- Ghi lại lỗi đã gặp và nguyên nhân.
-- Mỗi bài thực hành nên có expected result và tiêu chí hoàn thành.
-
----
-
-# 15. Anti-pattern và lỗi thường gặp
-
-## `undefined reference`
-
-Nguyên nhân:
-
-- Thiếu source file.
-- Khai báo hàm nhưng chưa định nghĩa.
-- Sai tên symbol trong linker script.
-- Thứ tự link không phù hợp.
-
-## Vector table bị loại bỏ
-
-Nguyên nhân:
-
-- Linker garbage collection loại section không được tham chiếu.
-
-Giải pháp:
-
-```ld
-KEEP(*(.isr_vector))
-```
-
-## Chương trình không vào `main()`
-
-Kiểm tra:
-
-- Địa chỉ `_estack`.
-- Địa chỉ `Reset_Handler`.
-- Vector table.
-- `.data` và `.bss`.
-- Entry point.
-- Địa chỉ Flash.
-- Startup file có thực sự được link hay không.
-
-## HardFault khi truy cập thanh ghi
-
-Nguyên nhân:
-
-- Địa chỉ sai.
-- Clock ngoại vi chưa được bật.
-- Truy cập sai kích thước.
-- Truy cập vùng nhớ không tồn tại.
-- Cấu hình bus hoặc privilege không đúng.
-
-## `.data` sai giá trị
-
-Nguyên nhân:
-
-- Không sao chép `.data` từ Flash sang RAM.
-- `_sidata`, `_sdata`, `_edata` sai.
-- Linker script không đúng.
-
-## Biến toàn cục không bằng 0
-
-Nguyên nhân:
-
-- Không xóa `.bss`.
-- `_sbss`, `_ebss` sai.
-
-## Makefile không tạo được object file
-
-Kiểm tra:
-
-- Pattern rule.
-- Đường dẫn source.
-- Thư mục output.
-- Tab trong recipe.
-- Biến `OBJECTS`.
-
----
-
-# 16. Kiểm thử
-
-Kiểm thử ở Chủ đề 1 tập trung vào việc xác nhận startup, memory layout, build output và thao tác phần cứng tối thiểu.
-
-## Kiểm tra trên host
-
-Các nội dung có thể kiểm tra trên máy tính:
-
-- Endianness.
-- Phép toán bit.
-- Ép kiểu con trỏ.
-- Hàm thao tác buffer không phụ thuộc phần cứng.
-- Quy tắc đặt dữ liệu vào section bằng cách phân tích object file.
-
-Có thể build một chương trình C nhỏ bằng compiler host để quan sát byte order trước khi chạy trên MCU.
-
-## Kiểm tra file build
-
-Sau khi build, chạy:
-
-```bash
-arm-none-eabi-size build/embedded_foundation.elf
-arm-none-eabi-objdump -h build/embedded_foundation.elf
-arm-none-eabi-nm -n build/embedded_foundation.elf
-arm-none-eabi-objdump -d build/embedded_foundation.elf
-```
-
-Cần xác nhận:
-
-- `.isr_vector` nằm đầu vùng Flash.
-- `.text` và `.rodata` nằm trong Flash.
-- `.data` có VMA trong RAM và giá trị khởi tạo trong Flash.
-- `.bss` nằm trong RAM.
-- `Reset_Handler` và `main` có trong symbol table.
-- Kích thước Flash/RAM không vượt target.
-
-## Kiểm tra trên target
-
-Thực hiện theo thứ tự:
-
-1. Flash chương trình tối thiểu.
-2. Xác nhận LED toggle.
-3. Xác nhận UART gửi đúng chuỗi.
-4. Đặt breakpoint tại `Reset_Handler` và `main()`.
-5. Kiểm tra giá trị biến `.data`.
-6. Kiểm tra biến `.bss` được khởi tạo bằng 0.
-7. Cố ý thay đổi một phần cấu hình để quan sát lỗi và khôi phục.
-
-## Fault injection đề xuất
-
-- Bỏ `KEEP(*(.isr_vector))`.
-- Không copy `.data`.
-- Không clear `.bss`.
-- Đặt sai địa chỉ Flash hoặc RAM.
-- Dùng sai offset thanh ghi.
-- Không bật clock GPIO.
-- Xóa một source file khỏi Makefile.
-
-Mỗi lỗi cần ghi lại:
-
-- Triệu chứng.
-- Nguyên nhân.
-- Cách phát hiện.
-- Cách sửa.
-
----
-
-# 17. Bài thực hành
-
-Các bài thực hành được sắp xếp từ cơ bản đến tích hợp:
-
-## Bài 1 — Biểu diễn số và endianness
-
-Viết chương trình:
-
-```c
-uint32_t value = 0x12345678U;
-uint8_t *ptr = (uint8_t *)&value;
-```
-
-Quan sát:
-
-```c
-ptr[0]
-ptr[1]
-ptr[2]
-ptr[3]
-```
-
-Mục tiêu:
-
-- Hiểu byte order.
-- Hiểu quan hệ giữa con trỏ và địa chỉ.
-- Nhận biết little-endian.
-
----
-
-## Bài 2 — Đọc và ghi bộ nhớ
-
-Viết hai hàm:
-
-```c
-uint32_t memory_read32(uint32_t address);
-void memory_write32(uint32_t address, uint32_t value);
-```
-
-Mục tiêu:
-
-- Ép kiểu địa chỉ sang con trỏ.
-- Hiểu `volatile`.
-- Hiểu rủi ro khi truy cập địa chỉ không hợp lệ.
-
----
-
-## Bài 3 — Khảo sát các section
-
-Tạo các biến:
-
-```c
-const uint32_t version = 1U;
-uint32_t initialized_data = 100U;
-uint32_t uninitialized_data;
-static uint8_t static_buffer[128];
-```
-
-Sau đó dùng:
-
-```bash
-arm-none-eabi-nm -n build/embedded_foundation.elf
-arm-none-eabi-objdump -h build/embedded_foundation.elf
-```
-
-Mục tiêu:
-
-- Xác định biến nằm trong `.rodata`, `.data` hay `.bss`.
-- Hiểu vai trò của linker.
-
----
-
-## Bài 4 — Tự viết Startup Code
-
-Yêu cầu:
-
-- Tạo vector table.
-- Tạo `Reset_Handler`.
-- Copy `.data`.
-- Clear `.bss`.
-- Gọi `main()`.
-
-Mục tiêu:
-
-- Hiểu quá trình từ reset tới `main()`.
-- Không phụ thuộc vào startup code có sẵn của IDE.
-
----
-
-## Bài 5 — Tự viết Linker Script
-
-Yêu cầu:
-
-- Khai báo Flash.
-- Khai báo RAM.
-- Đặt `.isr_vector` vào Flash.
-- Đặt `.text` vào Flash.
-- Đặt `.data` vào RAM nhưng load từ Flash.
-- Đặt `.bss` vào RAM.
-
-Mục tiêu:
-
-- Hiểu VMA và LMA.
-- Hiểu cách chương trình được bố trí trong bộ nhớ.
-
----
-
-## Bài 6 — Điều khiển GPIO bằng thanh ghi
-
-Yêu cầu:
-
-- Bật clock cho GPIO.
-- Cấu hình chân LED output.
-- Toggle LED.
-- Không sử dụng HAL.
-
-Mục tiêu:
-
-- Đọc Reference Manual.
-- Xác định địa chỉ base.
-- Xác định offset thanh ghi.
-- Thực hiện bit manipulation.
-
----
-
-## Bài 7 — UART polling
-
-Yêu cầu:
-
-- Khởi tạo UART.
-- Gửi chuỗi `"Hello Bare Metal\r\n"`.
-- Không sử dụng thư viện chuẩn nặng.
-
-Mục tiêu:
-
-- Hiểu peripheral register.
-- Hiểu polling.
-- Biết kiểm tra status flag.
-
----
-
-## Bài 8 — Phân tích file `.map`
-
-Yêu cầu:
-
-- Xác định kích thước `.text`.
-- Xác định kích thước `.data`.
-- Xác định kích thước `.bss`.
-- Tìm symbol chiếm nhiều bộ nhớ nhất.
-- Kiểm tra stack và heap.
-
-Mục tiêu:
-
-- Biết phân tích mức sử dụng Flash/RAM.
-- Chuẩn bị cho việc tối ưu firmware.
-
----
-
-# 18. Tiêu chí hoàn thành
-
-Người học được xem là hoàn thành chủ đề khi có thể:
-
-- Giải thích `PC`, `SP`, `LR`.
-- Vẽ được sơ đồ Flash, SRAM, peripheral.
-- Phân biệt `.text`, `.rodata`, `.data`, `.bss`, stack và heap.
-- Giải thích được `volatile`.
-- Đọc và ghi một thanh ghi bằng con trỏ.
-- Giải thích được Memory-Mapped I/O.
-- Tự viết vector table tối thiểu.
-- Tự viết `Reset_Handler`.
-- Tự viết linker script.
-- Tự viết Makefile.
-- Build được `.elf`, `.bin`, `.hex`, `.map`.
-- Dùng `objdump`, `nm`, `size` để phân tích firmware.
-- Điều khiển GPIO không dùng HAL.
-- Commit source code và tài liệu lên GitHub.
-
----
-
-# 19. Cấu trúc repository đề xuất
-
-## Kết quả đầu ra đề xuất
-
-Cấu trúc repository đề xuất:
-
-```text
-01-embedded-foundation/
-├── README.md
-├── Makefile
-├── .gitignore
-├── linker/
-│   └── memory.ld
-├── startup/
-│   └── startup.c
-├── src/
-│   ├── main.c
-│   ├── gpio.c
-│   └── uart.c
-├── include/
-│   ├── gpio.h
-│   └── uart.h
-├── labs/
-│   ├── 01-endianness/ # practice 1
-│   ├── 02-memory-access/ # practice 2
-│   ├── 03-memory-sections/ # practice 3
-│   ├── 04-startup-code/ # practice 4
-│   ├── 05-linker-script/ # practice 5
-│   ├── 06-gpio-register/ # practice 6
-│   ├── 07-uart-polling/ # practice 7
-│   └── 08-map-analysis/ # practice 8
-├── docs/
-│   ├── memory-map.md
-│   ├── startup-flow.md
-│   ├── sections-analysis.md
-│   └── map-analysis.md
-└── build/
-```
-
-# Nội dung README của project
-- Mục tiêu.
-- Board và MCU.
-- Kiến trúc CPU và thông số bộ nhớ.
-- Build và flash.
-- Memory map của MCU.
-- Bố trí các section
-- Luồng khởi động từ Reset đến main().
-- Cấu trúc Vector Table.
-- Trách nhiệm của Reset_Handler.
-- Cấu hình Linker Script.
-- Cấu hình Makefile.
-- Compiler và linker flags quan trọng.
-- Địa chỉ thanh ghi và bit cấu hình quan trọng.
-
----
-
-# 20. Tài liệu tham khảo
-
-Các tài liệu nên tham khảo:
-
-## Programming Paradigms — Stanford CS107
-
-- https://www.youtube.com/playlist?list=PL9D558D49CA734A02
-
-## AK Embedded Base Kit — Getting Started
-
-- https://epcb.vn/blogs/ak-embedded-software/ak-embedded-base-kit-stm32l151-getting-started
-
-## Application Startup Code
-
-- https://epcb.vn/blogs/ak-embedded-software/ak-embedded-base-kit-stm32l151-application-startup-code
-
-## Building Bare-Metal ARM Systems with GNU
-
-- https://www.state-machine.com/doc/Building_bare-metal_ARM_with_GNU.pdf
-
-## Tài liệu MCU cần đọc thêm
-
-- Datasheet.
-- Reference Manual.
-- ARM Cortex-M Generic User Guide.
-- ARM Architecture Reference Manual.
-- Schematic của board.
-- Errata Sheet.
-
----
-
-# 21. Tổng kết
-
-Xây dựng nền móng để hiểu một firmware bare-metal từ lúc MCU reset đến khi application chạy.
-
-Luồng kiến thức chính:
-
-```text
-CPU và bus
-      |
-      v
-Không gian địa chỉ
-      |
-      v
-Flash, SRAM và section
-      |
-      v
-Con trỏ và Memory-Mapped I/O
-      |
-      v
-Vector table và Reset Handler
-      |
-      v
-Linker script
-      |
-      v
-Makefile và toolchain
-      |
-      v
-GPIO/UART mức thanh ghi
-      |
-      v
-Phân tích ELF, MAP và memory usage
-```
-
-Các nguyên tắc cần nhớ:
-
-1. Địa chỉ và dữ liệu là hai khái niệm khác nhau.
-2. Thanh ghi ngoại vi được truy cập qua Memory-Mapped I/O.
-3. `volatile` cần thiết với dữ liệu có thể thay đổi ngoài luồng C thông thường.
-4. Startup code phải chuẩn bị `.data` và `.bss` trước khi gọi `main()`.
-5. Linker script quyết định vị trí của code và dữ liệu.
-6. Vector table phải nằm đúng địa chỉ và không bị linker loại bỏ.
-7. Build thành công chưa đủ; cần kiểm tra ELF, MAP, section và symbol.
-8. Địa chỉ thanh ghi phải lấy từ tài liệu chính thức của MCU.
-9. Warning của compiler cần được xử lý thay vì bỏ qua.
-10. Mọi bài bare-metal nên có cách kiểm tra trên target và tài liệu kết quả.
-
-Sau chủ đề này, người học cần có một project bare-metal tối thiểu có thể:
-
-```text
-Khởi động từ Reset_Handler
-+
-Khởi tạo .data và .bss
-+
-Điều khiển GPIO
-+
-Gửi UART polling
-+
-Build ELF/BIN/HEX/MAP
-+
-Phân tích Flash/RAM
-```
-
-Đây là nền tảng trực tiếp cho các chủ đề tiếp theo về interrupt, timer, Event-Driven Programming, scheduler và RTOS.
-
+## 18. Tài liệu tham khảo theo chương trình gốc
+
+- Stanford CS107 — Programming Paradigms.
+- AK Embedded Base Kit — Getting Started.
+- Application Startup Code của AK Embedded.
+- *Building Bare-Metal ARM Systems with GNU*.
+- ARM Cortex-M Architecture documentation.
+- Datasheet và Reference Manual của MCU đang sử dụng.
