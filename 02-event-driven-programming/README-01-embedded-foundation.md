@@ -306,12 +306,12 @@ Phần xử lý dài được deferred sang event handler ở thread/main contex
 
 ```mermaid
 flowchart TD
-    RESET([Reset released]) --> VECTOR[Fetch initial MSP and reset vector]
-    VECTOR --> HANDLER[Enter Reset_Handler]
-    HANDLER --> DATA[Copy .data from Flash to RAM]
-    DATA --> BSS[Zero .bss]
-    BSS --> RUNTIME[Initialize required runtime / platform state]
-    RUNTIME --> MAIN[Enter main()]
+    RESET(["Reset released"]) --> VECTOR["Fetch initial MSP and reset vector"]
+    VECTOR --> HANDLER["Enter Reset_Handler"]
+    HANDLER --> DATA["Copy .data from Flash to RAM"]
+    DATA --> BSS["Zero .bss"]
+    BSS --> RUNTIME["Initialize required runtime / platform state"]
+    RUNTIME --> MAIN["Enter main()"]
     MAIN -->|system reset| RESET
 ```
 
