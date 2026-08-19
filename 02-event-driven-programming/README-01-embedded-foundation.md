@@ -5,6 +5,78 @@
 
 ---
 
+## Mục lục
+
+- [Sơ đồ tổng quan](#sơ-đồ-tổng-quan)
+- [1. Embedded system nhìn từ góc độ phần mềm](#1-embedded-system-nhìn-từ-góc-độ-phần-mềm)
+- [2. Mô hình CPU — Memory — Peripheral](#2-mô-hình-cpu-memory-peripheral)
+- [3. Address space và memory map](#3-address-space-và-memory-map)
+- [4. C memory model trong firmware](#4-c-memory-model-trong-firmware)
+- [5. Pointer: cầu nối giữa C và phần cứng](#5-pointer-cầu-nối-giữa-c-và-phần-cứng)
+- [6. Memory-mapped I/O và peripheral register](#6-memory-mapped-io-và-peripheral-register)
+- [7. Exception và interrupt trên Cortex-M](#7-exception-và-interrupt-trên-cortex-m)
+- [8. Reset sequence và startup runtime](#8-reset-sequence-và-startup-runtime)
+- [9. Compiler, assembler, linker và binary image](#9-compiler-assembler-linker-và-binary-image)
+- [10. Linker script: hợp đồng giữa executable và memory map](#10-linker-script-hợp-đồng-giữa-executable-và-memory-map)
+- [11. ABI và function call](#11-abi-và-function-call)
+- [12. Stack, call frame và nguy cơ corruption](#12-stack-call-frame-và-nguy-cơ-corruption)
+- [13. Concurrency bắt đầu từ đâu?](#13-concurrency-bắt-đầu-từ-đâu)
+- [14. Determinism và bounded behavior](#14-determinism-và-bounded-behavior)
+- [15. Debug model: source không phải sự thật duy nhất](#15-debug-model-source-không-phải-sự-thật-duy-nhất)
+- [16. Tại sao nền tảng này cần cho Event-Driven Programming?](#16-tại-sao-nền-tảng-này-cần-cho-event-driven-programming)
+- [17. Các nguyên tắc cốt lõi](#17-các-nguyên-tắc-cốt-lõi)
+- [18. Tài liệu tham khảo theo chương trình gốc](#18-tài-liệu-tham-khảo-theo-chương-trình-gốc)
+- [Tài liệu tham khảo chuyên sâu](#tài-liệu-tham-khảo-chuyên-sâu)
+
+---
+
+## Sơ đồ tổng quan
+
+Toàn bộ nền tảng của một firmware bare-metal có thể nhìn như một chuỗi chuyển đổi từ source code đến trạng thái phần cứng:
+
+```text
+C / Assembly source
+       |
+       v
++---------------+      +----------------+
+| Compiler / Asm| ---> | object files   |
++---------------+      +-------+--------+
+                              |
+                    linker script + ABI
+                              |
+                              v
+                       +-------------+
+                       |     ELF     |
+                       +------+------+ 
+                              |
+                   startup/vector table
+                              |
+                              v
+Reset --> CPU --> memory map --> runtime C --> main/event runtime
+                    |
+                    +--> Flash : .text/.rodata
+                    +--> RAM   : .data/.bss/stack/heap
+                    +--> MMIO  : peripheral registers
+```
+
+Một cách reasoning quan trọng khác là tách **địa chỉ trong source** khỏi **vật thể vật lý mà địa chỉ đó đại diện**:
+
+```text
+C expression / pointer
+        |
+        v
+CPU load/store instruction
+        |
+        v
+address on system bus
+        |
+        +--> Flash/RAM
+        +--> peripheral MMIO
+        +--> invalid/reserved region -> fault/undefined behavior by platform
+```
+
+---
+
 ## 1. Embedded system nhìn từ góc độ phần mềm
 
 Một hệ thống nhúng là một hệ thống tính toán được thiết kế để thực hiện một tập chức năng tương đối xác định, thường gắn trực tiếp với phần cứng vật lý. Khác với máy tính đa dụng, firmware thường phải làm việc dưới các ràng buộc đồng thời về bộ nhớ, năng lượng, thời gian đáp ứng, độ tin cậy và khả năng quan sát lỗi.
@@ -476,3 +548,12 @@ Các mối liên hệ trực tiếp:
 - *Building Bare-Metal ARM Systems with GNU*.
 - ARM Cortex-M Architecture documentation.
 - Datasheet và Reference Manual của MCU đang sử dụng.
+
+---
+
+## Tài liệu tham khảo chuyên sâu
+
+- [ARM Cortex-M3 Technical Reference Manual](https://developer.arm.com/documentation/ddi0337/latest/)
+- [Building Bare-Metal ARM Systems with GNU](https://www.state-machine.com/doc/Building_bare-metal_ARM_with_GNU.pdf)
+- [GNU ld — Linker Scripts](https://sourceware.org/binutils/docs/ld/Scripts.html)
+- [Arm ABI specifications (abi-aa)](https://github.com/ARM-software/abi-aa)

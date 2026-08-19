@@ -5,6 +5,80 @@
 
 ---
 
+## Mục lục
+
+- [Sơ đồ tổng quan](#sơ-đồ-tổng-quan)
+- [1. Vấn đề cốt lõi: firmware phải phản ứng với nhiều dòng thời gian](#1-vấn-đề-cốt-lõi-firmware-phải-phản-ứng-với-nhiều-dòng-thời-gian)
+- [2. Synchronous và asynchronous](#2-synchronous-và-asynchronous)
+- [3. Blocking, polling và chi phí kiến trúc](#3-blocking-polling-và-chi-phí-kiến-trúc)
+- [4. Event là gì?](#4-event-là-gì)
+- [5. Event source](#5-event-source)
+- [6. Event queue](#6-event-queue)
+- [7. Mailbox và active-object boundary](#7-mailbox-và-active-object-boundary)
+- [8. Dispatcher](#8-dispatcher)
+- [9. Event handler và run-to-completion](#9-event-handler-và-run-to-completion)
+- [10. State machine: mô hình hóa hành vi theo thời gian](#10-state-machine-mô-hình-hóa-hành-vi-theo-thời-gian)
+- [11. Timer event và thời gian như một nguồn sự kiện](#11-timer-event-và-thời-gian-như-một-nguồn-sự-kiện)
+- [12. Interrupt và deferred processing](#12-interrupt-và-deferred-processing)
+- [13. Ownership và lifetime của event payload](#13-ownership-và-lifetime-của-event-payload)
+- [14. Event ordering](#14-event-ordering)
+- [15. Backpressure và overload](#15-backpressure-và-overload)
+- [16. Reentrancy](#16-reentrancy)
+- [17. Event-driven architecture và modularity](#17-event-driven-architecture-và-modularity)
+- [18. Publish–Subscribe](#18-publishsubscribe)
+- [19. Determinism trong Event-Driven Programming](#19-determinism-trong-event-driven-programming)
+- [20. Traceability](#20-traceability)
+- [21. Event-Driven và RTOS khác nhau thế nào?](#21-event-driven-và-rtos-khác-nhau-thế-nào)
+- [22. Những anti-pattern kiến trúc thường gặp](#22-những-anti-pattern-kiến-trúc-thường-gặp)
+- [23. Mô hình tư duy tổng hợp](#23-mô-hình-tư-duy-tổng-hợp)
+- [24. Quy trình thiết kế Event-Driven System ở mức kiến trúc](#24-quy-trình-thiết-kế-event-driven-system-ở-mức-kiến-trúc)
+- [25. Kết luận](#25-kết-luận)
+- [Tài liệu tham khảo chuyên sâu](#tài-liệu-tham-khảo-chuyên-sâu)
+
+---
+
+## Sơ đồ tổng quan
+
+Event-driven firmware biến nhiều dòng thời gian bất đồng bộ thành một luồng xử lý có trật tự tại các event handler:
+
+```text
+ GPIO IRQ ----+
+ UART RX -----+
+ Timer -------+--> event producers --> queues/mailboxes --> dispatcher
+ DMA done ----+                                      |
+ Network -----+                                      v
+                                             +---------------+
+                                             | event handler |
+                                             | run-to-       |
+                                             | completion    |
+                                             +-------+-------+
+                                                     |
+                                                     v
+                                               state update
+                                                     |
+                                          post new event/timer
+```
+
+Đặc biệt, ISR và application handler nên tách về execution context:
+
+```text
+hardware IRQ
+    |
+    v
+short ISR: capture/acknowledge
+    |
+    | post/defer
+    v
+queue ---------------------> application event handler
+                                  |
+                                  v
+                           longer stateful work
+```
+
+Bản chất của mô hình là **serialize state mutation tại owner**, thay vì cho mọi callback/ISR cùng sửa shared state tùy thời điểm.
+
+---
+
 ## 1. Vấn đề cốt lõi: firmware phải phản ứng với nhiều dòng thời gian
 
 Một firmware thực tế hiếm khi chỉ có một chuỗi công việc tuyến tính. Cùng lúc hệ thống có thể phải quan tâm tới:
@@ -547,8 +621,71 @@ Chất lượng của hệ thống phụ thuộc vào năm contract chính:
 
 ---
 
-## 24. Kết luận
+## 24. Quy trình thiết kế Event-Driven System ở mức kiến trúc
+
+Một quy trình tốt không bắt đầu bằng việc tạo thật nhiều signal. Nó bắt đầu từ **responsibility, state và temporal behavior**.
+
+```text
+Product behavior / use cases
+          |
+          v
+identify independent responsibilities
+          |
+          v
+define state owner / Active Object boundary
+          |
+          v
+identify external + internal events
+          |
+          v
+define state machines and invariants
+          |
+          v
+define queue/ownership/overflow/time semantics
+          |
+          v
+map ISR and drivers into event adapters
+          |
+          v
+add trace/test observability
+```
+
+### 24.1 Bắt đầu từ responsibility thay vì thread/task
+
+Một thành phần nên tồn tại vì nó sở hữu một responsibility và state có cohesive lifecycle. Nếu boundary được chọn chỉ vì “cần thêm task”, hệ dễ trở thành thread-centric thay vì model-centric.
+
+### 24.2 Liệt kê event theo ý nghĩa miền bài toán
+
+Event tốt biểu diễn fact có ý nghĩa như `CONNECTION_LOST`, `MEASUREMENT_READY`, `TIMEOUT_EXPIRED`, thay vì chỉ phản ánh implementation detail kiểu “function X đã được gọi”. Semantic event giúp producer và consumer ít coupling hơn.
+
+### 24.3 Xác định state owner
+
+Mỗi mutable state quan trọng nên có owner rõ. Nếu nhiều handler/ISR cùng sửa một state mà không có protocol, event-driven façade không loại bỏ race và hidden coupling.
+
+### 24.4 Định nghĩa time và failure semantics trước
+
+Queue full, timeout, duplicate event, retry, stale event và pool exhaustion phải có policy. Đây là behavior của system khi chịu tải/lỗi, không phải edge case để thêm sau.
+
+### 24.5 Observability là một phần của design
+
+Signal ID, source/destination, timestamp, state transition và resource counters nên có model từ đầu. Khi architecture chỉ debug được bằng breakpoint, temporal bug ngoài hiện trường sẽ rất khó tái dựng.
+
+Quy trình này giữ đúng tinh thần của Event-Driven Programming: **architecture được suy ra từ behavior và ownership**, không phụ thuộc vào một framework cụ thể.
+
+---
+
+## 25. Kết luận
 
 Bản chất của Event-Driven Programming không nằm ở một framework cụ thể. Nó nằm ở việc biến một firmware có nhiều dòng thời gian thành một hệ thống gồm các event có nghĩa, state machine rõ ràng và các handler run-to-completion với ownership/timing contract xác định.
 
 Khi các nguyên tắc này được hiểu đúng, Active Kernel chỉ còn là một hiện thực cụ thể của các ý tưởng: mailbox, dispatcher, event pool, timer và active object.
+
+---
+
+## Tài liệu tham khảo chuyên sâu
+
+- [QP/C Conceptual Model — Active Objects and event queues](https://www.state-machine.com/qpc/conc-qp.html)
+- [QP — Active Object key concept](https://www.state-machine.com/active-object)
+- [QP/C Event Delivery Mechanisms](https://www.state-machine.com/qpc/srs-qp_edm.html)
+- [AK Embedded — Event-Driven Task & Signal](https://epcb.vn/blogs/ak-embedded-software/ak-embedded-base-kit-stm32l151-event-driven-task-signal)
+- [AK Embedded — Event-Driven Timer](https://epcb.vn/blogs/ak-embedded-software/ak-embedded-base-kit-stm32l151-event-driven-timer)

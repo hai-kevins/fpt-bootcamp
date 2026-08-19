@@ -5,6 +5,95 @@
 
 ---
 
+## Mục lục
+
+- [Sơ đồ tổng quan](#sơ-đồ-tổng-quan)
+- [1. Vì sao kernel cần cấu trúc dữ liệu riêng?](#1-vì-sao-kernel-cần-cấu-trúc-dữ-liệu-riêng)
+- [2. Array và linked list trong kernel](#2-array-và-linked-list-trong-kernel)
+- [3. Singly linked list](#3-singly-linked-list)
+- [4. Doubly linked list](#4-doubly-linked-list)
+- [5. Circular list](#5-circular-list)
+- [6. Sentinel node](#6-sentinel-node)
+- [7. Intrusive linked list](#7-intrusive-linked-list)
+- [8. Non-intrusive list](#8-non-intrusive-list)
+- [9. Ownership của list node](#9-ownership-của-list-node)
+- [10. List invariant](#10-list-invariant)
+- [11. Duplicate insertion](#11-duplicate-insertion)
+- [12. `container_of`](#12-containerof)
+- [13. Task là gì trong RTOS?](#13-task-là-gì-trong-rtos)
+- [14. Task Control Block](#14-task-control-block)
+- [15. Saved stack pointer](#15-saved-stack-pointer)
+- [16. Task stack metadata](#16-task-stack-metadata)
+- [17. Priority: base và effective](#17-priority-base-và-effective)
+- [18. Task state](#18-task-state)
+- [19. Task entry và argument](#19-task-entry-và-argument)
+- [20. Static task creation](#20-static-task-creation)
+- [21. Dynamic task creation](#21-dynamic-task-creation)
+- [22. Task registry](#22-task-registry)
+- [23. Ready lists](#23-ready-lists)
+- [24. Delayed list](#24-delayed-list)
+- [25. Wait list](#25-wait-list)
+- [26. Một task có thể ở nhiều list cùng lúc không?](#26-một-task-có-thể-ở-nhiều-list-cùng-lúc-không)
+- [27. Membership matrix](#27-membership-matrix)
+- [28. Transition là transaction nhiều cấu trúc](#28-transition-là-transaction-nhiều-cấu-trúc)
+- [29. Current task và next task](#29-current-task-và-next-task)
+- [30. Ready bitmap như derived state](#30-ready-bitmap-như-derived-state)
+- [31. Complexity của kernel operations](#31-complexity-của-kernel-operations)
+- [32. Sorted list và delta list](#32-sorted-list-và-delta-list)
+- [33. Timing wheel](#33-timing-wheel)
+- [34. Object lifetime và list safety](#34-object-lifetime-và-list-safety)
+- [35. ABA-like hazards](#35-aba-like-hazards)
+- [36. Diagnostics trong TCB](#36-diagnostics-trong-tcb)
+- [37. Trace list transitions](#37-trace-list-transitions)
+- [38. Defensive invariants](#38-defensive-invariants)
+- [39. TCB size và cache/footprint](#39-tcb-size-và-cachefootprint)
+- [40. Data structure và concurrency](#40-data-structure-và-concurrency)
+- [41. Separation of concerns](#41-separation-of-concerns)
+- [42. Các nguyên tắc cốt lõi](#42-các-nguyên-tắc-cốt-lõi)
+- [Tài liệu tham khảo chuyên sâu](#tài-liệu-tham-khảo-chuyên-sâu)
+
+---
+
+## Sơ đồ tổng quan
+
+TCB là điểm nối giữa execution context và mọi cấu trúc scheduling/blocking của kernel:
+
+```text
+                         +------------------+
+                         |       TCB        |
+                         | saved SP         |
+                         | priority         |
+                         | state            |
+                         | wake/timeout     |
+                         +---+----------+---+
+                             |          |
+               intrusive node|          |intrusive node
+                             v          v
+                       ready list     wait/delay list
+                             |          |
+                             +----+-----+
+                                  |
+                                  v
+                              scheduler
+```
+
+Một state transition thường là transaction trên nhiều derived structures:
+
+```text
+BLOCKED -> READY
+   |
+   +--> remove from wait list
+   +--> cancel/remove timeout membership
+   +--> set wake reason
+   +--> insert ready list[priority]
+   +--> update ready bitmap
+   +--> maybe request preemption
+```
+
+Nếu một bước thiếu, kernel có thể có “ghost task”, duplicate membership hoặc bitmap/list không nhất quán.
+
+---
+
 ## 1. Vì sao kernel cần cấu trúc dữ liệu riêng?
 
 Kernel liên tục phải quản lý tập object thay đổi trạng thái:
@@ -566,3 +655,11 @@ Semaphore không nên tự sửa ready pointers tùy ý; nó yêu cầu kernel w
 11. Object không được free khi node còn linked.
 12. Kernel invariant checks nên phát hiện corruption tại điểm gần nguyên nhân nhất.
 13. Complexity của insert/remove/search ảnh hưởng trực tiếp khả năng bound kernel latency.
+
+---
+
+## Tài liệu tham khảo chuyên sâu
+
+- [FreeRTOS Kernel — list.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/list.c)
+- [FreeRTOS Kernel — tasks.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/tasks.c)
+- [Zephyr Documentation — Threads](https://docs.zephyrproject.org/latest/kernel/services/threads/index.html)

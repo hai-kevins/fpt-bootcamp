@@ -5,6 +5,94 @@
 
 ---
 
+## Mục lục
+
+- [Sơ đồ tổng quan](#sơ-đồ-tổng-quan)
+- [1. Test và debug là hai hoạt động khác nhau](#1-test-và-debug-là-hai-hoạt-động-khác-nhau)
+- [2. Pyramid quan sát firmware](#2-pyramid-quan-sát-firmware)
+- [3. Testability là thuộc tính kiến trúc](#3-testability-là-thuộc-tính-kiến-trúc)
+- [4. Unit test trong embedded](#4-unit-test-trong-embedded)
+- [5. Deterministic test](#5-deterministic-test)
+- [6. Test state machine](#6-test-state-machine)
+- [7. Temporal test](#7-temporal-test)
+- [8. Fake time và virtual time](#8-fake-time-và-virtual-time)
+- [9. Command-line interface như test interface](#9-command-line-interface-như-test-interface)
+- [10. Log](#10-log)
+- [11. Logging overhead](#11-logging-overhead)
+- [12. Event trace](#12-event-trace)
+- [13. Realtime trace và record event](#13-realtime-trace-và-record-event)
+- [14. Ring buffer cho trace](#14-ring-buffer-cho-trace)
+- [15. Timestamp](#15-timestamp)
+- [16. Fault và assertion](#16-fault-và-assertion)
+- [17. Cortex-M fault analysis](#17-cortex-m-fault-analysis)
+- [18. Reset cause](#18-reset-cause)
+- [19. Watchdog và diagnosability](#19-watchdog-và-diagnosability)
+- [20. Metrics](#20-metrics)
+- [21. Latency measurement](#21-latency-measurement)
+- [22. GPIO instrumentation](#22-gpio-instrumentation)
+- [23. Automated test architecture](#23-automated-test-architecture)
+- [24. Test oracle](#24-test-oracle)
+- [25. Black-box, gray-box và white-box](#25-black-box-gray-box-và-white-box)
+- [26. Fault injection](#26-fault-injection)
+- [27. Reproducibility](#27-reproducibility)
+- [28. CI cho embedded](#28-ci-cho-embedded)
+- [29. Test flakiness](#29-test-flakiness)
+- [30. Debugging theo causal chain](#30-debugging-theo-causal-chain)
+- [31. Observability budget](#31-observability-budget)
+- [32. Production diagnostics](#32-production-diagnostics)
+- [33. Tại sao Event-Driven đặc biệt thuận lợi cho debug?](#33-tại-sao-event-driven-đặc-biệt-thuận-lợi-cho-debug)
+- [34. Các nguyên tắc cốt lõi](#34-các-nguyên-tắc-cốt-lõi)
+- [Tài liệu tham khảo chuyên sâu](#tài-liệu-tham-khảo-chuyên-sâu)
+
+---
+
+## Sơ đồ tổng quan
+
+Observability của firmware nên được thiết kế theo nhiều lớp, từ assertion cục bộ đến trace toàn hệ thống:
+
+```text
+              Product/use-case validation
+                       /\
+                      /  \
+             event/state trace
+                    /------\
+             structured logging
+                  /----------\
+             metrics/counters/time
+                /--------------\
+        assertions + fault registers
+              /------------------\
+      GPIO/logic-analyzer instrumentation
+```
+
+Một failure nên được tái dựng theo causal chain thay vì chỉ đọc dòng log cuối:
+
+```text
+external input
+     |
+     v
+ISR/input adapter
+     |
+     v
+EVENT_X posted --timestamp--> queue
+     |
+     v
+handler A: S1 -> S2
+     |
+     +--> EVENT_Y
+             |
+             v
+         handler B
+             |
+             v
+       invariant fails
+             |
+             v
+   assertion/fault + recorder snapshot
+```
+
+---
+
 ## 1. Test và debug là hai hoạt động khác nhau
 
 **Testing** trả lời: hệ thống có thỏa contract hay không?
@@ -575,3 +663,12 @@ Ba đối tượng cần quan sát nhất là:
 10. Timing measurement phải định nghĩa chính xác start/end point và observer overhead.
 11. Flaky test là một vấn đề kỹ thuật cần xử lý, không phải chuyện bình thường.
 12. Production firmware cần observability đủ để debug khi không có debugger trực tiếp.
+
+---
+
+## Tài liệu tham khảo chuyên sâu
+
+- [Arm Cortex-M3 Technical Reference Manual — exception model](https://developer.arm.com/documentation/ddi0337/latest/)
+- [Zephyr Documentation — Tracing](https://docs.zephyrproject.org/latest/services/tracing/index.html)
+- [QP/C documentation — framework and tracing ecosystem](https://www.state-machine.com/qpc/)
+- [AK Embedded Base Kit STM32L151 repository](https://github.com/ak-embedded-software/ak-base-kit-stm32l151)

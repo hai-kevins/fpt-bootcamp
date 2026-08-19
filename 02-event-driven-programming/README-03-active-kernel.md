@@ -5,6 +5,79 @@
 
 ---
 
+## Mục lục
+
+- [Sơ đồ tổng quan](#sơ-đồ-tổng-quan)
+- [1. Active Kernel là gì?](#1-active-kernel-là-gì)
+- [2. Active Kernel khác preemptive RTOS ở đâu?](#2-active-kernel-khác-preemptive-rtos-ở-đâu)
+- [3. Kiến trúc lớp](#3-kiến-trúc-lớp)
+- [4. Task trong Active Kernel](#4-task-trong-active-kernel)
+- [5. Scheduler/dispatcher trong AK](#5-schedulerdispatcher-trong-ak)
+- [6. Signal và message](#6-signal-và-message)
+- [7. Pure message](#7-pure-message)
+- [8. Common message](#8-common-message)
+- [9. Dynamic message](#9-dynamic-message)
+- [10. Message pool](#10-message-pool)
+- [11. Mailbox](#11-mailbox)
+- [12. Message routing](#12-message-routing)
+- [13. Run-to-completion trong AK](#13-run-to-completion-trong-ak)
+- [14. Polling task trong Active Kernel](#14-polling-task-trong-active-kernel)
+- [15. Timer subsystem](#15-timer-subsystem)
+- [16. State machine trong AK](#16-state-machine-trong-ak)
+- [17. Interrupt integration](#17-interrupt-integration)
+- [18. Log](#18-log)
+- [19. Fatal error](#19-fatal-error)
+- [20. Command-line interface qua UART](#20-command-line-interface-qua-uart)
+- [21. Realtime event trace](#21-realtime-event-trace)
+- [22. Record event / flight recorder](#22-record-event-flight-recorder)
+- [23. Resource accounting](#23-resource-accounting)
+- [24. Failure containment](#24-failure-containment)
+- [25. Active Kernel như một protocol runtime](#25-active-kernel-như-một-protocol-runtime)
+- [26. Quan hệ giữa Active Kernel và hệ thống Event-Driven tổng quát](#26-quan-hệ-giữa-active-kernel-và-hệ-thống-event-driven-tổng-quát)
+- [27. Các nguyên tắc cốt lõi](#27-các-nguyên-tắc-cốt-lõi)
+- [Tài liệu tham khảo chuyên sâu](#tài-liệu-tham-khảo-chuyên-sâu)
+
+---
+
+## Sơ đồ tổng quan
+
+Active Kernel có thể được xem như một runtime thực thi các Active Object/Task thông qua mailbox và event dispatch:
+
+```text
+               +----------------------+
+ISR ---------->|                      |
+Timer -------->| Message/Event Runtime|<------ other task
+CLI ---------->|  pool + routing      |
+               +----------+-----------+
+                          |
+              +-----------+-----------+
+              |           |           |
+              v           v           v
+         +---------+  +---------+  +---------+
+         | Task A  |  | Task B  |  | Task C  |
+         | mailbox |  | mailbox |  | mailbox |
+         +----+----+  +----+----+  +----+----+
+              |           |           |
+              v           v           v
+          handler/SM   handler/SM   handler/SM
+              \           |           /
+               +----------+----------+
+                          |
+                    dispatcher/kernel
+```
+
+Run-to-completion tạo ra một invariant rất mạnh:
+
+```text
+dequeue one event -> dispatch -> state transition/actions -> return
+       ^                                                |
+       +---------------- next event --------------------+
+```
+
+Không có event thứ hai chen vào giữa một RTC step của cùng Active Object.
+
+---
+
 ## 1. Active Kernel là gì?
 
 Active Kernel có thể được hiểu là một kernel/framework nhẹ dành cho firmware event-driven, trong đó logic ứng dụng được tổ chức thành các **active task/object** nhận message từ mailbox và xử lý theo nguyên tắc run-to-completion.
@@ -538,3 +611,11 @@ Nếu abstraction được hiểu đúng, có thể thay AK bằng một framewo
 8. ISR là adapter từ hardware occurrence sang event domain.
 9. Trace event là công cụ quan sát đúng với kiến trúc event-driven.
 10. Fatal error phải bảo toàn bằng chứng và bảo vệ invariant của hệ thống.
+
+---
+
+## Tài liệu tham khảo chuyên sâu
+
+- [AK Embedded Base Kit STM32L151 repository](https://github.com/ak-embedded-software/ak-base-kit-stm32l151)
+- [QP/C Conceptual Model](https://www.state-machine.com/qpc/conc-qp.html)
+- [QP/C++ Active Object requirements — run-to-completion](https://www.state-machine.com/qpcpp/srs-qp_ao.html)

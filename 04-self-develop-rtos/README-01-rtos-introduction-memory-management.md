@@ -5,6 +5,92 @@
 
 ---
 
+## Mục lục
+
+- [Sơ đồ tổng quan](#sơ-đồ-tổng-quan)
+- [1. RTOS là gì?](#1-rtos-là-gì)
+- [2. Real-time không đồng nghĩa với “rất nhanh”](#2-real-time-không-đồng-nghĩa-với-rất-nhanh)
+- [3. Các đại lượng thời gian cốt lõi](#3-các-đại-lượng-thời-gian-cốt-lõi)
+- [4. Hard, firm và soft real-time](#4-hard-firm-và-soft-real-time)
+- [5. Super-loop và RTOS](#5-super-loop-và-rtos)
+- [6. Cấu trúc logic của một RTOS kernel nhỏ](#6-cấu-trúc-logic-của-một-rtos-kernel-nhỏ)
+- [7. Memory layout của firmware RTOS](#7-memory-layout-của-firmware-rtos)
+- [8. Memory budget là một phần của kernel design](#8-memory-budget-là-một-phần-của-kernel-design)
+- [9. Static allocation](#9-static-allocation)
+- [10. Stack allocation](#10-stack-allocation)
+- [11. Dynamic allocation](#11-dynamic-allocation)
+- [12. Memory pool](#12-memory-pool)
+- [13. Internal fragmentation](#13-internal-fragmentation)
+- [14. External fragmentation](#14-external-fragmentation)
+- [15. Memory leak](#15-memory-leak)
+- [16. Double free, invalid free và use-after-free](#16-double-free-invalid-free-và-use-after-free)
+- [17. Heap metadata](#17-heap-metadata)
+- [18. Alignment](#18-alignment)
+- [19. First-fit allocator](#19-first-fit-allocator)
+- [20. Splitting](#20-splitting)
+- [21. Coalescing](#21-coalescing)
+- [22. Free-list organization](#22-free-list-organization)
+- [23. First-fit, best-fit và worst-fit](#23-first-fit-best-fit-và-worst-fit)
+- [24. Buddy allocator](#24-buddy-allocator)
+- [25. TLSF và bounded allocation](#25-tlsf-và-bounded-allocation)
+- [26. Heap invariant](#26-heap-invariant)
+- [27. Fragmentation metrics](#27-fragmentation-metrics)
+- [28. Stack sizing trong RTOS](#28-stack-sizing-trong-rtos)
+- [29. Kernel object lifetime](#29-kernel-object-lifetime)
+- [30. Allocation trong critical path](#30-allocation-trong-critical-path)
+- [31. Failure policy khi hết memory](#31-failure-policy-khi-hết-memory)
+- [32. Memory protection và MPU](#32-memory-protection-và-mpu)
+- [33. Quan hệ giữa memory management và các chủ đề RTOS sau](#33-quan-hệ-giữa-memory-management-và-các-chủ-đề-rtos-sau)
+- [34. Các nguyên tắc cốt lõi](#34-các-nguyên-tắc-cốt-lõi)
+- [Tài liệu tham khảo chuyên sâu](#tài-liệu-tham-khảo-chuyên-sâu)
+
+---
+
+## Sơ đồ tổng quan
+
+Một RTOS kernel nhỏ liên kết scheduler, task metadata và memory/object management như sau:
+
+```text
+                    +----------------+
+                    |    Scheduler   |
+                    +-------+--------+
+                            |
+        +-------------------+-------------------+
+        |                   |                   |
+        v                   v                   v
+   +---------+         +---------+         +---------+
+   |  TCB A  |         |  TCB B  |         |  TCB C  |
+   +----+----+         +----+----+         +----+----+
+        |                   |                   |
+        v                   v                   v
+   task stack           task stack          task stack
+
+Kernel objects / messages / timers
+        |
+        v
++------------------------+
+| static area / pool /   |
+| heap allocator         |
++------------------------+
+```
+
+First-fit allocator ở mức khái niệm:
+
+```text
+free list: [16] -> [80] -> [24] -> [128]
+request 40 bytes
+             |
+             v
+first block large enough = [80]
+             |
+             +--> allocated part [40 + metadata/alignment]
+             +--> remainder returned to free list if usable
+```
+
+Allocator correctness phụ thuộc nhiều hơn vào **invariant của metadata và lifetime** hơn là riêng policy first-fit.
+
+---
+
 ## 1. RTOS là gì?
 
 **RTOS — Real-Time Operating System** là một hệ điều hành/kernel cung cấp cơ chế quản lý execution contexts và resource sao cho hành vi thời gian của hệ thống có thể được kiểm soát và phân tích tốt hơn.
@@ -608,3 +694,11 @@ Vì vậy memory management không phải module phụ; nó là nền của mọ
 10. Kernel object lifetime phải rõ trước khi thiết kế allocator.
 11. Out-of-memory là một failure mode phải có policy, không phải trường hợp “không thể xảy ra”.
 12. Memory management phải được thiết kế cùng timing requirements của kernel.
+
+---
+
+## Tài liệu tham khảo chuyên sâu
+
+- [FreeRTOS Kernel source](https://github.com/FreeRTOS/FreeRTOS-Kernel)
+- [Zephyr Kernel Memory Management documentation](https://docs.zephyrproject.org/latest/kernel/memory_management/index.html)
+- [Arm Cortex-M3 Technical Reference Manual](https://developer.arm.com/documentation/ddi0337/latest/)

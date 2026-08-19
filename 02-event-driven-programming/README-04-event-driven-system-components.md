@@ -5,6 +5,80 @@
 
 ---
 
+## Mục lục
+
+- [Sơ đồ tổng quan](#sơ-đồ-tổng-quan)
+- [1. Active Object là đơn vị kiến trúc](#1-active-object-là-đơn-vị-kiến-trúc)
+- [2. Active Object và thread không đồng nghĩa](#2-active-object-và-thread-không-đồng-nghĩa)
+- [3. Mailbox như boundary của concurrency](#3-mailbox-như-boundary-của-concurrency)
+- [4. State ownership](#4-state-ownership)
+- [5. Invariant của Active Object](#5-invariant-của-active-object)
+- [6. Các loại State Machine](#6-các-loại-state-machine)
+- [7. State explosion](#7-state-explosion)
+- [8. Event object model](#8-event-object-model)
+- [9. Event Pool — xương sống của memory model](#9-event-pool-xương-sống-của-memory-model)
+- [10. Event lifetime](#10-event-lifetime)
+- [11. Reference counting](#11-reference-counting)
+- [12. Event priority](#12-event-priority)
+- [13. Event coalescing](#13-event-coalescing)
+- [14. Dispatcher topology](#14-dispatcher-topology)
+- [15. Data-Link Layer trong Event-Driven System](#15-data-link-layer-trong-event-driven-system)
+- [16. Serialization](#16-serialization)
+- [17. Framing](#17-framing)
+- [18. Integrity và CRC](#18-integrity-và-crc)
+- [19. Addressing và routing giữa nhiều node](#19-addressing-và-routing-giữa-nhiều-node)
+- [20. Request/response và correlation](#20-requestresponse-và-correlation)
+- [21. Reliability semantics](#21-reliability-semantics)
+- [22. Sequence number](#22-sequence-number)
+- [23. Timeout và retry trong hệ phân tán](#23-timeout-và-retry-trong-hệ-phân-tán)
+- [24. Flow control và backpressure qua link](#24-flow-control-và-backpressure-qua-link)
+- [25. Multi-process event-driven system](#25-multi-process-event-driven-system)
+- [26. Versioning protocol](#26-versioning-protocol)
+- [27. Event security boundary](#27-event-security-boundary)
+- [28. Observability của distributed event flow](#28-observability-của-distributed-event-flow)
+- [29. Fault containment giữa các node](#29-fault-containment-giữa-các-node)
+- [30. Mô hình kiến trúc tổng hợp](#30-mô-hình-kiến-trúc-tổng-hợp)
+- [31. Các nguyên tắc cốt lõi](#31-các-nguyên-tắc-cốt-lõi)
+- [Tài liệu tham khảo chuyên sâu](#tài-liệu-tham-khảo-chuyên-sâu)
+
+---
+
+## Sơ đồ tổng quan
+
+Khi mở rộng Event-Driven System từ một MCU sang nhiều execution domain, kiến trúc có thể nhìn thành hai lớp: **local event runtime** và **data-link transport**.
+
+```text
+ MCU / Process A                              MCU / Process B
++------------------+                        +------------------+
+| Active Object A1 |                        | Active Object B1 |
+| Active Object A2 |                        | Active Object B2 |
++---------+--------+                        +---------+--------+
+          | mailbox/event pool                        ^
+          v                                           |
++------------------+                        +----------+-------+
+| local dispatcher |                        | local dispatcher |
++---------+--------+                        +----------+-------+
+          | serialize/frame                           ^ decode
+          v                                           |
++------------------+   UART/CAN/TCP/...     +----------+-------+
+| Data-Link Layer  |=======================>| Data-Link Layer  |
++------------------+                        +------------------+
+```
+
+Event lifetime phải được hiểu như một ownership graph:
+
+```text
+allocate event
+     |
+     +--> one consumer ----------> consume ----------> release
+     |
+     +--> N subscribers -> refcount=N -> each release -> free at 0
+```
+
+Đây là chỗ event pool, mailbox, routing và distributed transport gặp nhau.
+
+---
+
 ## 1. Active Object là đơn vị kiến trúc
 
 **Active Object (AO)** là một object có:
@@ -544,3 +618,12 @@ Ranh giới transport không nên làm thay đổi business meaning của event.
 10. Timeout không đồng nghĩa remote failure; retry có thể tạo duplicate.
 11. Protocol versioning và observability là phần của architecture, không phải phần bổ sung sau cùng.
 12. Hệ nhiều node vẫn tuân cùng nguyên tắc event-driven: explicit state, message ownership, bounded queues và traceable causality.
+
+---
+
+## Tài liệu tham khảo chuyên sâu
+
+- [QP/C Conceptual Model — Active Objects](https://www.state-machine.com/qpc/conc-qp.html)
+- [QP/C Event Delivery Mechanisms](https://www.state-machine.com/qpc/srs-qp_edm.html)
+- [QP/C++ QActive — event queue and state machine model](https://www.state-machine.com/qpcpp/class_q_p_1_1_q_active.html)
+- [AK Embedded Base Kit STM32L151 repository](https://github.com/ak-embedded-software/ak-base-kit-stm32l151)
