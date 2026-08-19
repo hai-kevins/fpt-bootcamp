@@ -1,53 +1,42 @@
 # Chủ đề 2 — Scheduling và Context Switch trên ARM Cortex-M3
-## Priority Scheduler, SysTick, SVC, PendSV và Exception Context
+> **Phạm vi:** Priority Scheduler, SysTick, SVC, PendSV và Exception Context
 
 > Tài liệu này trình bày sâu hai lớp cần tách biệt khi tự phát triển RTOS: **scheduler policy** quyết định task nào nên chạy và **context-switch mechanism** hiện thực việc chuyển CPU từ task hiện tại sang task tiếp theo trên Cortex-M3.
+
+> **Điều hướng:** [← Root README](../README.md) · [↑ Back to Track](README.md) · [← Chủ đề 1 — RTOS & Memory Management](README-01-rtos-introduction-memory-management.md) · [Chủ đề 3 — Kernel Data Structures & Task →](README-03-kernel-data-structures-task.md)
 
 ---
 
 ## Mục lục
 
-- [Sơ đồ tổng quan](#sơ-đồ-tổng-quan)
-- [1. Scheduling là gì?](#1-scheduling-là-gì)
-- [2. Task readiness](#2-task-readiness)
-- [3. Cooperative scheduling](#3-cooperative-scheduling)
-- [4. Preemptive scheduling](#4-preemptive-scheduling)
-- [5. Fixed-priority scheduling](#5-fixed-priority-scheduling)
-- [6. Round-robin cùng priority](#6-round-robin-cùng-priority)
-- [7. Earliest Deadline First](#7-earliest-deadline-first)
-- [8. Starvation](#8-starvation)
-- [9. Ready queues](#9-ready-queues)
-- [10. Task Control Block và saved stack pointer](#10-task-control-block-và-saved-stack-pointer)
-- [11. Cortex-M3 execution modes](#11-cortex-m3-execution-modes)
-- [12. MSP và PSP](#12-msp-và-psp)
-- [13. Register context trên Cortex-M3](#13-register-context-trên-cortex-m3)
-- [14. Exception entry](#14-exception-entry)
-- [15. EXC_RETURN](#15-excreturn)
-- [16. Initial task stack frame](#16-initial-task-stack-frame)
-- [17. Thumb state](#17-thumb-state)
-- [18. Stack alignment](#18-stack-alignment)
-- [19. SVC — Supervisor Call](#19-svc-supervisor-call)
-- [20. PendSV](#20-pendsv)
-- [21. SysTick](#21-systick)
-- [22. Deferred preemption](#22-deferred-preemption)
-- [23. SysTick, ISR và PendSV priority](#23-systick-isr-và-pendsv-priority)
-- [24. Scheduler lock và critical section](#24-scheduler-lock-và-critical-section)
-- [25. Scheduler decision và switch commit](#25-scheduler-decision-và-switch-commit)
-- [26. Yield](#26-yield)
-- [27. Time slicing](#27-time-slicing)
-- [28. Tick frequency trade-off](#28-tick-frequency-trade-off)
-- [29. Context-switch latency](#29-context-switch-latency)
-- [30. Interrupt-to-task latency](#30-interrupt-to-task-latency)
-- [31. Scheduler invariants](#31-scheduler-invariants)
-- [32. Context-switch invariants](#32-context-switch-invariants)
-- [33. Vì sao assembly handler dễ lỗi?](#33-vì-sao-assembly-handler-dễ-lỗi)
-- [34. Idle task](#34-idle-task)
-- [35. Scheduling và realtime analysis](#35-scheduling-và-realtime-analysis)
-- [36. Priority assignment](#36-priority-assignment)
-- [37. Tick wrap-around](#37-tick-wrap-around)
-- [38. Fault symptoms của context switch](#38-fault-symptoms-của-context-switch)
-- [39. Các nguyên tắc cốt lõi](#39-các-nguyên-tắc-cốt-lõi)
-- [Tài liệu tham khảo chuyên sâu](#tài-liệu-tham-khảo-chuyên-sâu)
+> Mục lục rút gọn theo **cụm kiến thức**. Các mục đánh số chi tiết vẫn được giữ nguyên trong nội dung.
+
+- **Scheduling policy**
+  - [Sơ đồ tổng quan](#sơ-đồ-tổng-quan)
+  - [1. Scheduling là gì?](#1-scheduling-là-gì)
+  - [4. Preemptive scheduling](#4-preemptive-scheduling)
+  - [5. Fixed-priority scheduling](#5-fixed-priority-scheduling)
+  - [9. Ready queues](#9-ready-queues)
+- **Cortex-M3 context model**
+  - [10. Task Control Block và saved stack pointer](#10-task-control-block-và-saved-stack-pointer)
+  - [13. Register context trên Cortex-M3](#13-register-context-trên-cortex-m3)
+  - [14. Exception entry](#14-exception-entry)
+- **Exception-based switch**
+  - [20. PendSV](#20-pendsv)
+  - [21. SysTick](#21-systick)
+  - [22. Deferred preemption](#22-deferred-preemption)
+  - [25. Scheduler decision và switch commit](#25-scheduler-decision-và-switch-commit)
+- **Timing & realtime**
+  - [29. Context-switch latency](#29-context-switch-latency)
+  - [30. Interrupt-to-task latency](#30-interrupt-to-task-latency)
+  - [35. Scheduling và realtime analysis](#35-scheduling-và-realtime-analysis)
+- **Correctness & diagnostics**
+  - [31. Scheduler invariants](#31-scheduler-invariants)
+  - [32. Context-switch invariants](#32-context-switch-invariants)
+  - [38. Fault symptoms của context switch](#38-fault-symptoms-của-context-switch)
+  - [39. Các nguyên tắc cốt lõi](#39-các-nguyên-tắc-cốt-lõi)
+- **Tra cứu**
+  - [Tài liệu tham khảo](#tài-liệu-tham-khảo)
 
 ---
 
@@ -428,15 +417,15 @@ Cortex-M3 hỗ trợ BASEPRI.
 ## 25. Scheduler decision và switch commit
 
 ```mermaid
-stateDiagram-v2
-    [*] --> RUNNING_A
-    RUNNING_A --> PREEMPT_REQUESTED : higher-priority task ready / yield
-    PREEMPT_REQUESTED --> PENDSV_PENDING : pend PendSV
-    PENDSV_PENDING --> SAVE_A : PendSV exception entry
-    SAVE_A --> SELECT_B : current context saved
-    SELECT_B --> RESTORE_B : scheduler selects next task
-    RESTORE_B --> RUNNING_B : exception return
-    RUNNING_B --> PREEMPT_REQUESTED : next scheduling event
+flowchart TD
+    RUNA[Task A running] --> EVENT{Scheduling event?}
+    EVENT -->|higher-priority ready / yield / tick| PEND[Pend PendSV]
+    PEND --> ENTRY[Exception entry]
+    ENTRY --> SAVE[Save remaining Task A context]
+    SAVE --> SELECT[Scheduler selects next task]
+    SELECT --> RESTORE[Restore Task B context]
+    RESTORE --> RETURN[Exception return]
+    RETURN --> RUNB[Task B running]
 ```
 
 Có thể tách:
@@ -626,9 +615,13 @@ Việc phân loại symptom theo layer giúp debug nhanh hơn.
 
 ---
 
-## Tài liệu tham khảo chuyên sâu
+## Tài liệu tham khảo
 
 - [Arm Cortex-M3 Technical Reference Manual — Exceptions/PendSV/SysTick](https://developer.arm.com/documentation/ddi0337/latest/)
 - [Arm Cortex-M3 Devices Generic User Guide](https://developer.arm.com/documentation/dui0552/latest/)
 - [Zephyr Documentation — Threads](https://docs.zephyrproject.org/latest/kernel/services/threads/index.html)
 - [FreeRTOS Kernel source — tasks/portable context](https://github.com/FreeRTOS/FreeRTOS-Kernel)
+
+---
+
+> **Điều hướng:** [← Root README](../README.md) · [↑ Back to Track](README.md) · [← Chủ đề 1 — RTOS & Memory Management](README-01-rtos-introduction-memory-management.md) · [Chủ đề 3 — Kernel Data Structures & Task →](README-03-kernel-data-structures-task.md)

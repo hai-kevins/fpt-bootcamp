@@ -1,41 +1,41 @@
 # Chủ đề 3 — Active Kernel (AK)
-## Khái niệm, mô hình thực thi, message, timer, state machine và diagnostic
+> **Phạm vi:** Khái niệm, mô hình thực thi, message, timer, state machine và diagnostic
 
 > Tài liệu này giải thích Active Kernel như một **mô hình tổ chức firmware hướng sự kiện**, không phải như một tập API cần học thuộc. Mục tiêu là hiểu cơ chế để có thể tự xây dựng hoặc thay thế framework mà vẫn giữ nguyên các nguyên lý kiến trúc.
+
+> **Điều hướng:** [← Root README](../README.md) · [↑ Back to Track](README.md) · [← Chủ đề 2 — Asynchronous & Event-Driven](README-02-asynchronous-event-driven.md) · [Chủ đề 4 — Event-Driven Components →](README-04-event-driven-system-components.md)
 
 ---
 
 ## Mục lục
 
-- [Sơ đồ tổng quan](#sơ-đồ-tổng-quan)
-- [1. Active Kernel là gì?](#1-active-kernel-là-gì)
-- [2. Active Kernel khác preemptive RTOS ở đâu?](#2-active-kernel-khác-preemptive-rtos-ở-đâu)
-- [3. Kiến trúc lớp](#3-kiến-trúc-lớp)
-- [4. Task trong Active Kernel](#4-task-trong-active-kernel)
-- [5. Scheduler/dispatcher trong AK](#5-schedulerdispatcher-trong-ak)
-- [6. Signal và message](#6-signal-và-message)
-- [7. Pure message](#7-pure-message)
-- [8. Common message](#8-common-message)
-- [9. Dynamic message](#9-dynamic-message)
-- [10. Message pool](#10-message-pool)
-- [11. Mailbox](#11-mailbox)
-- [12. Message routing](#12-message-routing)
-- [13. Run-to-completion trong AK](#13-run-to-completion-trong-ak)
-- [14. Polling task trong Active Kernel](#14-polling-task-trong-active-kernel)
-- [15. Timer subsystem](#15-timer-subsystem)
-- [16. State machine trong AK](#16-state-machine-trong-ak)
-- [17. Interrupt integration](#17-interrupt-integration)
-- [18. Log](#18-log)
-- [19. Fatal error](#19-fatal-error)
-- [20. Command-line interface qua UART](#20-command-line-interface-qua-uart)
-- [21. Realtime event trace](#21-realtime-event-trace)
-- [22. Record event / flight recorder](#22-record-event-flight-recorder)
-- [23. Resource accounting](#23-resource-accounting)
-- [24. Failure containment](#24-failure-containment)
-- [25. Active Kernel như một protocol runtime](#25-active-kernel-như-một-protocol-runtime)
-- [26. Quan hệ giữa Active Kernel và hệ thống Event-Driven tổng quát](#26-quan-hệ-giữa-active-kernel-và-hệ-thống-event-driven-tổng-quát)
-- [27. Các nguyên tắc cốt lõi](#27-các-nguyên-tắc-cốt-lõi)
-- [Tài liệu tham khảo chuyên sâu](#tài-liệu-tham-khảo-chuyên-sâu)
+> Mục lục rút gọn theo **cụm kiến thức**. Các mục đánh số chi tiết vẫn được giữ nguyên trong nội dung.
+
+- **Mô hình Active Kernel**
+  - [Sơ đồ tổng quan](#sơ-đồ-tổng-quan)
+  - [1. Active Kernel là gì?](#1-active-kernel-là-gì)
+  - [2. Active Kernel khác preemptive RTOS ở đâu?](#2-active-kernel-khác-preemptive-rtos-ở-đâu)
+  - [4. Task trong Active Kernel](#4-task-trong-active-kernel)
+  - [5. Scheduler/dispatcher trong AK](#5-schedulerdispatcher-trong-ak)
+- **Message và mailbox**
+  - [6. Signal và message](#6-signal-và-message)
+  - [10. Message pool](#10-message-pool)
+  - [11. Mailbox](#11-mailbox)
+  - [12. Message routing](#12-message-routing)
+- **Execution semantics**
+  - [13. Run-to-completion trong AK](#13-run-to-completion-trong-ak)
+  - [15. Timer subsystem](#15-timer-subsystem)
+  - [16. State machine trong AK](#16-state-machine-trong-ak)
+- **Diagnostic & observability**
+  - [18. Log](#18-log)
+  - [21. Realtime event trace](#21-realtime-event-trace)
+  - [22. Record event / flight recorder](#22-record-event-flight-recorder)
+- **System properties**
+  - [23. Resource accounting](#23-resource-accounting)
+  - [25. Active Kernel như một protocol runtime](#25-active-kernel-như-một-protocol-runtime)
+  - [27. Các nguyên tắc cốt lõi](#27-các-nguyên-tắc-cốt-lõi)
+- **Tra cứu**
+  - [Tài liệu tham khảo](#tài-liệu-tham-khảo)
 
 ---
 
@@ -626,8 +626,12 @@ Nếu abstraction được hiểu đúng, có thể thay AK bằng một framewo
 
 ---
 
-## Tài liệu tham khảo chuyên sâu
+## Tài liệu tham khảo
 
 - [AK Embedded Base Kit STM32L151 repository](https://github.com/ak-embedded-software/ak-base-kit-stm32l151)
 - [QP/C Conceptual Model](https://www.state-machine.com/qpc/conc-qp.html)
 - [QP/C++ Active Object requirements — run-to-completion](https://www.state-machine.com/qpcpp/srs-qp_ao.html)
+
+---
+
+> **Điều hướng:** [← Root README](../README.md) · [↑ Back to Track](README.md) · [← Chủ đề 2 — Asynchronous & Event-Driven](README-02-asynchronous-event-driven.md) · [Chủ đề 4 — Event-Driven Components →](README-04-event-driven-system-components.md)

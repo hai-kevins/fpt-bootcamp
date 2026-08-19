@@ -1,56 +1,43 @@
 # Chủ đề 3 — Cấu trúc dữ liệu trong Kernel và Task
-## Intrusive Lists, Ready Structures, Task Control Block và Kernel Invariants
+> **Phạm vi:** Intrusive Lists, Ready Structures, Task Control Block và Kernel Invariants
 
 > Tài liệu này giải thích vì sao RTOS kernel cần những cấu trúc dữ liệu có ownership và complexity rõ ràng, đặc biệt là intrusive linked list và Task Control Block. Trọng tâm là quan hệ giữa data structure, task lifetime, scheduler và các invariant mà kernel phải bảo toàn.
+
+> **Điều hướng:** [← Root README](../README.md) · [↑ Back to Track](README.md) · [← Chủ đề 2 — Scheduling & Context Switch](README-02-scheduling-context-switch.md) · [Chủ đề 4 — Task State & Synchronization →](README-04-task-state-synchronization.md)
 
 ---
 
 ## Mục lục
 
-- [Sơ đồ tổng quan](#sơ-đồ-tổng-quan)
-- [1. Vì sao kernel cần cấu trúc dữ liệu riêng?](#1-vì-sao-kernel-cần-cấu-trúc-dữ-liệu-riêng)
-- [2. Array và linked list trong kernel](#2-array-và-linked-list-trong-kernel)
-- [3. Singly linked list](#3-singly-linked-list)
-- [4. Doubly linked list](#4-doubly-linked-list)
-- [5. Circular list](#5-circular-list)
-- [6. Sentinel node](#6-sentinel-node)
-- [7. Intrusive linked list](#7-intrusive-linked-list)
-- [8. Non-intrusive list](#8-non-intrusive-list)
-- [9. Ownership của list node](#9-ownership-của-list-node)
-- [10. List invariant](#10-list-invariant)
-- [11. Duplicate insertion](#11-duplicate-insertion)
-- [12. `container_of`](#12-containerof)
-- [13. Task là gì trong RTOS?](#13-task-là-gì-trong-rtos)
-- [14. Task Control Block](#14-task-control-block)
-- [15. Saved stack pointer](#15-saved-stack-pointer)
-- [16. Task stack metadata](#16-task-stack-metadata)
-- [17. Priority: base và effective](#17-priority-base-và-effective)
-- [18. Task state](#18-task-state)
-- [19. Task entry và argument](#19-task-entry-và-argument)
-- [20. Static task creation](#20-static-task-creation)
-- [21. Dynamic task creation](#21-dynamic-task-creation)
-- [22. Task registry](#22-task-registry)
-- [23. Ready lists](#23-ready-lists)
-- [24. Delayed list](#24-delayed-list)
-- [25. Wait list](#25-wait-list)
-- [26. Một task có thể ở nhiều list cùng lúc không?](#26-một-task-có-thể-ở-nhiều-list-cùng-lúc-không)
-- [27. Membership matrix](#27-membership-matrix)
-- [28. Transition là transaction nhiều cấu trúc](#28-transition-là-transaction-nhiều-cấu-trúc)
-- [29. Current task và next task](#29-current-task-và-next-task)
-- [30. Ready bitmap như derived state](#30-ready-bitmap-như-derived-state)
-- [31. Complexity của kernel operations](#31-complexity-của-kernel-operations)
-- [32. Sorted list và delta list](#32-sorted-list-và-delta-list)
-- [33. Timing wheel](#33-timing-wheel)
-- [34. Object lifetime và list safety](#34-object-lifetime-và-list-safety)
-- [35. ABA-like hazards](#35-aba-like-hazards)
-- [36. Diagnostics trong TCB](#36-diagnostics-trong-tcb)
-- [37. Trace list transitions](#37-trace-list-transitions)
-- [38. Defensive invariants](#38-defensive-invariants)
-- [39. TCB size và cache/footprint](#39-tcb-size-và-cachefootprint)
-- [40. Data structure và concurrency](#40-data-structure-và-concurrency)
-- [41. Separation of concerns](#41-separation-of-concerns)
-- [42. Các nguyên tắc cốt lõi](#42-các-nguyên-tắc-cốt-lõi)
-- [Tài liệu tham khảo chuyên sâu](#tài-liệu-tham-khảo-chuyên-sâu)
+> Mục lục rút gọn theo **cụm kiến thức**. Các mục đánh số chi tiết vẫn được giữ nguyên trong nội dung.
+
+- **Kernel containers**
+  - [Sơ đồ tổng quan](#sơ-đồ-tổng-quan)
+  - [1. Vì sao kernel cần cấu trúc dữ liệu riêng?](#1-vì-sao-kernel-cần-cấu-trúc-dữ-liệu-riêng)
+  - [7. Intrusive linked list](#7-intrusive-linked-list)
+  - [10. List invariant](#10-list-invariant)
+- **Task & TCB**
+  - [13. Task là gì trong RTOS?](#13-task-là-gì-trong-rtos)
+  - [14. Task Control Block](#14-task-control-block)
+  - [17. Priority: base và effective](#17-priority-base-và-effective)
+  - [18. Task state](#18-task-state)
+- **Scheduling structures**
+  - [23. Ready lists](#23-ready-lists)
+  - [24. Delayed list](#24-delayed-list)
+  - [25. Wait list](#25-wait-list)
+  - [28. Transition là transaction nhiều cấu trúc](#28-transition-là-transaction-nhiều-cấu-trúc)
+  - [30. Ready bitmap như derived state](#30-ready-bitmap-như-derived-state)
+- **Complexity & timer structures**
+  - [31. Complexity của kernel operations](#31-complexity-của-kernel-operations)
+  - [32. Sorted list và delta list](#32-sorted-list-và-delta-list)
+- **Lifetime & diagnostics**
+  - [34. Object lifetime và list safety](#34-object-lifetime-và-list-safety)
+  - [36. Diagnostics trong TCB](#36-diagnostics-trong-tcb)
+  - [38. Defensive invariants](#38-defensive-invariants)
+  - [40. Data structure và concurrency](#40-data-structure-và-concurrency)
+  - [42. Các nguyên tắc cốt lõi](#42-các-nguyên-tắc-cốt-lõi)
+- **Tra cứu**
+  - [Tài liệu tham khảo](#tài-liệu-tham-khảo)
 
 ---
 
@@ -670,8 +657,12 @@ Semaphore không nên tự sửa ready pointers tùy ý; nó yêu cầu kernel w
 
 ---
 
-## Tài liệu tham khảo chuyên sâu
+## Tài liệu tham khảo
 
 - [FreeRTOS Kernel — list.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/list.c)
 - [FreeRTOS Kernel — tasks.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/tasks.c)
 - [Zephyr Documentation — Threads](https://docs.zephyrproject.org/latest/kernel/services/threads/index.html)
+
+---
+
+> **Điều hướng:** [← Root README](../README.md) · [↑ Back to Track](README.md) · [← Chủ đề 2 — Scheduling & Context Switch](README-02-scheduling-context-switch.md) · [Chủ đề 4 — Task State & Synchronization →](README-04-task-state-synchronization.md)

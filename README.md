@@ -1,5 +1,18 @@
 # EMBEDDED SOFTWARE TRAINING PROGRAM
 
+## Tài liệu lý thuyết chuyên sâu
+
+Các track dưới đây có **landing page riêng** và liên kết trực tiếp tới từng chapter lý thuyết.
+
+| Track | Index | Chapters |
+|---|---|---|
+| Event-Driven Programming | [Track README](02-event-driven-programming/README.md) | [1. Embedded Foundation](02-event-driven-programming/README-01-embedded-foundation.md)<br>[2. Asynchronous & Event-Driven](02-event-driven-programming/README-02-asynchronous-event-driven.md)<br>[3. Active Kernel](02-event-driven-programming/README-03-active-kernel.md)<br>[4. Event-Driven Components](02-event-driven-programming/README-04-event-driven-system-components.md)<br>[5. Test & Debug](02-event-driven-programming/README-05-embedded-test-debug.md) |
+| Linux Basic | [Track README](03-linux-basic/README.md) | [1. Linux Architecture & Boot Flow](03-linux-basic/README-01-linux-architecture-boot-flow.md)<br>[2. Device Tree & Hardware](03-linux-basic/README-02-device-tree-hardware.md)<br>[3. Kernel, Driver & Isolation](03-linux-basic/README-03-kernel-driver-isolation.md)<br>[4. RootFS, Cross-Compile & Deployment](03-linux-basic/README-04-rootfs-cross-compile-deployment.md) |
+| Self-Develop RTOS | [Track README](04-self-develop-rtos/README.md) | [1. RTOS & Memory Management](04-self-develop-rtos/README-01-rtos-introduction-memory-management.md)<br>[2. Scheduling & Context Switch](04-self-develop-rtos/README-02-scheduling-context-switch.md)<br>[3. Kernel Data Structures & Task](04-self-develop-rtos/README-03-kernel-data-structures-task.md)<br>[4. Task State & Synchronization](04-self-develop-rtos/README-04-task-state-synchronization.md)<br>[5. Communication, Timer & Benchmark](04-self-develop-rtos/README-05-communication-timer-benchmark.md) |
+
+---
+
+
 | Track | Description | Mentor |
 |---|---|---|
 | Algorithm Practice | Luyện thuật toán là phương pháp nhanh nhất để tăng năng lực tư duy và giải quyết vấn đề, đồng thời là yêu cầu xuyên suốt trong toàn bộ quá trình thực tập. Môn này đòi hỏi sự kiên trì và kỷ luật cao. | [Phan Quốc Bửu](https://www.linkedin.com/in/phan-quoc-buu-549336321/) |

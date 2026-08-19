@@ -1,37 +1,37 @@
 # Chủ đề 1 — Kiến trúc và Boot Flow của Linux Embedded
-## Từ reset vector của SoC đến PID 1 và application
+> **Phạm vi:** Từ reset vector của SoC đến PID 1 và application
 
 > Chương này mô tả **bản chất của một hệ Embedded Linux** và toàn bộ chuỗi khởi động từ phần cứng đến userspace. Mục tiêu không phải ghi nhớ tên từng bootloader hay từng lệnh U-Boot, mà là hiểu **mỗi tầng chịu trách nhiệm điều gì, dữ liệu nào được truyền qua biên giữa các tầng, và một lỗi boot thuộc về tầng nào**.
+
+> **Điều hướng:** [← Root README](../README.md) · [↑ Back to Track](README.md) · [Chủ đề 2 — Device Tree & Hardware →](README-02-device-tree-hardware.md)
 
 ---
 
 ## Mục lục
 
-- [1. Embedded Linux là gì?](#1-embedded-linux-là-gì)
-- [2. Embedded Linux khác MCU bare-metal/RTOS ở đâu?](#2-embedded-linux-khác-mcu-bare-metalrtos-ở-đâu)
-- [3. Kiến trúc phần cứng điển hình của một SoC Linux](#3-kiến-trúc-phần-cứng-điển-hình-của-một-soc-linux)
-- [4. Các tầng phần mềm của Embedded Linux](#4-các-tầng-phần-mềm-của-embedded-linux)
-- [5. Boot là một chuỗi chuyển giao quyền kiểm soát](#5-boot-là-một-chuỗi-chuyển-giao-quyền-kiểm-soát)
-- [6. Boot ROM / ROM Code](#6-boot-rom-rom-code)
-- [7. SPL/TPL và early boot stage](#7-spltpl-và-early-boot-stage)
-- [8. U-Boot và bootloader đầy đủ](#8-u-boot-và-bootloader-đầy-đủ)
-- [9. Kernel image, DTB và initramfs](#9-kernel-image-dtb-và-initramfs)
-- [10. Kernel early boot](#10-kernel-early-boot)
-- [11. Memory management được thiết lập trong boot](#11-memory-management-được-thiết-lập-trong-boot)
-- [12. Driver probing trong boot](#12-driver-probing-trong-boot)
-- [13. Root filesystem và chuyển sang userspace](#13-root-filesystem-và-chuyển-sang-userspace)
-- [14. PID 1 và init system](#14-pid-1-và-init-system)
-- [15. Application startup](#15-application-startup)
-- [16. Boot arguments và contract giữa bootloader với kernel](#16-boot-arguments-và-contract-giữa-bootloader-với-kernel)
-- [17. UART console và giá trị của boot log](#17-uart-console-và-giá-trị-của-boot-log)
-- [18. Cách đọc boot log theo causal chain](#18-cách-đọc-boot-log-theo-causal-chain)
-- [19. Phân loại lỗi boot theo tầng](#19-phân-loại-lỗi-boot-theo-tầng)
-- [20. Boot time và critical path](#20-boot-time-và-critical-path)
-- [21. Boot reliability và recovery](#21-boot-reliability-và-recovery)
-- [22. Secure/verified boot nhìn ở mức kiến trúc](#22-secureverified-boot-nhìn-ở-mức-kiến-trúc)
-- [23. Mô hình tư duy tổng hợp](#23-mô-hình-tư-duy-tổng-hợp)
-- [24. Các nguyên tắc cốt lõi](#24-các-nguyên-tắc-cốt-lõi)
-- [25. Tài liệu tham khảo chính](#25-tài-liệu-tham-khảo-chính)
+> Mục lục rút gọn theo **cụm kiến thức**. Các mục đánh số chi tiết vẫn được giữ nguyên trong nội dung.
+
+- **System architecture**
+  - [1. Embedded Linux là gì?](#1-embedded-linux-là-gì)
+  - [3. Kiến trúc phần cứng điển hình của một SoC Linux](#3-kiến-trúc-phần-cứng-điển-hình-của-một-soc-linux)
+- **Boot chain**
+  - [5. Boot là một chuỗi chuyển giao quyền kiểm soát](#5-boot-là-một-chuỗi-chuyển-giao-quyền-kiểm-soát)
+  - [8. U-Boot và bootloader đầy đủ](#8-u-boot-và-bootloader-đầy-đủ)
+  - [9. Kernel image, DTB và initramfs](#9-kernel-image-dtb-và-initramfs)
+- **Kernel → userspace handoff**
+  - [13. Root filesystem và chuyển sang userspace](#13-root-filesystem-và-chuyển-sang-userspace)
+  - [14. PID 1 và init system](#14-pid-1-và-init-system)
+  - [16. Boot arguments và contract giữa bootloader với kernel](#16-boot-arguments-và-contract-giữa-bootloader-với-kernel)
+- **Boot observation & failure**
+  - [17. UART console và giá trị của boot log](#17-uart-console-và-giá-trị-của-boot-log)
+  - [19. Phân loại lỗi boot theo tầng](#19-phân-loại-lỗi-boot-theo-tầng)
+- **Reliability & security**
+  - [21. Boot reliability và recovery](#21-boot-reliability-và-recovery)
+  - [22. Secure/verified boot nhìn ở mức kiến trúc](#22-secureverified-boot-nhìn-ở-mức-kiến-trúc)
+  - [23. Mô hình tư duy tổng hợp](#23-mô-hình-tư-duy-tổng-hợp)
+  - [24. Các nguyên tắc cốt lõi](#24-các-nguyên-tắc-cốt-lõi)
+- **Tra cứu**
+  - [Tài liệu tham khảo](#tài-liệu-tham-khảo)
 
 ---
 
@@ -172,20 +172,19 @@ Mỗi stage phải thiết lập đủ điều kiện để stage sau tồn tạ
 ## 5. Boot là một chuỗi chuyển giao quyền kiểm soát
 
 ```mermaid
-stateDiagram-v2
-    [*] --> ROM
-    ROM --> SPL : first stage loaded
-    SPL --> UBOOT : DRAM + minimal hardware ready
-    UBOOT --> KERNEL : kernel + DTB + bootargs handoff
-    KERNEL --> ROOTFS : root filesystem mounted
-    ROOTFS --> PID1 : init executable started
-    PID1 --> APPLICATION : services ready
+flowchart TD
+    ROM[Boot ROM / ROM Code] -->|load first stage| SPL[SPL / TPL]
+    SPL -->|DRAM ready| UBOOT[U-Boot]
+    UBOOT -->|kernel + DTB + bootargs| KERNEL[Linux Kernel]
+    KERNEL -->|mount root filesystem| ROOTFS[RootFS]
+    ROOTFS --> PID1[PID 1 / init system]
+    PID1 --> APP[Application / services]
 
-    ROM --> RECOVERY : boot-source / authentication failure
-    SPL --> RECOVERY : early-init / load failure
-    UBOOT --> RECOVERY : image / boot-policy failure
-    KERNEL --> RECOVERY : panic / rootfs failure
-    RECOVERY --> ROM : reboot / retry policy
+    ROM -. boot/auth failure .-> RECOVERY[Recovery policy]
+    SPL -. early-init/load failure .-> RECOVERY
+    UBOOT -. image/policy failure .-> RECOVERY
+    KERNEL -. panic/rootfs failure .-> RECOVERY
+    RECOVERY -->|retry / reboot| ROM
 ```
 
 Luồng tổng quát trong root README có thể mở rộng thành:
@@ -795,13 +794,16 @@ Nếu trả lời được bốn câu này, phần lớn lỗi boot có thể đ
 
 ---
 
-## 25. Tài liệu tham khảo chính
+## Tài liệu tham khảo
 
-- U-Boot Documentation — Standard Boot Overview: https://docs.u-boot.org/en/stable/develop/bootstd/overview.html
-- Linux Kernel Documentation — Kernel parameters: https://docs.kernel.org/admin-guide/kernel-parameters.html
-- Linux Kernel Documentation — ramfs, rootfs and initramfs: https://docs.kernel.org/filesystems/ramfs-rootfs-initramfs.html
-- Linux Kernel Documentation — Using the initial RAM disk: https://docs.kernel.org/admin-guide/initrd.html
-- Linux Kernel Documentation — Devicetree usage model: https://docs.kernel.org/devicetree/usage-model.html
-- Buildroot User Manual: https://buildroot.org/downloads/manual/manual.html
-- SWUpdate Documentation — best practices: https://sbabic.github.io/swupdate/swupdate-best-practise.html
+- [U-Boot Documentation — Standard Boot Overview](https://docs.u-boot.org/en/stable/develop/bootstd/overview.html)
+- [Linux Kernel Documentation — Kernel parameters](https://docs.kernel.org/admin-guide/kernel-parameters.html)
+- [Linux Kernel Documentation — ramfs, rootfs and initramfs](https://docs.kernel.org/filesystems/ramfs-rootfs-initramfs.html)
+- [Linux Kernel Documentation — Using the initial RAM disk](https://docs.kernel.org/admin-guide/initrd.html)
+- [Linux Kernel Documentation — Devicetree usage model](https://docs.kernel.org/devicetree/usage-model.html)
+- [Buildroot User Manual](https://buildroot.org/downloads/manual/manual.html)
+- [SWUpdate Documentation — best practices](https://sbabic.github.io/swupdate/swupdate-best-practise.html)
 
+---
+
+> **Điều hướng:** [← Root README](../README.md) · [↑ Back to Track](README.md) · [Chủ đề 2 — Device Tree & Hardware →](README-02-device-tree-hardware.md)

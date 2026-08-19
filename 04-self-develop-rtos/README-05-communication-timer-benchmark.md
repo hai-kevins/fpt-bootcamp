@@ -1,73 +1,45 @@
 # Chủ đề 5 — Communication, Software Timer và Benchmark
-## Message Passing, Queue Semantics, Timer Service và Kernel Performance
+> **Phạm vi:** Message Passing, Queue Semantics, Timer Service và Kernel Performance
 
 > Tài liệu này trình bày ba mảng cuối của một RTOS nhỏ: communication giữa task, software timer và phương pháp đo performance kernel. Trọng tâm là ownership/lifetime của message, blocking queue semantics, timer race/drift, và cách định nghĩa benchmark sao cho số đo có ý nghĩa kỹ thuật.
+
+> **Điều hướng:** [← Root README](../README.md) · [↑ Back to Track](README.md) · [← Chủ đề 4 — Task State & Synchronization](README-04-task-state-synchronization.md)
 
 ---
 
 ## Mục lục
 
-- [Sơ đồ tổng quan](#sơ-đồ-tổng-quan)
-- [1. Communication trong RTOS](#1-communication-trong-rtos)
-- [2. Shared memory](#2-shared-memory)
-- [3. Message passing](#3-message-passing)
-- [4. Queue](#4-queue)
-- [5. Mailbox](#5-mailbox)
-- [6. Direct task notification](#6-direct-task-notification)
-- [7. Event flags](#7-event-flags)
-- [8. Message là event hay data?](#8-message-là-event-hay-data)
-- [9. Message ownership](#9-message-ownership)
-- [10. Copy-by-value](#10-copy-by-value)
-- [11. Pointer message](#11-pointer-message)
-- [12. Zero-copy](#12-zero-copy)
-- [13. Ring buffer](#13-ring-buffer)
-- [14. Queue send](#14-queue-send)
-- [15. Queue receive](#15-queue-receive)
-- [16. Blocking sender](#16-blocking-sender)
-- [17. Blocking receiver](#17-blocking-receiver)
-- [18. Queue waiter ordering](#18-queue-waiter-ordering)
-- [19. Queue from ISR](#19-queue-from-isr)
-- [20. Message pool](#20-message-pool)
-- [21. Software timer là gì?](#21-software-timer-là-gì)
-- [22. Software timer và task delay](#22-software-timer-và-task-delay)
-- [23. One-shot và periodic timer](#23-one-shot-và-periodic-timer)
-- [24. Timer state machine](#24-timer-state-machine)
-- [25. Expiry time và wrap-around](#25-expiry-time-và-wrap-around)
-- [26. Sorted timer list](#26-sorted-timer-list)
-- [27. Delta timer list](#27-delta-timer-list)
-- [28. Timing wheel](#28-timing-wheel)
-- [29. Timer service task](#29-timer-service-task)
-- [30. Timer command queue](#30-timer-command-queue)
-- [31. Callback contract](#31-callback-contract)
-- [32. Timer cancel race](#32-timer-cancel-race)
-- [33. Periodic timer drift](#33-periodic-timer-drift)
-- [34. Timer overrun](#34-timer-overrun)
-- [35. Benchmark là gì?](#35-benchmark-là-gì)
-- [36. Benchmark khác profiling](#36-benchmark-khác-profiling)
-- [37. Context-switch latency](#37-context-switch-latency)
-- [38. Event/message latency](#38-eventmessage-latency)
-- [39. Interrupt-to-task latency](#39-interrupt-to-task-latency)
-- [40. Timer expiry latency](#40-timer-expiry-latency)
-- [41. Queue throughput](#41-queue-throughput)
-- [42. Jitter](#42-jitter)
-- [43. Percentile](#43-percentile)
-- [44. Maximum observed và WCET](#44-maximum-observed-và-wcet)
-- [45. Timestamp backend](#45-timestamp-backend)
-- [46. DWT cycle counter trên Cortex-M3](#46-dwt-cycle-counter-trên-cortex-m3)
-- [47. Timestamp overhead](#47-timestamp-overhead)
-- [48. Observer effect](#48-observer-effect)
-- [49. Interrupt masking trong benchmark](#49-interrupt-masking-trong-benchmark)
-- [50. Warm-up và cache note trên Cortex-M3](#50-warm-up-và-cache-note-trên-cortex-m3)
-- [51. Reproducibility](#51-reproducibility)
-- [52. Histogram và tail analysis](#52-histogram-và-tail-analysis)
-- [53. Trace buffer](#53-trace-buffer)
-- [54. Benchmark workload design](#54-benchmark-workload-design)
-- [55. Communication invariants](#55-communication-invariants)
-- [56. Timer invariants](#56-timer-invariants)
-- [57. Benchmark invariants](#57-benchmark-invariants)
-- [58. Mối liên hệ ba mảng communication — timer — benchmark](#58-mối-liên-hệ-ba-mảng-communication-timer-benchmark)
-- [59. Các nguyên tắc cốt lõi](#59-các-nguyên-tắc-cốt-lõi)
-- [Tài liệu tham khảo chuyên sâu](#tài-liệu-tham-khảo-chuyên-sâu)
+> Mục lục rút gọn theo **cụm kiến thức**. Các mục đánh số chi tiết vẫn được giữ nguyên trong nội dung.
+
+- **Communication model**
+  - [Sơ đồ tổng quan](#sơ-đồ-tổng-quan)
+  - [1. Communication trong RTOS](#1-communication-trong-rtos)
+  - [4. Queue](#4-queue)
+- **Ownership & queue semantics**
+  - [9. Message ownership](#9-message-ownership)
+  - [14. Queue send](#14-queue-send)
+  - [20. Message pool](#20-message-pool)
+- **Software timer**
+  - [21. Software timer là gì?](#21-software-timer-là-gì)
+  - [24. Timer state machine](#24-timer-state-machine)
+  - [32. Timer cancel race](#32-timer-cancel-race)
+  - [33. Periodic timer drift](#33-periodic-timer-drift)
+- **Benchmark metrics**
+  - [35. Benchmark là gì?](#35-benchmark-là-gì)
+  - [37. Context-switch latency](#37-context-switch-latency)
+  - [39. Interrupt-to-task latency](#39-interrupt-to-task-latency)
+  - [42. Jitter](#42-jitter)
+- **Measurement methodology**
+  - [45. Timestamp backend](#45-timestamp-backend)
+  - [46. DWT cycle counter trên Cortex-M3](#46-dwt-cycle-counter-trên-cortex-m3)
+  - [48. Observer effect](#48-observer-effect)
+  - [54. Benchmark workload design](#54-benchmark-workload-design)
+- **System invariants**
+  - [55. Communication invariants](#55-communication-invariants)
+  - [57. Benchmark invariants](#57-benchmark-invariants)
+  - [59. Các nguyên tắc cốt lõi](#59-các-nguyên-tắc-cốt-lõi)
+- **Tra cứu**
+  - [Tài liệu tham khảo](#tài-liệu-tham-khảo)
 
 ---
 
@@ -907,9 +879,13 @@ Communication và timer tạo workload; benchmark cho biết kernel thực hiệ
 
 ---
 
-## Tài liệu tham khảo chuyên sâu
+## Tài liệu tham khảo
 
 - [Zephyr Documentation — Kernel Timing](https://docs.zephyrproject.org/latest/kernel/services/timing/clocks.html)
 - [Zephyr Documentation — Tracing](https://docs.zephyrproject.org/latest/services/tracing/index.html)
 - [FreeRTOS Kernel source](https://github.com/FreeRTOS/FreeRTOS-Kernel)
 - [Arm Cortex-M3 Technical Reference Manual](https://developer.arm.com/documentation/ddi0337/latest/)
+
+---
+
+> **Điều hướng:** [← Root README](../README.md) · [↑ Back to Track](README.md) · [← Chủ đề 4 — Task State & Synchronization](README-04-task-state-synchronization.md)

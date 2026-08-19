@@ -1,39 +1,41 @@
 # Chủ đề 2 — Lập trình bất đồng bộ và hướng sự kiện
-## Asynchronous & Event-Driven Programming
+> **Phạm vi:** Asynchronous & Event-Driven Programming
 
 > Tài liệu này tập trung vào bản chất của lập trình bất đồng bộ trong firmware: vì sao blocking và polling không mở rộng tốt, event là gì, event queue hoạt động như thế nào, state machine giúp quản lý trạng thái ra sao và những điều kiện nào làm một kiến trúc Event-Driven trở nên xác định, dễ kiểm thử và dễ bảo trì.
+
+> **Điều hướng:** [← Root README](../README.md) · [↑ Back to Track](README.md) · [← Chủ đề 1 — Embedded Foundation](README-01-embedded-foundation.md) · [Chủ đề 3 — Active Kernel →](README-03-active-kernel.md)
 
 ---
 
 ## Mục lục
 
-- [Sơ đồ tổng quan](#sơ-đồ-tổng-quan)
-- [1. Vấn đề cốt lõi: firmware phải phản ứng với nhiều dòng thời gian](#1-vấn-đề-cốt-lõi-firmware-phải-phản-ứng-với-nhiều-dòng-thời-gian)
-- [2. Synchronous và asynchronous](#2-synchronous-và-asynchronous)
-- [3. Blocking, polling và chi phí kiến trúc](#3-blocking-polling-và-chi-phí-kiến-trúc)
-- [4. Event là gì?](#4-event-là-gì)
-- [5. Event source](#5-event-source)
-- [6. Event queue](#6-event-queue)
-- [7. Mailbox và active-object boundary](#7-mailbox-và-active-object-boundary)
-- [8. Dispatcher](#8-dispatcher)
-- [9. Event handler và run-to-completion](#9-event-handler-và-run-to-completion)
-- [10. State machine: mô hình hóa hành vi theo thời gian](#10-state-machine-mô-hình-hóa-hành-vi-theo-thời-gian)
-- [11. Timer event và thời gian như một nguồn sự kiện](#11-timer-event-và-thời-gian-như-một-nguồn-sự-kiện)
-- [12. Interrupt và deferred processing](#12-interrupt-và-deferred-processing)
-- [13. Ownership và lifetime của event payload](#13-ownership-và-lifetime-của-event-payload)
-- [14. Event ordering](#14-event-ordering)
-- [15. Backpressure và overload](#15-backpressure-và-overload)
-- [16. Reentrancy](#16-reentrancy)
-- [17. Event-driven architecture và modularity](#17-event-driven-architecture-và-modularity)
-- [18. Publish–Subscribe](#18-publishsubscribe)
-- [19. Determinism trong Event-Driven Programming](#19-determinism-trong-event-driven-programming)
-- [20. Traceability](#20-traceability)
-- [21. Event-Driven và RTOS khác nhau thế nào?](#21-event-driven-và-rtos-khác-nhau-thế-nào)
-- [22. Những anti-pattern kiến trúc thường gặp](#22-những-anti-pattern-kiến-trúc-thường-gặp)
-- [23. Mô hình tư duy tổng hợp](#23-mô-hình-tư-duy-tổng-hợp)
-- [24. Quy trình thiết kế Event-Driven System ở mức kiến trúc](#24-quy-trình-thiết-kế-event-driven-system-ở-mức-kiến-trúc)
-- [25. Kết luận](#25-kết-luận)
-- [Tài liệu tham khảo chuyên sâu](#tài-liệu-tham-khảo-chuyên-sâu)
+> Mục lục rút gọn theo **cụm kiến thức**. Các mục đánh số chi tiết vẫn được giữ nguyên trong nội dung.
+
+- **Bài toán bất đồng bộ**
+  - [Sơ đồ tổng quan](#sơ-đồ-tổng-quan)
+  - [1. Vấn đề cốt lõi: firmware phải phản ứng với nhiều dòng thời gian](#1-vấn-đề-cốt-lõi-firmware-phải-phản-ứng-với-nhiều-dòng-thời-gian)
+  - [3. Blocking, polling và chi phí kiến trúc](#3-blocking-polling-và-chi-phí-kiến-trúc)
+- **Event execution model**
+  - [4. Event là gì?](#4-event-là-gì)
+  - [6. Event queue](#6-event-queue)
+  - [9. Event handler và run-to-completion](#9-event-handler-và-run-to-completion)
+- **State, time và ISR**
+  - [10. State machine: mô hình hóa hành vi theo thời gian](#10-state-machine-mô-hình-hóa-hành-vi-theo-thời-gian)
+  - [11. Timer event và thời gian như một nguồn sự kiện](#11-timer-event-và-thời-gian-như-một-nguồn-sự-kiện)
+  - [12. Interrupt và deferred processing](#12-interrupt-và-deferred-processing)
+- **Ownership và overload**
+  - [13. Ownership và lifetime của event payload](#13-ownership-và-lifetime-của-event-payload)
+  - [15. Backpressure và overload](#15-backpressure-và-overload)
+- **Kiến trúc hệ thống**
+  - [17. Event-driven architecture và modularity](#17-event-driven-architecture-và-modularity)
+  - [18. Publish–Subscribe](#18-publishsubscribe)
+  - [19. Determinism trong Event-Driven Programming](#19-determinism-trong-event-driven-programming)
+- **Thiết kế và anti-pattern**
+  - [22. Những anti-pattern kiến trúc thường gặp](#22-những-anti-pattern-kiến-trúc-thường-gặp)
+  - [24. Quy trình thiết kế Event-Driven System ở mức kiến trúc](#24-quy-trình-thiết-kế-event-driven-system-ở-mức-kiến-trúc)
+  - [25. Kết luận](#25-kết-luận)
+- **Tra cứu**
+  - [Tài liệu tham khảo](#tài-liệu-tham-khảo)
 
 ---
 
@@ -697,10 +699,14 @@ Khi các nguyên tắc này được hiểu đúng, Active Kernel chỉ còn là
 
 ---
 
-## Tài liệu tham khảo chuyên sâu
+## Tài liệu tham khảo
 
 - [QP/C Conceptual Model — Active Objects and event queues](https://www.state-machine.com/qpc/conc-qp.html)
 - [QP — Active Object key concept](https://www.state-machine.com/active-object)
 - [QP/C Event Delivery Mechanisms](https://www.state-machine.com/qpc/srs-qp_edm.html)
 - [AK Embedded — Event-Driven Task & Signal](https://epcb.vn/blogs/ak-embedded-software/ak-embedded-base-kit-stm32l151-event-driven-task-signal)
 - [AK Embedded — Event-Driven Timer](https://epcb.vn/blogs/ak-embedded-software/ak-embedded-base-kit-stm32l151-event-driven-timer)
+
+---
+
+> **Điều hướng:** [← Root README](../README.md) · [↑ Back to Track](README.md) · [← Chủ đề 1 — Embedded Foundation](README-01-embedded-foundation.md) · [Chủ đề 3 — Active Kernel →](README-03-active-kernel.md)

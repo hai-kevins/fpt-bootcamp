@@ -1,46 +1,41 @@
 # Chủ đề 3 — Kernel, Driver và Isolation
-## Kernel space, user space, Linux device model, sysfs/devfs và fault boundaries
+> **Phạm vi:** Kernel space, user space, Linux device model, sysfs/devfs và fault boundaries
 
 > Chương này giải thích Linux kernel từ góc nhìn của embedded engineer: kernel quản lý resource nào, driver nằm ở đâu, userspace tương tác với hardware qua những interface nào, isolation được tạo ra bằng CPU privilege + MMU + process model ra sao, và vì sao một bug trong kernel/driver có blast radius khác hoàn toàn một bug trong application.
+
+> **Điều hướng:** [← Root README](../README.md) · [↑ Back to Track](README.md) · [← Chủ đề 2 — Device Tree & Hardware](README-02-device-tree-hardware.md) · [Chủ đề 4 — RootFS, Cross-Compile & Deployment →](README-04-rootfs-cross-compile-deployment.md)
 
 ---
 
 ## Mục lục
 
-- [1. Linux kernel chịu trách nhiệm gì?](#1-linux-kernel-chịu-trách-nhiệm-gì)
-- [2. Monolithic kernel không có nghĩa mọi thứ là một file](#2-monolithic-kernel-không-có-nghĩa-mọi-thứ-là-một-file)
-- [3. Kernel space và user space](#3-kernel-space-và-user-space)
-- [4. CPU privilege level và system call boundary](#4-cpu-privilege-level-và-system-call-boundary)
-- [5. Virtual memory và process isolation](#5-virtual-memory-và-process-isolation)
-- [6. Kernel virtual address space](#6-kernel-virtual-address-space)
-- [7. Process, thread và execution context](#7-process-thread-và-execution-context)
-- [8. Linux driver là gì?](#8-linux-driver-là-gì)
-- [9. Driver nằm trong subsystem](#9-driver-nằm-trong-subsystem)
-- [10. Linux device model](#10-linux-device-model)
-- [11. Bus, device và driver](#11-bus-device-và-driver)
-- [12. Probe và remove](#12-probe-và-remove)
-- [13. Character, block và network device](#13-character-block-và-network-device)
-- [14. `/dev`: device node là interface, không phải device](#14-dev-device-node-là-interface-không-phải-device)
-- [15. sysfs `/sys`](#15-sysfs-sys)
-- [16. procfs `/proc`](#16-procfs-proc)
-- [17. sysfs khác `/dev` như thế nào?](#17-sysfs-khác-dev-như-thế-nào)
-- [18. Interrupt context và process context](#18-interrupt-context-và-process-context)
-- [19. Top-half, deferred work và concurrency](#19-top-half-deferred-work-và-concurrency)
-- [20. Memory-mapped I/O trong driver](#20-memory-mapped-io-trong-driver)
-- [21. DMA và isolation khó hơn MMIO](#21-dma-và-isolation-khó-hơn-mmio)
-- [22. Kernel synchronization](#22-kernel-synchronization)
-- [23. Driver bug có thể phá hệ thống như thế nào?](#23-driver-bug-có-thể-phá-hệ-thống-như-thế-nào)
-- [24. User-space crash và kernel crash](#24-user-space-crash-và-kernel-crash)
-- [25. Oops, panic và lockup](#25-oops-panic-và-lockup)
-- [26. `dmesg` và kernel log](#26-dmesg-và-kernel-log)
-- [27. Call trace và fault reasoning](#27-call-trace-và-fault-reasoning)
-- [28. Process isolation không phải security hoàn chỉnh](#28-process-isolation-không-phải-security-hoàn-chỉnh)
-- [29. Namespaces, capabilities và cgroups ở mức khái niệm](#29-namespaces-capabilities-và-cgroups-ở-mức-khái-niệm)
-- [30. Driver interface design cho userspace](#30-driver-interface-design-cho-userspace)
-- [31. Stable ABI và internal kernel API](#31-stable-abi-và-internal-kernel-api)
-- [32. Mô hình causal khi debug driver](#32-mô-hình-causal-khi-debug-driver)
-- [33. Các nguyên tắc cốt lõi](#33-các-nguyên-tắc-cốt-lõi)
-- [34. Tài liệu tham khảo chính](#34-tài-liệu-tham-khảo-chính)
+> Mục lục rút gọn theo **cụm kiến thức**. Các mục đánh số chi tiết vẫn được giữ nguyên trong nội dung.
+
+- **Kernel/user boundary**
+  - [1. Linux kernel chịu trách nhiệm gì?](#1-linux-kernel-chịu-trách-nhiệm-gì)
+  - [3. Kernel space và user space](#3-kernel-space-và-user-space)
+  - [5. Virtual memory và process isolation](#5-virtual-memory-và-process-isolation)
+- **Linux device model**
+  - [8. Linux driver là gì?](#8-linux-driver-là-gì)
+  - [10. Linux device model](#10-linux-device-model)
+  - [12. Probe và remove](#12-probe-và-remove)
+- **Userspace interfaces**
+  - [14. `/dev`: device node là interface, không phải device](#14-dev-device-node-là-interface-không-phải-device)
+  - [15. sysfs `/sys`](#15-sysfs-sys)
+- **Execution & concurrency**
+  - [18. Interrupt context và process context](#18-interrupt-context-và-process-context)
+  - [21. DMA và isolation khó hơn MMIO](#21-dma-và-isolation-khó-hơn-mmio)
+  - [22. Kernel synchronization](#22-kernel-synchronization)
+- **Failure & isolation**
+  - [23. Driver bug có thể phá hệ thống như thế nào?](#23-driver-bug-có-thể-phá-hệ-thống-như-thế-nào)
+  - [25. Oops, panic và lockup](#25-oops-panic-và-lockup)
+  - [29. Namespaces, capabilities và cgroups ở mức khái niệm](#29-namespaces-capabilities-và-cgroups-ở-mức-khái-niệm)
+- **Driver API design & debug**
+  - [30. Driver interface design cho userspace](#30-driver-interface-design-cho-userspace)
+  - [32. Mô hình causal khi debug driver](#32-mô-hình-causal-khi-debug-driver)
+  - [33. Các nguyên tắc cốt lõi](#33-các-nguyên-tắc-cốt-lõi)
+- **Tra cứu**
+  - [Tài liệu tham khảo](#tài-liệu-tham-khảo)
 
 ---
 
@@ -731,14 +726,17 @@ Mỗi bước có observable evidence khác nhau. Debug có hệ thống đi the
 
 ---
 
-## 34. Tài liệu tham khảo chính
+## Tài liệu tham khảo
 
-- Linux Kernel Documentation — Driver infrastructure: https://docs.kernel.org/driver-api/infrastructure.html
-- Linux Kernel Documentation — Basic Device Structure: https://docs.kernel.org/driver-api/driver-model/device.html
-- Linux Kernel Documentation — sysfs: https://docs.kernel.org/filesystems/sysfs.html
-- Linux Kernel Documentation — kobjects/ksets/ktypes: https://docs.kernel.org/core-api/kobject.html
-- Linux Kernel Documentation — Driver Basics: https://docs.kernel.org/driver-api/basics.html
-- Linux man-pages — namespaces overview: https://man7.org/linux/man-pages/man7/namespaces.7.html
-- Linux man-pages — mount namespaces: https://man7.org/linux/man-pages/man7/mount_namespaces.7.html
-- Linux man-pages — strace: https://man7.org/linux/man-pages/man1/strace.1.html
+- [Linux Kernel Documentation — Driver infrastructure](https://docs.kernel.org/driver-api/infrastructure.html)
+- [Linux Kernel Documentation — Basic Device Structure](https://docs.kernel.org/driver-api/driver-model/device.html)
+- [Linux Kernel Documentation — sysfs](https://docs.kernel.org/filesystems/sysfs.html)
+- [Linux Kernel Documentation — kobjects/ksets/ktypes](https://docs.kernel.org/core-api/kobject.html)
+- [Linux Kernel Documentation — Driver Basics](https://docs.kernel.org/driver-api/basics.html)
+- [Linux man-pages — namespaces overview](https://man7.org/linux/man-pages/man7/namespaces.7.html)
+- [Linux man-pages — mount namespaces](https://man7.org/linux/man-pages/man7/mount_namespaces.7.html)
+- [Linux man-pages — strace](https://man7.org/linux/man-pages/man1/strace.1.html)
 
+---
+
+> **Điều hướng:** [← Root README](../README.md) · [↑ Back to Track](README.md) · [← Chủ đề 2 — Device Tree & Hardware](README-02-device-tree-hardware.md) · [Chủ đề 4 — RootFS, Cross-Compile & Deployment →](README-04-rootfs-cross-compile-deployment.md)

@@ -1,56 +1,45 @@
 # Chủ đề 4 — Task State và Synchronization
-## Blocking, Timeout, Semaphore, Mutex, Priority Inversion và Wake-up Races
+> **Phạm vi:** Blocking, Timeout, Semaphore, Mutex, Priority Inversion và Wake-up Races
 
 > Tài liệu này đi sâu vào state machine của task và các cơ chế synchronization trong RTOS. Trọng tâm là hiểu một task thực sự “block” như thế nào, timeout được biểu diễn ra sao, vì sao wake-up là một transaction cạnh tranh giữa nhiều nguồn, và mutex khác semaphore ở ownership/priority semantics như thế nào.
+
+> **Điều hướng:** [← Root README](../README.md) · [↑ Back to Track](README.md) · [← Chủ đề 3 — Kernel Data Structures & Task](README-03-kernel-data-structures-task.md) · [Chủ đề 5 — Communication, Timer & Benchmark →](README-05-communication-timer-benchmark.md)
 
 ---
 
 ## Mục lục
 
-- [Sơ đồ tổng quan](#sơ-đồ-tổng-quan)
-- [1. Task state là gì?](#1-task-state-là-gì)
-- [2. READY và RUNNING](#2-ready-và-running)
-- [3. BLOCKED](#3-blocked)
-- [4. SUSPENDED](#4-suspended)
-- [5. State transition là atomic kernel transaction](#5-state-transition-là-atomic-kernel-transaction)
-- [6. Busy-wait và blocking](#6-busy-wait-và-blocking)
-- [7. Delay](#7-delay)
-- [8. Delayed task list](#8-delayed-task-list)
-- [9. Tick wrap-around](#9-tick-wrap-around)
-- [10. Timeout model](#10-timeout-model)
-- [11. Hai nguồn wake cho finite wait](#11-hai-nguồn-wake-cho-finite-wait)
-- [12. Single-winner wake-up rule](#12-single-winner-wake-up-rule)
-- [13. Wake reason](#13-wake-reason)
-- [14. Synchronization là gì?](#14-synchronization-là-gì)
-- [15. Race condition](#15-race-condition)
-- [16. Atomicity và critical section](#16-atomicity-và-critical-section)
-- [17. Semaphore](#17-semaphore)
-- [18. Direct handoff trong semaphore](#18-direct-handoff-trong-semaphore)
-- [19. Mutex](#19-mutex)
-- [20. Semaphore và mutex khác nhau bản chất](#20-semaphore-và-mutex-khác-nhau-bản-chất)
-- [21. Recursive mutex](#21-recursive-mutex)
-- [22. Waiter ordering](#22-waiter-ordering)
-- [23. Priority inversion](#23-priority-inversion)
-- [24. Priority inheritance](#24-priority-inheritance)
-- [25. Base priority và effective priority](#25-base-priority-và-effective-priority)
-- [26. Transitive priority inheritance](#26-transitive-priority-inheritance)
-- [27. Priority ceiling](#27-priority-ceiling)
-- [28. Deadlock](#28-deadlock)
-- [29. Lock ordering](#29-lock-ordering)
-- [30. Starvation và fairness](#30-starvation-và-fairness)
-- [31. ISR-safe synchronization](#31-isr-safe-synchronization)
-- [32. Wake high-priority task từ ISR](#32-wake-high-priority-task-từ-isr)
-- [33. Suspend/resume](#33-suspendresume)
-- [34. Kernel invariant cho blocking](#34-kernel-invariant-cho-blocking)
-- [35. Semaphore invariant](#35-semaphore-invariant)
-- [36. Mutex invariant](#36-mutex-invariant)
-- [37. Timeout và object deletion](#37-timeout-và-object-deletion)
-- [38. Lost wake-up](#38-lost-wake-up)
-- [39. Spurious wake-up](#39-spurious-wake-up)
-- [40. Thundering herd](#40-thundering-herd)
-- [41. Blocking time và schedulability](#41-blocking-time-và-schedulability)
-- [42. Các nguyên tắc cốt lõi](#42-các-nguyên-tắc-cốt-lõi)
-- [Tài liệu tham khảo chuyên sâu](#tài-liệu-tham-khảo-chuyên-sâu)
+> Mục lục rút gọn theo **cụm kiến thức**. Các mục đánh số chi tiết vẫn được giữ nguyên trong nội dung.
+
+- **Task state & blocking**
+  - [Sơ đồ tổng quan](#sơ-đồ-tổng-quan)
+  - [1. Task state là gì?](#1-task-state-là-gì)
+  - [3. BLOCKED](#3-blocked)
+  - [5. State transition là atomic kernel transaction](#5-state-transition-là-atomic-kernel-transaction)
+  - [10. Timeout model](#10-timeout-model)
+- **Wake-up races**
+  - [11. Hai nguồn wake cho finite wait](#11-hai-nguồn-wake-cho-finite-wait)
+  - [12. Single-winner wake-up rule](#12-single-winner-wake-up-rule)
+- **Synchronization primitives**
+  - [14. Synchronization là gì?](#14-synchronization-là-gì)
+  - [17. Semaphore](#17-semaphore)
+  - [19. Mutex](#19-mutex)
+  - [20. Semaphore và mutex khác nhau bản chất](#20-semaphore-và-mutex-khác-nhau-bản-chất)
+- **Priority & liveness**
+  - [23. Priority inversion](#23-priority-inversion)
+  - [24. Priority inheritance](#24-priority-inheritance)
+  - [28. Deadlock](#28-deadlock)
+  - [30. Starvation và fairness](#30-starvation-và-fairness)
+- **ISR & invariants**
+  - [31. ISR-safe synchronization](#31-isr-safe-synchronization)
+  - [34. Kernel invariant cho blocking](#34-kernel-invariant-cho-blocking)
+  - [36. Mutex invariant](#36-mutex-invariant)
+- **Failure patterns**
+  - [38. Lost wake-up](#38-lost-wake-up)
+  - [41. Blocking time và schedulability](#41-blocking-time-và-schedulability)
+  - [42. Các nguyên tắc cốt lõi](#42-các-nguyên-tắc-cốt-lõi)
+- **Tra cứu**
+  - [Tài liệu tham khảo](#tài-liệu-tham-khảo)
 
 ---
 
@@ -647,9 +636,13 @@ Mutex protocol là một phần của schedulability, không chỉ correctness m
 
 ---
 
-## Tài liệu tham khảo chuyên sâu
+## Tài liệu tham khảo
 
 - [FreeRTOS Documentation — Mutexes](https://freertos.org/Documentation/02-Kernel/02-Kernel-features/02-Queues-mutexes-and-semaphores/04-Mutexes)
 - [FreeRTOS Documentation — Binary Semaphores](https://www.freertos.org/Documentation/02-Kernel/02-Kernel-features/02-Queues-mutexes-and-semaphores/02-Binary-semaphores)
 - [Zephyr Documentation — Threads](https://docs.zephyrproject.org/latest/kernel/services/threads/index.html)
 - [Zephyr Documentation — Synchronization](https://docs.zephyrproject.org/latest/kernel/services/synchronization/index.html)
+
+---
+
+> **Điều hướng:** [← Root README](../README.md) · [↑ Back to Track](README.md) · [← Chủ đề 3 — Kernel Data Structures & Task](README-03-kernel-data-structures-task.md) · [Chủ đề 5 — Communication, Timer & Benchmark →](README-05-communication-timer-benchmark.md)

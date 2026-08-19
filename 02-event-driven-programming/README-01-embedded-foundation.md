@@ -1,32 +1,35 @@
 # Chủ đề 1 — Kiến thức nền tảng trong Embedded System Programming
-## Computer Architecture, Memory, Toolchain và Bare-Metal Runtime
+> **Phạm vi:** Computer Architecture, Memory, Toolchain và Bare-Metal Runtime
 
 > Tài liệu này trình bày **thuần lý thuyết** các nền tảng cần có trước khi học Event-Driven Programming trên vi điều khiển. Trọng tâm là hiểu CPU nhìn chương trình như thế nào, dữ liệu tồn tại ở đâu, phần mềm truy cập phần cứng ra sao, và một firmware bare-metal hình thành từ reset đến `main()` như thế nào.
+
+> **Điều hướng:** [← Root README](../README.md) · [↑ Back to Track](README.md) · [Chủ đề 2 — Asynchronous & Event-Driven →](README-02-asynchronous-event-driven.md)
 
 ---
 
 ## Mục lục
 
-- [Sơ đồ tổng quan](#sơ-đồ-tổng-quan)
-- [1. Embedded system nhìn từ góc độ phần mềm](#1-embedded-system-nhìn-từ-góc-độ-phần-mềm)
-- [2. Mô hình CPU — Memory — Peripheral](#2-mô-hình-cpu-memory-peripheral)
-- [3. Address space và memory map](#3-address-space-và-memory-map)
-- [4. C memory model trong firmware](#4-c-memory-model-trong-firmware)
-- [5. Pointer: cầu nối giữa C và phần cứng](#5-pointer-cầu-nối-giữa-c-và-phần-cứng)
-- [6. Memory-mapped I/O và peripheral register](#6-memory-mapped-io-và-peripheral-register)
-- [7. Exception và interrupt trên Cortex-M](#7-exception-và-interrupt-trên-cortex-m)
-- [8. Reset sequence và startup runtime](#8-reset-sequence-và-startup-runtime)
-- [9. Compiler, assembler, linker và binary image](#9-compiler-assembler-linker-và-binary-image)
-- [10. Linker script: hợp đồng giữa executable và memory map](#10-linker-script-hợp-đồng-giữa-executable-và-memory-map)
-- [11. ABI và function call](#11-abi-và-function-call)
-- [12. Stack, call frame và nguy cơ corruption](#12-stack-call-frame-và-nguy-cơ-corruption)
-- [13. Concurrency bắt đầu từ đâu?](#13-concurrency-bắt-đầu-từ-đâu)
-- [14. Determinism và bounded behavior](#14-determinism-và-bounded-behavior)
-- [15. Debug model: source không phải sự thật duy nhất](#15-debug-model-source-không-phải-sự-thật-duy-nhất)
-- [16. Tại sao nền tảng này cần cho Event-Driven Programming?](#16-tại-sao-nền-tảng-này-cần-cho-event-driven-programming)
-- [17. Các nguyên tắc cốt lõi](#17-các-nguyên-tắc-cốt-lõi)
-- [18. Tài liệu tham khảo theo chương trình gốc](#18-tài-liệu-tham-khảo-theo-chương-trình-gốc)
-- [Tài liệu tham khảo chuyên sâu](#tài-liệu-tham-khảo-chuyên-sâu)
+> Mục lục rút gọn theo **cụm kiến thức**. Các mục đánh số chi tiết vẫn được giữ nguyên trong nội dung.
+
+- **Kiến trúc hệ thống**
+  - [Sơ đồ tổng quan](#sơ-đồ-tổng-quan)
+  - [1. Embedded system nhìn từ góc độ phần mềm](#1-embedded-system-nhìn-từ-góc-độ-phần-mềm)
+  - [3. Address space và memory map](#3-address-space-và-memory-map)
+- **Memory, C và phần cứng**
+  - [4. C memory model trong firmware](#4-c-memory-model-trong-firmware)
+  - [6. Memory-mapped I/O và peripheral register](#6-memory-mapped-io-và-peripheral-register)
+- **Startup và toolchain**
+  - [8. Reset sequence và startup runtime](#8-reset-sequence-và-startup-runtime)
+  - [10. Linker script: hợp đồng giữa executable và memory map](#10-linker-script-hợp-đồng-giữa-executable-và-memory-map)
+- **Runtime correctness**
+  - [12. Stack, call frame và nguy cơ corruption](#12-stack-call-frame-và-nguy-cơ-corruption)
+  - [14. Determinism và bounded behavior](#14-determinism-và-bounded-behavior)
+  - [15. Debug model: source không phải sự thật duy nhất](#15-debug-model-source-không-phải-sự-thật-duy-nhất)
+- **Liên hệ Event-Driven**
+  - [16. Tại sao nền tảng này cần cho Event-Driven Programming?](#16-tại-sao-nền-tảng-này-cần-cho-event-driven-programming)
+  - [17. Các nguyên tắc cốt lõi](#17-các-nguyên-tắc-cốt-lõi)
+- **Tra cứu**
+  - [Tài liệu tham khảo](#tài-liệu-tham-khảo)
 
 ---
 
@@ -302,15 +305,14 @@ Phần xử lý dài được deferred sang event handler ở thread/main contex
 ## 8. Reset sequence và startup runtime
 
 ```mermaid
-stateDiagram-v2
-    [*] --> RESET
-    RESET --> VECTOR_FETCH : reset released
-    VECTOR_FETCH --> RESET_HANDLER : load MSP + reset vector
-    RESET_HANDLER --> INIT_DATA : enter startup code
-    INIT_DATA --> INIT_BSS : copy .data Flash to RAM
-    INIT_BSS --> INIT_RUNTIME : zero .bss
-    INIT_RUNTIME --> MAIN : runtime ready
-    MAIN --> RESET : system reset
+flowchart TD
+    RESET([Reset released]) --> VECTOR[Fetch initial MSP and reset vector]
+    VECTOR --> HANDLER[Enter Reset_Handler]
+    HANDLER --> DATA[Copy .data from Flash to RAM]
+    DATA --> BSS[Zero .bss]
+    BSS --> RUNTIME[Initialize required runtime / platform state]
+    RUNTIME --> MAIN[Enter main()]
+    MAIN -->|system reset| RESET
 ```
 
 Khi MCU reset, CPU chưa biết khái niệm C runtime. Firmware phải tự tạo môi trường để C hoạt động đúng.
@@ -563,9 +565,13 @@ Các mối liên hệ trực tiếp:
 
 ---
 
-## Tài liệu tham khảo chuyên sâu
+## Tài liệu tham khảo
 
 - [ARM Cortex-M3 Technical Reference Manual](https://developer.arm.com/documentation/ddi0337/latest/)
 - [Building Bare-Metal ARM Systems with GNU](https://www.state-machine.com/doc/Building_bare-metal_ARM_with_GNU.pdf)
 - [GNU ld — Linker Scripts](https://sourceware.org/binutils/docs/ld/Scripts.html)
 - [Arm ABI specifications (abi-aa)](https://github.com/ARM-software/abi-aa)
+
+---
+
+> **Điều hướng:** [← Root README](../README.md) · [↑ Back to Track](README.md) · [Chủ đề 2 — Asynchronous & Event-Driven →](README-02-asynchronous-event-driven.md)

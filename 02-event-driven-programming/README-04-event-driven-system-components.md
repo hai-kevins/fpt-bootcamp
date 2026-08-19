@@ -1,45 +1,41 @@
 # Chủ đề 4 — Các thành phần chính của hệ thống Event-Driven trong Embedded
-## Active Object, Mailbox, State Machine, Event Pool và Data-Link Layer
+> **Phạm vi:** Active Object, Mailbox, State Machine, Event Pool và Data-Link Layer
 
 > Tài liệu này đi sâu vào các building block tạo nên một hệ Event-Driven hoàn chỉnh. Trọng tâm không phải API của một framework cụ thể mà là các contract về state ownership, event transport, memory, timing và mở rộng communication từ một MCU tới nhiều process hoặc nhiều node.
+
+> **Điều hướng:** [← Root README](../README.md) · [↑ Back to Track](README.md) · [← Chủ đề 3 — Active Kernel](README-03-active-kernel.md) · [Chủ đề 5 — Test & Debug →](README-05-embedded-test-debug.md)
 
 ---
 
 ## Mục lục
 
-- [Sơ đồ tổng quan](#sơ-đồ-tổng-quan)
-- [1. Active Object là đơn vị kiến trúc](#1-active-object-là-đơn-vị-kiến-trúc)
-- [2. Active Object và thread không đồng nghĩa](#2-active-object-và-thread-không-đồng-nghĩa)
-- [3. Mailbox như boundary của concurrency](#3-mailbox-như-boundary-của-concurrency)
-- [4. State ownership](#4-state-ownership)
-- [5. Invariant của Active Object](#5-invariant-của-active-object)
-- [6. Các loại State Machine](#6-các-loại-state-machine)
-- [7. State explosion](#7-state-explosion)
-- [8. Event object model](#8-event-object-model)
-- [9. Event Pool — xương sống của memory model](#9-event-pool-xương-sống-của-memory-model)
-- [10. Event lifetime](#10-event-lifetime)
-- [11. Reference counting](#11-reference-counting)
-- [12. Event priority](#12-event-priority)
-- [13. Event coalescing](#13-event-coalescing)
-- [14. Dispatcher topology](#14-dispatcher-topology)
-- [15. Data-Link Layer trong Event-Driven System](#15-data-link-layer-trong-event-driven-system)
-- [16. Serialization](#16-serialization)
-- [17. Framing](#17-framing)
-- [18. Integrity và CRC](#18-integrity-và-crc)
-- [19. Addressing và routing giữa nhiều node](#19-addressing-và-routing-giữa-nhiều-node)
-- [20. Request/response và correlation](#20-requestresponse-và-correlation)
-- [21. Reliability semantics](#21-reliability-semantics)
-- [22. Sequence number](#22-sequence-number)
-- [23. Timeout và retry trong hệ phân tán](#23-timeout-và-retry-trong-hệ-phân-tán)
-- [24. Flow control và backpressure qua link](#24-flow-control-và-backpressure-qua-link)
-- [25. Multi-process event-driven system](#25-multi-process-event-driven-system)
-- [26. Versioning protocol](#26-versioning-protocol)
-- [27. Event security boundary](#27-event-security-boundary)
-- [28. Observability của distributed event flow](#28-observability-của-distributed-event-flow)
-- [29. Fault containment giữa các node](#29-fault-containment-giữa-các-node)
-- [30. Mô hình kiến trúc tổng hợp](#30-mô-hình-kiến-trúc-tổng-hợp)
-- [31. Các nguyên tắc cốt lõi](#31-các-nguyên-tắc-cốt-lõi)
-- [Tài liệu tham khảo chuyên sâu](#tài-liệu-tham-khảo-chuyên-sâu)
+> Mục lục rút gọn theo **cụm kiến thức**. Các mục đánh số chi tiết vẫn được giữ nguyên trong nội dung.
+
+- **Active Object & State Machine**
+  - [Sơ đồ tổng quan](#sơ-đồ-tổng-quan)
+  - [1. Active Object là đơn vị kiến trúc](#1-active-object-là-đơn-vị-kiến-trúc)
+  - [3. Mailbox như boundary của concurrency](#3-mailbox-như-boundary-của-concurrency)
+  - [6. Các loại State Machine](#6-các-loại-state-machine)
+- **Event memory model**
+  - [8. Event object model](#8-event-object-model)
+  - [9. Event Pool — xương sống của memory model](#9-event-pool-xương-sống-của-memory-model)
+  - [10. Event lifetime](#10-event-lifetime)
+- **Transport & Data-Link**
+  - [15. Data-Link Layer trong Event-Driven System](#15-data-link-layer-trong-event-driven-system)
+  - [16. Serialization](#16-serialization)
+  - [19. Addressing và routing giữa nhiều node](#19-addressing-và-routing-giữa-nhiều-node)
+- **Distributed reliability**
+  - [21. Reliability semantics](#21-reliability-semantics)
+  - [23. Timeout và retry trong hệ phân tán](#23-timeout-và-retry-trong-hệ-phân-tán)
+  - [24. Flow control và backpressure qua link](#24-flow-control-và-backpressure-qua-link)
+  - [26. Versioning protocol](#26-versioning-protocol)
+- **Boundary & observability**
+  - [27. Event security boundary](#27-event-security-boundary)
+  - [28. Observability của distributed event flow](#28-observability-của-distributed-event-flow)
+  - [30. Mô hình kiến trúc tổng hợp](#30-mô-hình-kiến-trúc-tổng-hợp)
+  - [31. Các nguyên tắc cốt lõi](#31-các-nguyên-tắc-cốt-lõi)
+- **Tra cứu**
+  - [Tài liệu tham khảo](#tài-liệu-tham-khảo)
 
 ---
 
@@ -634,9 +630,13 @@ Ranh giới transport không nên làm thay đổi business meaning của event.
 
 ---
 
-## Tài liệu tham khảo chuyên sâu
+## Tài liệu tham khảo
 
 - [QP/C Conceptual Model — Active Objects](https://www.state-machine.com/qpc/conc-qp.html)
 - [QP/C Event Delivery Mechanisms](https://www.state-machine.com/qpc/srs-qp_edm.html)
 - [QP/C++ QActive — event queue and state machine model](https://www.state-machine.com/qpcpp/class_q_p_1_1_q_active.html)
 - [AK Embedded Base Kit STM32L151 repository](https://github.com/ak-embedded-software/ak-base-kit-stm32l151)
+
+---
+
+> **Điều hướng:** [← Root README](../README.md) · [↑ Back to Track](README.md) · [← Chủ đề 3 — Active Kernel](README-03-active-kernel.md) · [Chủ đề 5 — Test & Debug →](README-05-embedded-test-debug.md)

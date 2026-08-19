@@ -1,45 +1,38 @@
 # Chủ đề 2 — Device Tree (DTS/DTB) và phần cứng
-## Hardware description, binding, resource graph và driver matching
+> **Phạm vi:** Hardware description, binding, resource graph và driver matching
 
 > Device Tree không phải “file config để bật driver”. Nó là **một cấu trúc dữ liệu mô tả phần cứng** được truyền cho kernel, cho phép kernel hiểu topology và resource của board mà không hard-code toàn bộ board description vào source C. Chương này tập trung vào semantic của Device Tree: node, property, address translation, interrupt topology, phandle, binding và mối quan hệ từ DTS đến driver probe.
+
+> **Điều hướng:** [← Root README](../README.md) · [↑ Back to Track](README.md) · [← Chủ đề 1 — Linux Architecture & Boot Flow](README-01-linux-architecture-boot-flow.md) · [Chủ đề 3 — Kernel, Driver & Isolation →](README-03-kernel-driver-isolation.md)
 
 ---
 
 ## Mục lục
 
-- [1. Vấn đề Device Tree giải quyết](#1-vấn-đề-device-tree-giải-quyết)
-- [2. Hardware discovery: self-describing và non-self-describing](#2-hardware-discovery-self-describing-và-non-self-describing)
-- [3. Device Tree là cây dữ liệu](#3-device-tree-là-cây-dữ-liệu)
-- [4. DTS, DTSI và DTB](#4-dts-dtsi-và-dtb)
-- [5. Node name và unit-address](#5-node-name-và-unit-address)
-- [6. Property và kiểu dữ liệu](#6-property-và-kiểu-dữ-liệu)
-- [7. `compatible` và driver matching](#7-compatible-và-driver-matching)
-- [8. `status` và sự tồn tại logic của device](#8-status-và-sự-tồn-tại-logic-của-device)
-- [9. `#address-cells`, `#size-cells` và `reg`](#9-address-cells-size-cells-và-reg)
-- [10. Address translation và `ranges`](#10-address-translation-và-ranges)
-- [11. Phandle: liên kết giữa các node](#11-phandle-liên-kết-giữa-các-node)
-- [12. Clock, reset, regulator và dependency graph](#12-clock-reset-regulator-và-dependency-graph)
-- [13. GPIO trong Device Tree](#13-gpio-trong-device-tree)
-- [14. I2C device](#14-i2c-device)
-- [15. SPI device](#15-spi-device)
-- [16. UART](#16-uart)
-- [17. Interrupt topology](#17-interrupt-topology)
-- [18. Pin control / pinmux](#18-pin-control-pinmux)
-- [19. Device Tree Binding](#19-device-tree-binding)
-- [20. Từ DTS đến DTB](#20-từ-dts-đến-dtb)
-- [21. Bootloader và Device Tree](#21-bootloader-và-device-tree)
-- [22. Kernel unflatten và platform device creation](#22-kernel-unflatten-và-platform-device-creation)
-- [23. Driver probe chain](#23-driver-probe-chain)
-- [24. Deferred probe và dependency chưa sẵn sàng](#24-deferred-probe-và-dependency-chưa-sẵn-sàng)
-- [25. Lỗi `reg` và address](#25-lỗi-reg-và-address)
-- [26. Lỗi interrupt](#26-lỗi-interrupt)
-- [27. Device không probe](#27-device-không-probe)
-- [28. Overlay](#28-overlay)
-- [29. Device Tree không nên chứa gì?](#29-device-tree-không-nên-chứa-gì)
-- [30. Cách reasoning một node Device Tree](#30-cách-reasoning-một-node-device-tree)
-- [31. Mô hình tổng hợp](#31-mô-hình-tổng-hợp)
-- [32. Các nguyên tắc cốt lõi](#32-các-nguyên-tắc-cốt-lõi)
-- [33. Tài liệu tham khảo chính](#33-tài-liệu-tham-khảo-chính)
+> Mục lục rút gọn theo **cụm kiến thức**. Các mục đánh số chi tiết vẫn được giữ nguyên trong nội dung.
+
+- **Device Tree model**
+  - [1. Vấn đề Device Tree giải quyết](#1-vấn-đề-device-tree-giải-quyết)
+  - [3. Device Tree là cây dữ liệu](#3-device-tree-là-cây-dữ-liệu)
+  - [4. DTS, DTSI và DTB](#4-dts-dtsi-và-dtb)
+- **Identity & addressing**
+  - [7. `compatible` và driver matching](#7-compatible-và-driver-matching)
+  - [9. `#address-cells`, `#size-cells` và `reg`](#9-address-cells-size-cells-và-reg)
+  - [11. Phandle: liên kết giữa các node](#11-phandle-liên-kết-giữa-các-node)
+- **Resource graph**
+  - [12. Clock, reset, regulator và dependency graph](#12-clock-reset-regulator-và-dependency-graph)
+  - [13. GPIO trong Device Tree](#13-gpio-trong-device-tree)
+  - [17. Interrupt topology](#17-interrupt-topology)
+- **Bindings & runtime probe**
+  - [19. Device Tree Binding](#19-device-tree-binding)
+  - [23. Driver probe chain](#23-driver-probe-chain)
+  - [24. Deferred probe và dependency chưa sẵn sàng](#24-deferred-probe-và-dependency-chưa-sẵn-sàng)
+- **Debug & design rules**
+  - [27. Device không probe](#27-device-không-probe)
+  - [30. Cách reasoning một node Device Tree](#30-cách-reasoning-một-node-device-tree)
+  - [32. Các nguyên tắc cốt lõi](#32-các-nguyên-tắc-cốt-lõi)
+- **Tra cứu**
+  - [Tài liệu tham khảo](#tài-liệu-tham-khảo)
 
 ---
 
@@ -778,13 +771,16 @@ Với bất kỳ node nào, đọc theo 7 câu hỏi:
 
 ---
 
-## 33. Tài liệu tham khảo chính
+## Tài liệu tham khảo
 
-- Devicetree Specification — latest: https://devicetree-specification.readthedocs.io/en/latest/
-- Devicetree Specification — source language: https://devicetree-specification.readthedocs.io/en/latest/chapter6-source-language.html
-- Linux Kernel Documentation — Linux and the Devicetree: https://docs.kernel.org/devicetree/usage-model.html
-- Linux Kernel Documentation — Devicetree Kernel API: https://docs.kernel.org/devicetree/kernel-api.html
-- Linux Kernel Documentation — DTS coding style: https://docs.kernel.org/devicetree/bindings/dts-coding-style.html
-- Linux Kernel Documentation — Writing Devicetree Bindings: https://docs.kernel.org/devicetree/bindings/writing-bindings.html
-- Linux Kernel Documentation — Devicetree Overlay Notes: https://docs.kernel.org/devicetree/overlay-notes.html
+- [Devicetree Specification — latest](https://devicetree-specification.readthedocs.io/en/latest/)
+- [Devicetree Specification — source language](https://devicetree-specification.readthedocs.io/en/latest/chapter6-source-language.html)
+- [Linux Kernel Documentation — Linux and the Devicetree](https://docs.kernel.org/devicetree/usage-model.html)
+- [Linux Kernel Documentation — Devicetree Kernel API](https://docs.kernel.org/devicetree/kernel-api.html)
+- [Linux Kernel Documentation — DTS coding style](https://docs.kernel.org/devicetree/bindings/dts-coding-style.html)
+- [Linux Kernel Documentation — Writing Devicetree Bindings](https://docs.kernel.org/devicetree/bindings/writing-bindings.html)
+- [Linux Kernel Documentation — Devicetree Overlay Notes](https://docs.kernel.org/devicetree/overlay-notes.html)
 
+---
+
+> **Điều hướng:** [← Root README](../README.md) · [↑ Back to Track](README.md) · [← Chủ đề 1 — Linux Architecture & Boot Flow](README-01-linux-architecture-boot-flow.md) · [Chủ đề 3 — Kernel, Driver & Isolation →](README-03-kernel-driver-isolation.md)

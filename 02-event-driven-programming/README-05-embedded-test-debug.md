@@ -1,48 +1,40 @@
 # Chủ đề 5 — Kiểm thử và gỡ lỗi cho Embedded Programming
-## Test, Debug, Trace, Record Event và Automated Validation trong hệ Event-Driven
+> **Phạm vi:** Test, Debug, Trace, Record Event và Automated Validation trong hệ Event-Driven
 
 > Tài liệu này trình bày lý thuyết về khả năng kiểm thử và quan sát firmware trong toàn vòng đời. Trọng tâm là phân biệt test, debug, log và trace; hiểu cách thiết kế observability ngay từ kiến trúc; và lý giải vì sao event-driven firmware đặc biệt phù hợp với deterministic test và replay.
+
+> **Điều hướng:** [← Root README](../README.md) · [↑ Back to Track](README.md) · [← Chủ đề 4 — Event-Driven Components](README-04-event-driven-system-components.md)
 
 ---
 
 ## Mục lục
 
-- [Sơ đồ tổng quan](#sơ-đồ-tổng-quan)
-- [1. Test và debug là hai hoạt động khác nhau](#1-test-và-debug-là-hai-hoạt-động-khác-nhau)
-- [2. Pyramid quan sát firmware](#2-pyramid-quan-sát-firmware)
-- [3. Testability là thuộc tính kiến trúc](#3-testability-là-thuộc-tính-kiến-trúc)
-- [4. Unit test trong embedded](#4-unit-test-trong-embedded)
-- [5. Deterministic test](#5-deterministic-test)
-- [6. Test state machine](#6-test-state-machine)
-- [7. Temporal test](#7-temporal-test)
-- [8. Fake time và virtual time](#8-fake-time-và-virtual-time)
-- [9. Command-line interface như test interface](#9-command-line-interface-như-test-interface)
-- [10. Log](#10-log)
-- [11. Logging overhead](#11-logging-overhead)
-- [12. Event trace](#12-event-trace)
-- [13. Realtime trace và record event](#13-realtime-trace-và-record-event)
-- [14. Ring buffer cho trace](#14-ring-buffer-cho-trace)
-- [15. Timestamp](#15-timestamp)
-- [16. Fault và assertion](#16-fault-và-assertion)
-- [17. Cortex-M fault analysis](#17-cortex-m-fault-analysis)
-- [18. Reset cause](#18-reset-cause)
-- [19. Watchdog và diagnosability](#19-watchdog-và-diagnosability)
-- [20. Metrics](#20-metrics)
-- [21. Latency measurement](#21-latency-measurement)
-- [22. GPIO instrumentation](#22-gpio-instrumentation)
-- [23. Automated test architecture](#23-automated-test-architecture)
-- [24. Test oracle](#24-test-oracle)
-- [25. Black-box, gray-box và white-box](#25-black-box-gray-box-và-white-box)
-- [26. Fault injection](#26-fault-injection)
-- [27. Reproducibility](#27-reproducibility)
-- [28. CI cho embedded](#28-ci-cho-embedded)
-- [29. Test flakiness](#29-test-flakiness)
-- [30. Debugging theo causal chain](#30-debugging-theo-causal-chain)
-- [31. Observability budget](#31-observability-budget)
-- [32. Production diagnostics](#32-production-diagnostics)
-- [33. Tại sao Event-Driven đặc biệt thuận lợi cho debug?](#33-tại-sao-event-driven-đặc-biệt-thuận-lợi-cho-debug)
-- [34. Các nguyên tắc cốt lõi](#34-các-nguyên-tắc-cốt-lõi)
-- [Tài liệu tham khảo chuyên sâu](#tài-liệu-tham-khảo-chuyên-sâu)
+> Mục lục rút gọn theo **cụm kiến thức**. Các mục đánh số chi tiết vẫn được giữ nguyên trong nội dung.
+
+- **Testability & deterministic test**
+  - [Sơ đồ tổng quan](#sơ-đồ-tổng-quan)
+  - [1. Test và debug là hai hoạt động khác nhau](#1-test-và-debug-là-hai-hoạt-động-khác-nhau)
+  - [3. Testability là thuộc tính kiến trúc](#3-testability-là-thuộc-tính-kiến-trúc)
+  - [5. Deterministic test](#5-deterministic-test)
+  - [6. Test state machine](#6-test-state-machine)
+- **Time & test interface**
+  - [7. Temporal test](#7-temporal-test)
+  - [9. Command-line interface như test interface](#9-command-line-interface-như-test-interface)
+- **Log, trace & fault evidence**
+  - [10. Log](#10-log)
+  - [12. Event trace](#12-event-trace)
+  - [16. Fault và assertion](#16-fault-và-assertion)
+- **Measurement & automation**
+  - [21. Latency measurement](#21-latency-measurement)
+  - [23. Automated test architecture](#23-automated-test-architecture)
+  - [26. Fault injection](#26-fault-injection)
+- **CI & production diagnostics**
+  - [28. CI cho embedded](#28-ci-cho-embedded)
+  - [30. Debugging theo causal chain](#30-debugging-theo-causal-chain)
+  - [32. Production diagnostics](#32-production-diagnostics)
+  - [34. Các nguyên tắc cốt lõi](#34-các-nguyên-tắc-cốt-lõi)
+- **Tra cứu**
+  - [Tài liệu tham khảo](#tài-liệu-tham-khảo)
 
 ---
 
@@ -191,16 +183,23 @@ Event-driven system có thể tăng determinism bằng cách đưa external occu
 ## 6. Test state machine
 
 ```mermaid
-stateDiagram-v2
-    [*] --> SETUP
-    SETUP --> INJECT_EVENT : establish initial state
-    INJECT_EVENT --> OBSERVE : deliver event
-    OBSERVE --> ASSERT : capture state + actions
-    ASSERT --> INJECT_EVENT : next transition
-    ASSERT --> PASS : sequence satisfies contract
-    ASSERT --> FAIL : contract violated
-    PASS --> [*]
-    FAIL --> [*]
+sequenceDiagram
+    participant H as Test Harness
+    participant S as Firmware / SUT
+    participant O as Trace / Observer
+
+    H->>S: Establish initial state
+    loop Each stimulus
+        H->>S: Inject event / input
+        S-->>O: State transition, action, trace
+        O-->>H: Observation
+        H->>H: Assert expected contract
+    end
+    alt Contract satisfied
+        H->>H: Mark PASS
+    else Contract violated
+        H->>H: Mark FAIL
+    end
 ```
 
 State machine có thể được kiểm tra theo transition:
@@ -679,9 +678,13 @@ Ba đối tượng cần quan sát nhất là:
 
 ---
 
-## Tài liệu tham khảo chuyên sâu
+## Tài liệu tham khảo
 
 - [Arm Cortex-M3 Technical Reference Manual — exception model](https://developer.arm.com/documentation/ddi0337/latest/)
 - [Zephyr Documentation — Tracing](https://docs.zephyrproject.org/latest/services/tracing/index.html)
 - [QP/C documentation — framework and tracing ecosystem](https://www.state-machine.com/qpc/)
 - [AK Embedded Base Kit STM32L151 repository](https://github.com/ak-embedded-software/ak-base-kit-stm32l151)
+
+---
+
+> **Điều hướng:** [← Root README](../README.md) · [↑ Back to Track](README.md) · [← Chủ đề 4 — Event-Driven Components](README-04-event-driven-system-components.md)

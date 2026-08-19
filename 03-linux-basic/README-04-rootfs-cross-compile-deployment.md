@@ -1,49 +1,43 @@
 # Chủ đề 4 — RootFS, Cross-Compile và Deployment
-## Root filesystem, ABI/sysroot, toolchain, Buildroot/Yocto và reliable software update
+> **Phạm vi:** Root filesystem, ABI/sysroot, toolchain, Buildroot/Yocto và reliable software update
 
 > Chương này trình bày userspace của Embedded Linux từ nền tảng: root filesystem là gì, executable tìm library ra sao, cross-compilation thực chất giải quyết khác biệt host/target như thế nào, Buildroot và Yocto tổ chức build ra sao, và deployment/update phải bảo vệ tính nhất quán của toàn bộ image như thế nào. Phần OTA chỉ phân tích architecture và reliability semantics, không phải bài thực hành.
+
+> **Điều hướng:** [← Root README](../README.md) · [↑ Back to Track](README.md) · [← Chủ đề 3 — Kernel, Driver & Isolation](README-03-kernel-driver-isolation.md)
 
 ---
 
 ## Mục lục
 
-- [1. Root filesystem là gì?](#1-root-filesystem-là-gì)
-- [2. RootFS không đồng nghĩa storage partition](#2-rootfs-không-đồng-nghĩa-storage-partition)
-- [3. Filesystem hierarchy quan trọng trong embedded](#3-filesystem-hierarchy-quan-trọng-trong-embedded)
-- [4. `/bin`, `/sbin`, `/usr`](#4-bin-sbin-usr)
-- [5. `/etc`, `/var`, `/run`, `/tmp`](#5-etc-var-run-tmp)
-- [6. `/dev`, `/proc`, `/sys`](#6-dev-proc-sys)
-- [7. Static và dynamic linking](#7-static-và-dynamic-linking)
-- [8. Dynamic loader và shared library dependency](#8-dynamic-loader-và-shared-library-dependency)
-- [9. ABI là contract host-target quan trọng](#9-abi-là-contract-host-target-quan-trọng)
-- [10. Cross-compilation là gì?](#10-cross-compilation-là-gì)
-- [11. Build, host và target machine](#11-build-host-và-target-machine)
-- [12. Cross toolchain gồm những gì?](#12-cross-toolchain-gồm-những-gì)
-- [13. Sysroot](#13-sysroot)
-- [14. Headers, libraries và target ABI](#14-headers-libraries-và-target-abi)
-- [15. Common cross-compile failure modes](#15-common-cross-compile-failure-modes)
-- [16. BusyBox và minimal userspace](#16-busybox-và-minimal-userspace)
-- [17. Init system trong RootFS](#17-init-system-trong-rootfs)
-- [18. Read-only và writable partition design](#18-read-only-và-writable-partition-design)
-- [19. Persistent data và stateless rootfs](#19-persistent-data-và-stateless-rootfs)
-- [20. Buildroot: model và output](#20-buildroot-model-và-output)
-- [21. Yocto Project: model và metadata](#21-yocto-project-model-và-metadata)
-- [22. Buildroot và Yocto khác nhau ở bản chất nào?](#22-buildroot-và-yocto-khác-nhau-ở-bản-chất-nào)
-- [23. Reproducible build và version provenance](#23-reproducible-build-và-version-provenance)
-- [24. Deployment là release transaction](#24-deployment-là-release-transaction)
-- [25. Rủi ro khi deploy sai RootFS](#25-rủi-ro-khi-deploy-sai-rootfs)
-- [26. Atomic update](#26-atomic-update)
-- [27. A/B update](#27-ab-update)
-- [28. Bootloader và update state machine](#28-bootloader-và-update-state-machine)
-- [29. Rollback](#29-rollback)
-- [30. Health check và commit](#30-health-check-và-commit)
-- [31. Authenticity và integrity của update](#31-authenticity-và-integrity-của-update)
-- [32. Version compatibility](#32-version-compatibility)
-- [33. Data migration](#33-data-migration)
-- [34. OTA system end-to-end](#34-ota-system-end-to-end)
-- [35. Build/deploy artifact graph](#35-builddeploy-artifact-graph)
-- [36. Các nguyên tắc cốt lõi](#36-các-nguyên-tắc-cốt-lõi)
-- [37. Tài liệu tham khảo chính](#37-tài-liệu-tham-khảo-chính)
+> Mục lục rút gọn theo **cụm kiến thức**. Các mục đánh số chi tiết vẫn được giữ nguyên trong nội dung.
+
+- **RootFS & runtime ABI**
+  - [1. Root filesystem là gì?](#1-root-filesystem-là-gì)
+  - [3. Filesystem hierarchy quan trọng trong embedded](#3-filesystem-hierarchy-quan-trọng-trong-embedded)
+  - [7. Static và dynamic linking](#7-static-và-dynamic-linking)
+  - [9. ABI là contract host-target quan trọng](#9-abi-là-contract-host-target-quan-trọng)
+- **Cross toolchain & sysroot**
+  - [10. Cross-compilation là gì?](#10-cross-compilation-là-gì)
+  - [13. Sysroot](#13-sysroot)
+  - [15. Common cross-compile failure modes](#15-common-cross-compile-failure-modes)
+- **Userspace & image build**
+  - [16. BusyBox và minimal userspace](#16-busybox-và-minimal-userspace)
+  - [20. Buildroot: model và output](#20-buildroot-model-và-output)
+  - [22. Buildroot và Yocto khác nhau ở bản chất nào?](#22-buildroot-và-yocto-khác-nhau-ở-bản-chất-nào)
+- **Release & deployment**
+  - [23. Reproducible build và version provenance](#23-reproducible-build-và-version-provenance)
+  - [24. Deployment là release transaction](#24-deployment-là-release-transaction)
+- **Reliable OTA**
+  - [26. Atomic update](#26-atomic-update)
+  - [27. A/B update](#27-ab-update)
+  - [29. Rollback](#29-rollback)
+  - [31. Authenticity và integrity của update](#31-authenticity-và-integrity-của-update)
+  - [34. OTA system end-to-end](#34-ota-system-end-to-end)
+- **Artifact model**
+  - [35. Build/deploy artifact graph](#35-builddeploy-artifact-graph)
+  - [36. Các nguyên tắc cốt lõi](#36-các-nguyên-tắc-cốt-lõi)
+- **Tra cứu**
+  - [Tài liệu tham khảo](#tài-liệu-tham-khảo)
 
 ---
 
@@ -892,16 +886,19 @@ Quản lý version ở graph này quan trọng hơn việc “binary nào mới 
 
 ---
 
-## 37. Tài liệu tham khảo chính
+## Tài liệu tham khảo
 
-- Buildroot User Manual: https://buildroot.org/downloads/manual/manual.html
-- Buildroot — project overview: https://buildroot.org/
-- Yocto Project Documentation: https://docs.yoctoproject.org/
-- Yocto Project — Overview and Concepts: https://docs.yoctoproject.org/overview-manual/yp-intro.html
-- Yocto Project — Building: https://docs.yoctoproject.org/dev-manual/building.html
-- BusyBox Documentation: https://busybox.net/BusyBox.html
-- Linux Kernel Documentation — rootfs/initramfs: https://docs.kernel.org/filesystems/ramfs-rootfs-initramfs.html
-- RAUC Documentation — Advanced / Software Deployment: https://rauc.readthedocs.io/en/latest/advanced.html
-- SWUpdate Documentation — Software Management: https://sbabic.github.io/swupdate/overview.html
-- SWUpdate Documentation — Best Practice: https://sbabic.github.io/swupdate/swupdate-best-practise.html
+- [Buildroot User Manual](https://buildroot.org/downloads/manual/manual.html)
+- [Buildroot — project overview](https://buildroot.org/)
+- [Yocto Project Documentation](https://docs.yoctoproject.org/)
+- [Yocto Project — Overview and Concepts](https://docs.yoctoproject.org/overview-manual/yp-intro.html)
+- [Yocto Project — Building](https://docs.yoctoproject.org/dev-manual/building.html)
+- [BusyBox Documentation](https://busybox.net/BusyBox.html)
+- [Linux Kernel Documentation — rootfs/initramfs](https://docs.kernel.org/filesystems/ramfs-rootfs-initramfs.html)
+- [RAUC Documentation — Advanced / Software Deployment](https://rauc.readthedocs.io/en/latest/advanced.html)
+- [SWUpdate Documentation — Software Management](https://sbabic.github.io/swupdate/overview.html)
+- [SWUpdate Documentation — Best Practice](https://sbabic.github.io/swupdate/swupdate-best-practise.html)
 
+---
+
+> **Điều hướng:** [← Root README](../README.md) · [↑ Back to Track](README.md) · [← Chủ đề 3 — Kernel, Driver & Isolation](README-03-kernel-driver-isolation.md)
