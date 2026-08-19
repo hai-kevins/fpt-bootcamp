@@ -401,6 +401,18 @@ Event-driven kernel thường ưu tiên timer **post message** hơn chạy appli
 
 ## 16. State machine trong AK
 
+```mermaid
+stateDiagram-v2
+    [*] --> WAITING
+    WAITING --> READY : mailbox receives message
+    READY --> DISPATCHING : scheduler selects task
+    DISPATCHING --> HANDLING : dequeue one message
+    HANDLING --> READY : handler returns / mailbox non-empty
+    HANDLING --> WAITING : handler returns / mailbox empty
+    HANDLING --> FATAL : invariant violated
+    FATAL --> [*]
+```
+
 AK cung cấp execution environment; state machine mô tả behavior của từng task.
 
 Có thể dùng:

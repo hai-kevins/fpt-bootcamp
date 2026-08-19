@@ -436,6 +436,21 @@ Sau expiry tự schedule lần kế. Cần định nghĩa period reference và m
 
 ## 24. Timer state machine
 
+```mermaid
+stateDiagram-v2
+    [*] --> INACTIVE
+    INACTIVE --> ARMED : start
+    ARMED --> ARMED : restart / rearm
+    ARMED --> EXPIRED_PENDING : deadline reached
+    EXPIRED_PENDING --> CALLBACK_RUNNING : timer service dispatches
+    CALLBACK_RUNNING --> INACTIVE : one-shot complete
+    CALLBACK_RUNNING --> ARMED : periodic rearm
+    ARMED --> CANCELLED : cancel before expiry
+    EXPIRED_PENDING --> CANCELLED : cancel pending callback (policy-dependent)
+    CALLBACK_RUNNING --> CANCELLED : stop requested (policy-dependent)
+    CANCELLED --> INACTIVE : cleanup complete
+```
+
 Một timer có thể có state:
 
 - INACTIVE;

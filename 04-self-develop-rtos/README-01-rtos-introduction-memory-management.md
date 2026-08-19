@@ -619,6 +619,18 @@ Canary/guard pattern ở biên stack giúp phát hiện overflow trước khi me
 
 ## 29. Kernel object lifetime
 
+```mermaid
+stateDiagram-v2
+    [*] --> FREE
+    FREE --> ALLOCATED : allocate / create
+    ALLOCATED --> INITIALIZED : metadata + invariants initialized
+    INITIALIZED --> ACTIVE : object published / usable
+    ACTIVE --> QUIESCENT : no active user / waiter
+    QUIESCENT --> FREE : destroy / recycle
+    ACTIVE --> ERROR : lifetime invariant violated
+    ERROR --> [*]
+```
+
 Kernel object có thể có lifetime:
 
 - static whole-system;

@@ -249,6 +249,17 @@ Hai sự kiện có thể xảy ra rất gần nhau từ các context khác nhau
 
 ## 12. Single-winner wake-up rule
 
+```mermaid
+stateDiagram-v2
+    [*] --> BLOCKED_WAIT
+    BLOCKED_WAIT --> CLAIMED_BY_OBJECT : resource / event wins
+    BLOCKED_WAIT --> CLAIMED_BY_TIMEOUT : timeout wins
+    CLAIMED_BY_OBJECT --> READY_SUCCESS : remove timeout membership + set success
+    CLAIMED_BY_TIMEOUT --> READY_TIMEOUT : remove object wait membership + set timeout
+    READY_SUCCESS --> RUNNING : scheduler selects
+    READY_TIMEOUT --> RUNNING : scheduler selects
+```
+
 Kernel phải đảm bảo chỉ một nguồn “thắng” việc chuyển task từ BLOCKED → READY.
 
 Winner phải:

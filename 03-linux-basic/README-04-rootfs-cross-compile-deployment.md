@@ -663,6 +663,19 @@ Chi phí: storage lớn hơn, boot metadata và state machine phức tạp hơn.
 
 ## 28. Bootloader và update state machine
 
+```mermaid
+stateDiagram-v2
+    [*] --> GOOD_A
+    GOOD_A --> INSTALLING_B : install update to inactive slot
+    INSTALLING_B --> TRY_B : image verified + mark candidate
+    TRY_B --> HEALTH_CHECK_B : candidate boots
+    HEALTH_CHECK_B --> GOOD_B : health success / commit
+    TRY_B --> ROLLBACK_A : boot failure / attempts exhausted
+    HEALTH_CHECK_B --> ROLLBACK_A : health check fails
+    ROLLBACK_A --> GOOD_A : restore known-good slot
+    GOOD_B --> INSTALLING_A : next update targets inactive slot A
+```
+
 Bootloader thường cần biết slot nào:
 
 - active/good;

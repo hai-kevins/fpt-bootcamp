@@ -362,6 +362,18 @@ Nếu data model không chuẩn bị, mutex PI về sau sẽ khó thêm đúng.
 
 ## 18. Task state
 
+```mermaid
+stateDiagram-v2
+    [*] --> READY
+    READY --> RUNNING : scheduler selects
+    RUNNING --> READY : preempt / yield
+    RUNNING --> BLOCKED : wait / delay
+    BLOCKED --> READY : event / timeout
+    READY --> SUSPENDED : suspend
+    RUNNING --> SUSPENDED : suspend
+    SUSPENDED --> READY : resume
+```
+
 Tối thiểu:
 
 - READY;

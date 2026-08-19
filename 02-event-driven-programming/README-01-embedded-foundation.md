@@ -301,6 +301,18 @@ Phần xử lý dài được deferred sang event handler ở thread/main contex
 
 ## 8. Reset sequence và startup runtime
 
+```mermaid
+stateDiagram-v2
+    [*] --> RESET
+    RESET --> VECTOR_FETCH : reset released
+    VECTOR_FETCH --> RESET_HANDLER : load MSP + reset vector
+    RESET_HANDLER --> INIT_DATA : enter startup code
+    INIT_DATA --> INIT_BSS : copy .data Flash to RAM
+    INIT_BSS --> INIT_RUNTIME : zero .bss
+    INIT_RUNTIME --> MAIN : runtime ready
+    MAIN --> RESET : system reset
+```
+
 Khi MCU reset, CPU chưa biết khái niệm C runtime. Firmware phải tự tạo môi trường để C hoạt động đúng.
 
 Luồng khái niệm:

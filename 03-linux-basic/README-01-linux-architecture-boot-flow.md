@@ -171,6 +171,23 @@ Mỗi stage phải thiết lập đủ điều kiện để stage sau tồn tạ
 
 ## 5. Boot là một chuỗi chuyển giao quyền kiểm soát
 
+```mermaid
+stateDiagram-v2
+    [*] --> ROM
+    ROM --> SPL : first stage loaded
+    SPL --> UBOOT : DRAM + minimal hardware ready
+    UBOOT --> KERNEL : kernel + DTB + bootargs handoff
+    KERNEL --> ROOTFS : root filesystem mounted
+    ROOTFS --> PID1 : init executable started
+    PID1 --> APPLICATION : services ready
+
+    ROM --> RECOVERY : boot-source / authentication failure
+    SPL --> RECOVERY : early-init / load failure
+    UBOOT --> RECOVERY : image / boot-policy failure
+    KERNEL --> RECOVERY : panic / rootfs failure
+    RECOVERY --> ROM : reboot / retry policy
+```
+
 Luồng tổng quát trong root README có thể mở rộng thành:
 
 ```text

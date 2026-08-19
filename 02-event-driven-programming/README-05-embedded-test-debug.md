@@ -190,6 +190,19 @@ Event-driven system có thể tăng determinism bằng cách đưa external occu
 
 ## 6. Test state machine
 
+```mermaid
+stateDiagram-v2
+    [*] --> SETUP
+    SETUP --> INJECT_EVENT : establish initial state
+    INJECT_EVENT --> OBSERVE : deliver event
+    OBSERVE --> ASSERT : capture state + actions
+    ASSERT --> INJECT_EVENT : next transition
+    ASSERT --> PASS : sequence satisfies contract
+    ASSERT --> FAIL : contract violated
+    PASS --> [*]
+    FAIL --> [*]
+```
+
 State machine có thể được kiểm tra theo transition:
 
 ```text

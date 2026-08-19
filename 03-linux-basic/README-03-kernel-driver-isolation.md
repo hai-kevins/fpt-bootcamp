@@ -278,6 +278,17 @@ Match có thể dựa vào:
 
 ## 12. Probe và remove
 
+```mermaid
+stateDiagram-v2
+    [*] --> UNBOUND
+    UNBOUND --> PROBING : device-driver match
+    PROBING --> BOUND : initialization succeeds
+    PROBING --> UNWIND : initialization fails
+    UNWIND --> UNBOUND : release acquired resources
+    BOUND --> REMOVING : unbind / remove
+    REMOVING --> UNBOUND : teardown complete
+```
+
 `probe` là lifecycle callback khi driver được bind với device. Trong probe driver thường acquire resource và register interface.
 
 Conceptual transaction:

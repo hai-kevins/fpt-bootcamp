@@ -294,6 +294,21 @@ Trong một active object đơn luồng:
 
 ## 10. State machine: mô hình hóa hành vi theo thời gian
 
+```mermaid
+stateDiagram-v2
+    [*] --> DISCONNECTED
+    DISCONNECTED --> CONNECTED : LINK_UP
+
+    state CONNECTED {
+        [*] --> UNAUTHENTICATED
+        UNAUTHENTICATED --> AUTHENTICATED : AUTH_OK
+        AUTHENTICATED --> ACTIVE : START
+        ACTIVE --> AUTHENTICATED : STOP
+    }
+
+    CONNECTED --> DISCONNECTED : LINK_DOWN
+```
+
 State machine mô tả hành vi bằng ba yếu tố:
 
 ```text

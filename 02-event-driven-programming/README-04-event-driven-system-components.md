@@ -281,6 +281,19 @@ Allocator cần biết block free/used. Metadata có thể nằm trong block t�
 
 ## 10. Event lifetime
 
+```mermaid
+stateDiagram-v2
+    [*] --> FREE
+    FREE --> ALLOCATED : allocate
+    ALLOCATED --> POPULATED : fill signal + payload
+    POPULATED --> QUEUED : post / publish
+    QUEUED --> DISPATCHING : dequeue
+    DISPATCHING --> CONSUMED : handler completes
+    CONSUMED --> RETAINED : references remain
+    CONSUMED --> FREE : last owner releases
+    RETAINED --> FREE : refcount reaches zero
+```
+
 Một event có vòng đời:
 
 ```text

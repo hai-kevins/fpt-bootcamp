@@ -427,6 +427,18 @@ Cortex-M3 hỗ trợ BASEPRI.
 
 ## 25. Scheduler decision và switch commit
 
+```mermaid
+stateDiagram-v2
+    [*] --> RUNNING_A
+    RUNNING_A --> PREEMPT_REQUESTED : higher-priority task ready / yield
+    PREEMPT_REQUESTED --> PENDSV_PENDING : pend PendSV
+    PENDSV_PENDING --> SAVE_A : PendSV exception entry
+    SAVE_A --> SELECT_B : current context saved
+    SELECT_B --> RESTORE_B : scheduler selects next task
+    RESTORE_B --> RUNNING_B : exception return
+    RUNNING_B --> PREEMPT_REQUESTED : next scheduling event
+```
+
 Có thể tách:
 
 - **decision**: tính `next_task`;

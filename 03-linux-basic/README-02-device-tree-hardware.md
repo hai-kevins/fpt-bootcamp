@@ -556,6 +556,20 @@ Device Tree không “gọi driver” trực tiếp. Nó cung cấp dữ liệu 
 
 ## 23. Driver probe chain
 
+```mermaid
+stateDiagram-v2
+    [*] --> DESCRIBED
+    DESCRIBED --> DISABLED : node not enabled
+    DESCRIBED --> INSTANTIATED : DT population
+    INSTANTIATED --> MATCHED : compatible / bus match
+    MATCHED --> PROBING : probe invoked
+    PROBING --> BOUND : resources ready + probe success
+    PROBING --> DEFERRED : provider not ready
+    DEFERRED --> PROBING : provider becomes ready / retry
+    PROBING --> FAILED : permanent probe error
+    BOUND --> UNBOUND : driver unbind / remove
+```
+
 Probe thành công thường cần nhiều điều kiện cùng đúng:
 
 ```text
